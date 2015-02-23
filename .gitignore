@@ -1,0 +1,12 @@
+# Misc files
+*.swp
+.DS_Store
+Gemfile.local
+Gemfile.lock
+/nbproject
+compile_commands.json
+
+# Generated files
+/debug*/
+/release*/
+/.idea/
