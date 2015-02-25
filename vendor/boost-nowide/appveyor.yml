@@ -1,0 +1,25 @@
+version: 1.0.{build}
+skip_tags: true
+clone_folder: c:\projects\boost-nowide
+os: unstable
+environment:
+  BOOST_ROOT: c:\Libraries\boost
+  NOWIDE_ROOT: c:\projects\boost-nowide
+platform:
+  - Win32
+  - x64
+configuration:
+  - Debug
+  - Release
+install:
+  - if "%PLATFORM%" == "Win32" set CMAKE_GENERATOR="Visual Studio 12"
+  - if "%PLATFORM%" == "x64"   set CMAKE_GENERATOR="Visual Studio 12 Win64"
+  - if "%PLATFORM%" == "Win32" set BOOST_DEFINITIONS=-DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_ROOT%/lib32-msvc-12.0"
+  - if "%PLATFORM%" == "x64"   set BOOST_DEFINITIONS=-DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_ROOT%/lib64-msvc-12.0"
+  - mkdir "%NOWIDE_ROOT%\tmp"
+  - cd "%NOWIDE_ROOT%\tmp"
+  - cmake .. -G %CMAKE_GENERATOR% %BOOST_DEFINITIONS%
+build:
+  project: c:\projects\boost-nowide\tmp\boost-nowide.sln
+before_test:
+  - cd "%NOWIDE_ROOT%\tmp" && ctest -C %Configuration%

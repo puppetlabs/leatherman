@@ -11,13 +11,47 @@
 # "standard" leatherman components"
 ####
 
-# Usage: set_dependencies(${DEP1_LIB} ${DEP2_LIB})
+# Usage: add_leatherman_deps(${DEP1_LIB} ${DEP2_LIB})
 #
-# Set the LEATHERMAN_<LIBRARY>_DEPS variable.
+# Append to the LEATHERMAN_<LIBRARY>_DEPS variable.
+macro(add_leatherman_deps)
+    list(APPEND ${deps_var} ${ARGV})
+    export_var(${deps_var})
+endmacro()
+
+# Usage: leatherman_dependency("libname")
 #
-# Calling this macro multiple times will override the previous value.
-macro(set_dependencies)
-    set(${deps_var} ${ARGV} PARENT_SCOPE)
+# Automatically handle include directories and library linking for the
+# given leatherman library.
+#
+# Will throw a fatal error if the dependency cannot be found.
+macro(leatherman_dependency library)
+    string(MAKE_C_IDENTIFIER "${library}" id)
+    string(TOUPPER "${id}" name)
+    set(option "LEATHERMAN_USE_${name}")
+    set(dep_lib "LEATHERMAN_${name}_LIB")
+    set(dep_deps "LEATHERMAN_${name}_DEPS")
+    set(dep_include "LEATHERMAN_${name}_INCLUDE")
+
+    if(${${option}})
+	debug("Found ${library} as ${name}, using it in current context")
+	if (NOT "" STREQUAL "${${dep_deps}}")
+	    debug("Adding ${${dep_deps}} to deps for ${dirname}")
+	    list(APPEND ${deps_var} ${${dep_deps}})
+	    export_var(${deps_var})
+	endif()
+	if (NOT "" STREQUAL "${${dep_lib}}")
+	    debug("Adding ${${dep_lib}} to deps for ${dirname}")
+	    list(APPEND ${deps_var} ${${dep_lib}})
+	    export_var(${deps_var})
+	endif()
+	if (NOT "" STREQUAL "${${dep_include}}")
+	    debug("Adding ${${dep_include}} to include directories for ${dirname}")
+	    include_directories(${${dep_include}})
+	endif()
+    else()
+	message(FATAL_ERROR "${library} not found as a dependency for ${dirname}")
+    endif()
 endmacro()
 
 # Usage: add_leatherman_library(${SOURCES} [OPTS])
@@ -30,7 +64,9 @@ endmacro()
 #
 # This macro cannot be invoked multiple times
 macro(add_leatherman_library)
+    include_directories(${${include_var}})
     add_library(${libname} STATIC ${ARGV})
+    set_target_properties(${libname} PROPERTIES COMPILE_FLAGS "${LEATHERMAN_CXX_FLAGS} ${LEATHERMAN_LIBRARY_FLAGS}")
     set(${lib_var} "${libname}" PARENT_SCOPE)
 endmacro()
 
@@ -45,7 +81,9 @@ endmacro()
 # This macro cannot be invoked multiple times.
 macro(add_leatherman_test)
     if(LEATHERMAN_ENABLE_TESTING)
+	leatherman_dependency(catch)
 	add_library(${testlibname} STATIC ${ARGV})
+	set_target_properties(${testlibname} PROPERTIES COMPILE_FLAGS ${LEATHERMAN_CXX_FLAGS})
 	set(${testlib_var} "${testlibname}" PARENT_SCOPE)
     endif()
 endmacro()
@@ -73,6 +111,7 @@ macro(add_leatherman_dir dir)
     debug("Setting up leatherman library for ${dir}")
     string(MAKE_C_IDENTIFIER "${dir}" id)
     string(TOUPPER "${id}" id_upper)
+    set(dirname "${dir}") # Used by other macros to know our human-readable name
     set(option "LEATHERMAN_USE_${id_upper}")
     set(include_dir "${CMAKE_CURRENT_SOURCE_DIR}/${dir}/inc")
     set(libname "leatherman_${id}")
@@ -96,13 +135,14 @@ macro(add_leatherman_dir dir)
 
 	# We set this one afterwards because it doesn't need
 	# overriding
+	#
+	# We put deps before libs. This is backwards on purpose. We
+	# later reverse the entire libraries list in order to ensure
+	# proper link order. Ideally we could put things in the
+	# correct order directly, but CMake de-duplicates link lines
+	# in ways that just make this a sad, sad process.
 	set(libs_var "LEATHERMAN_${id_upper}_LIBS")
-	set(${libs_var} ${${lib_var}} ${${deps_var}})
-
-	export_var(${include_var})
-	export_var(${lib_var})
-	export_var(${libs_var})
-	export_var(${deps_var})
+	set(${libs_var} ${${deps_var}} ${${lib_var}})
 
 	if(NOT "${ARGV1}" STREQUAL EXCLUDE_FROM_VARS)
 	    debug("Appending values for ${id_upper} to common vars")
@@ -112,6 +152,17 @@ macro(add_leatherman_dir dir)
 	else()
 	    debug("Excluding values for ${id_upper} from common vars")
 	endif()
+
+
+	# Put our link line into the right order.
+        if("${${libs_var}}")
+            list(REVERSE ${libs_var})
+        endif()
+
+	export_var(${include_var})
+	export_var(${lib_var})
+	export_var(${libs_var})
+	export_var(${deps_var})
 
 	# Enable cppcheck on this library	
 	list(APPEND CPPCHECK_DIRS "${CMAKE_SOURCE_DIR}/${dir}")
@@ -138,7 +189,7 @@ endmacro(debug)
 # "foobar" in the invoking scope. Remember that a macro does not
 # create a new scope, but a function does.
 macro(export_var varname)
-    if (NOT LEATHERMAN_TOPLEVEL)
+    if (NOT "${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
 	debug("Exporting ${varname}")
 	set(${varname} ${${varname}} PARENT_SCOPE)
     else()

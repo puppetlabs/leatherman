@@ -1,0 +1,15 @@
+language: cpp
+compiler:
+  - clang
+  - gcc
+install:
+  - sudo apt-get install libboost1.48-all-dev
+script:
+  - mkdir tmp
+  - pushd tmp
+  - cmake ..
+  - make
+  - make test
+  - popd
+os:
+  - linux

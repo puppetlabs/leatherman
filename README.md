@@ -52,6 +52,22 @@ variables:
 * `LEATHERMAN_<LIBRARY>_LIBS` The contents of both
   `LEATHERMAN_<LIBRARY>_LIB` and `LEATHERMAN_<LIBRARY>_DEPS`
 
+### Using Logging
+
+Each `.cc` file that uses logging (or includes a header which uses
+logging) needs to know its logging namespace. This can be set by
+defining `LEATHERMAN_LOGGING_NAMESPACE` to a string such as
+"leatherman.logging" or "puppetlabs.facter".
+
+Since typically a large number of files at once will need to use the
+same logging namespace, leatherman provides a CMake macro to set it
+globally. This can be used as follows:
+
+    ...
+    include(leatherman)
+    leatherman_logging_namespace("logging.namespace")
+    ...
+
 ## Extending leatherman
 
 Adding a new library to leatherman is easy!
