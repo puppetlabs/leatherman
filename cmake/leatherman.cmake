@@ -112,6 +112,9 @@ macro(add_leatherman_dir dir)
 	else()
 	    debug("Excluding values for ${id_upper} from common vars")
 	endif()
+
+	# Enable cppcheck on this library	
+	list(APPEND CPPCHECK_DIRS "${CMAKE_SOURCE_DIR}/${dir}")
     endif()
 endmacro(add_leatherman_dir)
 
