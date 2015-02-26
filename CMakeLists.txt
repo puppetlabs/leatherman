@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(LEATHERMAN)
-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/leatherman.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/internal.cmake")
 
 # If we're the top-level project, we want to ensure the build type is
 # sane, and flag ourselves as such for later checks
