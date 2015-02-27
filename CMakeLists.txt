@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(LEATHERMAN)
-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/leatherman.cmake")
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(internal)
+include(leatherman)
+include(cflags)
 
 # If we're the top-level project, we want to ensure the build type is
 # sane, and flag ourselves as such for later checks
@@ -21,7 +25,11 @@ defoption(LEATHERMAN_DEBUG "Enable verbose logging messages from leatherman macr
 defoption(LEATHERMAN_ENABLE_TESTING "Build the leatherman test binary" ${LEATHERMAN_DEFAULT_ENABLE})
 
 add_leatherman_dir(catch EXCLUDE_FROM_VARS)
+add_leatherman_dir(nowide)
 add_leatherman_dir(locale)
+add_leatherman_dir(logging)
+
+list(REVERSE LEATHERMAN_LIBRARIES)
 
 export_var(LEATHERMAN_INCLUDE_DIRS)
 export_var(LEATHERMAN_LIBRARIES)
