@@ -4,6 +4,8 @@
 # Leatherman, you should check out the README for information on its
 # interface.
 
+include(leatherman) # contains some helpers we use
+
 ####
 # Macros for use by leatherman libraries
 #
@@ -182,21 +184,6 @@ macro(debug str)
 	message(STATUS ${str})
     endif()
 endmacro(debug)
-
-# Usage: export_var("foobar")
-#
-# Sets variable "foobar" in the parent scope to the same value as
-# "foobar" in the invoking scope. Remember that a macro does not
-# create a new scope, but a function does.
-macro(export_var varname)
-    if (NOT "${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
-	debug("Exporting ${varname}")
-	set(${varname} ${${varname}} PARENT_SCOPE)
-    else()
-	debug("Skipping export of ${varname} because I'm top-level")
-    endif()
-    debug("It's value is: ${${varname}}")
-endmacro(export_var)
 
 # Usage: defoption(VARNAME "Documentation String" ${DEFAULT_VALUE}")
 #
