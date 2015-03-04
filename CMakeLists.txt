@@ -6,6 +6,8 @@ include(internal)
 include(leatherman)
 include(cflags)
 
+add_definitions(${LEATHERMAN_DEFINITIONS})
+
 # If we're the top-level project, we want to ensure the build type is
 # sane, and flag ourselves as such for later checks
 if ("${CMAKE_PROJECT_NAME}" STREQUAL "${PROJECT_NAME}")
