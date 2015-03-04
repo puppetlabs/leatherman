@@ -74,20 +74,17 @@ endmacro()
 
 # Usage: add_leatherman_test(${SOURCES} [OPTS])
 #
-# Creates a static CMake library that will be linked into the
-# leatherman test binary.
-#
-# This macro directly calls add_library, so any add_library options
-# can be passed along with the sources.
-#
-# This macro cannot be invoked multiple times.
+# Adds the listed files to the set which will be built for the
+# leatherman unit test executable.
 macro(add_leatherman_test)
-    if(LEATHERMAN_ENABLE_TESTING)
-	leatherman_dependency(catch)
-	add_library(${testlibname} STATIC ${ARGV})
-	set_target_properties(${testlibname} PROPERTIES COMPILE_FLAGS "${LEATHERMAN_CXX_FLAGS} ${LEATHERMAN_LIBRARY_FLAGS}")
-	set(${testlib_var} "${testlibname}" PARENT_SCOPE)
-    endif()
+    foreach(FILE ${ARGV})
+	if (IS_ABSOLUTE FILE)
+	    list(APPEND LEATHERMAN_TEST_SRCS "${FILE}")
+	else()
+	    list(APPEND LEATHERMAN_TEST_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${FILE}")
+	endif()
+    endforeach()
+    export_var(LEATHERMAN_TEST_SRCS)
 endmacro()
 
 ####
@@ -117,18 +114,15 @@ macro(add_leatherman_dir dir)
     set(option "LEATHERMAN_USE_${id_upper}")
     set(include_dir "${CMAKE_CURRENT_SOURCE_DIR}/${dir}/inc")
     set(libname "leatherman_${id}")
-    set(testlibname "${libname}_test")
 
     defoption(${option} "Should ${dir} be built and used?" ${LEATHERMAN_DEFAULT_ENABLE})
     if (${${option}})
 	set(include_var "LEATHERMAN_${id_upper}_INCLUDE")
 	set(lib_var "LEATHERMAN_${id_upper}_LIB")
 	set(deps_var "LEATHERMAN_${id_upper}_DEPS")
-	set(testlib_var "LEATHERMAN_${id_upper}_TESTLIB")
  
 	set(${include_var} ${include_dir})
 	set(${lib_var} "") # if library is built, this will be set automatically
-	set(${testlib_var} "") # if tests are specified, this will be set automatically
 
 	# By adding the subdirectory after setting all variables, but
 	# before exporting, we give the library an opportunity to
@@ -150,7 +144,6 @@ macro(add_leatherman_dir dir)
 	    debug("Appending values for ${id_upper} to common vars")
 	    list(APPEND LEATHERMAN_INCLUDE_DIRS ${${include_var}})
 	    list(APPEND LEATHERMAN_LIBRARIES ${${libs_var}})
-	    list(APPEND LEATHERMAN_TESTLIBS ${${testlib_var}})
 	else()
 	    debug("Excluding values for ${id_upper} from common vars")
 	endif()
