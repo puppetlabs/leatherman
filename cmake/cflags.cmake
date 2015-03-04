@@ -1,4 +1,5 @@
 defoption(COVERALLS "Generate code coverage using Coveralls.io" OFF)
+defoption(BOOST_STATIC "Use Boost's static libraries" OFF)
 
 # Set compiler-specific flags
 # Each of our project dirs sets CMAKE_CXX_FLAGS based on these. We do
@@ -36,7 +37,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
     # On unix systems we want to be sure to specify -fPIC for libraries
     if (NOT WIN32)
-	set(LEATHERMAN_LIBRARY_FLAGS -fPIC)
+	set(LEATHERMAN_LIBRARY_FLAGS "-fPIC -nostdlib -nodefaultlibs")
     endif()
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
@@ -63,3 +64,12 @@ else()
 endif()
 
 list(APPEND LEATHERMAN_DEFINITIONS -DBOOST_LOG_WITHOUT_WCHAR_T)
+
+# Find our dependency packages
+if (BOOST_STATIC)
+    set(Boost_USE_STATIC_LIBS ON)
+else()
+    # Boost.Log requires that BOOST_LOG_DYN_LINK is set when using dynamic linking. We set ALL for consistency.
+    list(APPEND LEATHERMAN_DEFINITIONS -DBOOST_ALL_DYN_LINK)
+    set(Boost_USE_STATIC_LIBS OFF)
+endif()

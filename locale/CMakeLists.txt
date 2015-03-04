@@ -1,4 +1,4 @@
-find_package(Boost 1.54 REQUIRED COMPONENTS system filesystem)
+find_package(Boost 1.54 REQUIRED COMPONENTS system filesystem thread)
 
 if(WIN32)
     set(LEATHERMAN_LOCALE_SRCS "src/windows/locale.cc")
@@ -7,7 +7,7 @@ else()
 endif()
 
 include_directories(${Boost_INCLUDE_DIRS})
-add_leatherman_deps("${Boost_FILESYSTEM_LIBRARY}" "${Boost_SYSTEM_LIBRARY}")
+add_leatherman_deps("${Boost_THREAD_LIBRARY}" "${Boost_SYSTEM_LIBRARY}" "${Boost_FILESYSTEM_LIBRARY}")
 
 add_leatherman_library(${LEATHERMAN_LOCALE_SRCS})
 
