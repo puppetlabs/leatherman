@@ -51,3 +51,75 @@ macro(defoption name doc default)
     endif()
     option(${name} ${doc} ${enabled})
 endmacro()
+
+# Usage: add_cppcheck_dirs(dir1 dir2)
+#
+# Add the listed directories to the set that cppcheck will be run
+# against
+macro(add_cppcheck_dirs)
+    list(APPEND CPPCHECK_DIRS ${ARGV})
+    export_var(CPPCHECK_DIRS)
+endmacro()
+
+# Usage: add_cpplint_files(file1 file2)
+#
+# Add the listed files to the set that cpplint will be run against
+macro(add_cpplint_files)
+    list(APPEND CPPLINT_FILES ${ARGV})
+    export_var(CPPLINT_FILES)
+endmacro()
+
+# Usage: enable_cppcheck()
+#
+# Create the cppcheck custom target with all the directories specified
+# in previous calls to `add_cppcheck_dirs`
+macro(enable_cppcheck)
+    add_custom_target(cppcheck COMMAND cppcheck --enable=warning,performance --error-exitcode=2 --quiet ${CPPCHECK_DIRS})
+endmacro()
+
+# We set this here so that enable_cpplint() can find it
+set(LEATHERMAN_CPPLINT_PATH "${CMAKE_CURRENT_LIST_DIR}/../scripts/cpplint.py")
+
+# Usage: enable_cpplint()
+#
+# Create the cpplint custom target with all the specified in previous
+# calls to `add_cpplint_files`
+macro(enable_cpplint)
+    include(FindPythonInterp)
+    if (NOT PYTHONINTERP_FOUND)
+	message(STATUS "Python not found; 'cpplint' target will not be available")
+    else()
+	set(CPPLINT_FILTER
+            "-build/c++11"            # <thread>, <condvar>, etc...
+            "-whitespace/indent"      # We use 4 space indentation
+            "-build/include"          # Why?
+            "-build/namespaces"       # What's a namespace to do
+            "-legal/copyright"        # Not yet
+            "-runtime/references"     # Not sure about this religion
+            "-readability/streams"    # What?
+            "-readability/namespace"  # Ignore nested namespace comment formatting
+            "-whitespace/braces"      # Is there a k&r setting?
+            "-whitespace/line_length" # Well yeah, but ... not just now
+            "-runtime/arrays"         # Sizing an array with a 'const int' doesn't make it variable sized
+            "-readability/todo"       # Seriously? todo comments need to identify an owner? pffft
+            "-whitespace/empty_loop_body" # Can't handle do { ... } while(expr);
+            "-runtime/int"            # Some C types are needed for library interop
+            "-runtime/explicit"       # Using implicit conversion from string to regex for regex calls.
+            "-build/header_guard"     # Disable header guards (cpplint doesn't yet support enforcing #pragma once)
+        )
+
+	set(CPPLINT_ARGS "--extensions=cc,hpp,h")
+	if (CPPLINT_FILTER)
+            string(REPLACE ";" "," CPPLINT_FILTER "${CPPLINT_FILTER}")
+            set(CPPLINT_ARGS "${CPPLINT_ARGS};--filter=${CPPLINT_FILTER}")
+	endif()
+	if (MSVC)
+            set(CPPLINT_ARGS "${CPPLINT_ARGS};--output=vs7")
+	endif()
+
+	add_custom_target(cpplint
+            COMMAND ${PYTHON_EXECUTABLE} ${LEATHERMAN_CPPLINT_PATH} ${CPPLINT_ARGS} ${CPPLINT_FILES}
+            VERBATIM
+	)
+    endif()
+endmacro()

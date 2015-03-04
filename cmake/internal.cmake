@@ -167,6 +167,6 @@ macro(add_leatherman_dir dir)
 	export_var(${deps_var})
 
 	# Enable cppcheck on this library	
-	list(APPEND CPPCHECK_DIRS "${CMAKE_SOURCE_DIR}/${dir}")
+	list(APPEND LEATHERMAN_CPPCHECK_DIRS "${CMAKE_SOURCE_DIR}/${dir}")
     endif()
 endmacro(add_leatherman_dir)
