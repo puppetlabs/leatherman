@@ -1,3 +1,5 @@
+defoption(COVERALLS "Generate code coverage using Coveralls.io" OFF)
+
 # Set compiler-specific flags
 # Each of our project dirs sets CMAKE_CXX_FLAGS based on these. We do
 # not set CMAKE_CXX_FLAGS globally because gtest is not warning-clean.
@@ -39,6 +41,11 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     #set(LEATHERMAN_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wall")
+endif()
+
+# Add code coverage
+if (COVERALLS)
+    set(LEATHERMAN_CXX_FLAGS "${LEATHERMAN_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
 endif()
 
 if (WIN32)
