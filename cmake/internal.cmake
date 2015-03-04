@@ -21,6 +21,15 @@ macro(add_leatherman_deps)
     export_var(${deps_var})
 endmacro()
 
+# Usage: add_leatherman_includes(${DIR1} ${DIR2})
+#
+# Append to the LEATHERMAN_<LIBRARY>_INCLUDE variable
+macro(add_leatherman_includes)
+    list(APPEND ${include_var} ${ARGV})
+    list(REMOVE_DUPLICATES ${include_var})
+    export_var(${include_var})
+endmacro()
+
 # Usage: leatherman_dependency("libname")
 #
 # Automatically handle include directories and library linking for the
@@ -49,7 +58,9 @@ macro(leatherman_dependency library)
 	endif()
 	if (NOT "" STREQUAL "${${dep_include}}")
 	    debug("Adding ${${dep_include}} to include directories for ${dirname}")
-	    include_directories(${${dep_include}})
+	    list(APPEND ${include_var} ${${dep_include}})
+	    list(REMOVE_DUPLICATES ${include_var})
+	    export_var(${include_var})
 	endif()
     else()
 	message(FATAL_ERROR "${library} not found as a dependency for ${dirname}")
