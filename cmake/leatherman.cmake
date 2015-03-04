@@ -9,6 +9,16 @@ macro(leatherman_logging_namespace namespace)
     add_definitions("-DLEATHERMAN_LOGGING_NAMESPACE=\"${namespace}\"")
 endmacro()
 
+# Usage: debug("Something cool is happening")
+#
+# Print message if LEATHERMAN_DEBUG is set. Used to introspect macro
+# logic.
+macro(debug str)
+    if (LEATHERMAN_DEBUG)
+	message(STATUS ${str})
+    endif()
+endmacro(debug)
+
 # Usage: export_var("foobar")
 #
 # Sets variable "foobar" in the parent scope to the same value as
@@ -24,3 +34,20 @@ macro(export_var varname)
     debug("It's value is: ${${varname}}")
 endmacro(export_var)
 
+# Usage: defoption(VARNAME "Documentation String" ${DEFAULT_VALUE}")
+#
+# Define an option that will only be set to DEFAULT_VALUE if it does
+# not already exist in this scope. If the variable is available in the
+# scope, the option will keep the current value. This works around a
+# weird CMake behavior where set(OPTION_VAR TRUE) does not cause
+# option() to ignore its default.
+macro(defoption name doc default)
+    if(DEFINED ${name})
+	debug("${name} is already set, using it")
+	set(enabled ${${name}})
+    else()
+	debug("${name} unset, using default")
+	set(enabled ${default})
+    endif()
+    option(${name} ${doc} ${enabled})
+endmacro()

@@ -170,35 +170,3 @@ macro(add_leatherman_dir dir)
 	list(APPEND CPPCHECK_DIRS "${CMAKE_SOURCE_DIR}/${dir}")
     endif()
 endmacro(add_leatherman_dir)
-
-####
-# Helper Macros
-####
-
-# Usage: debug("Something cool is happening")
-#
-# Print message if LEATHERMAN_DEBUG is set. Used to introspect macro
-# logic.
-macro(debug str)
-    if (LEATHERMAN_DEBUG)
-	message(STATUS ${str})
-    endif()
-endmacro(debug)
-
-# Usage: defoption(VARNAME "Documentation String" ${DEFAULT_VALUE}")
-#
-# Define an option that will only be set to DEFAULT_VALUE if it does
-# not already exist in this scope. If the variable is available in the
-# scope, the option will keep the current value. This works around a
-# weird CMake behavior where set(OPTION_VAR TRUE) does not cause
-# option() to ignore its default.
-macro(defoption name doc default)
-    if(DEFINED ${name})
-	debug("${name} is already set, using it")
-	set(enabled ${${name}})
-    else()
-	debug("${name} unset, using default")
-	set(enabled ${default})
-    endif()
-    option(${name} ${doc} ${enabled})
-endmacro()

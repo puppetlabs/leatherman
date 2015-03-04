@@ -1,3 +1,4 @@
+include(leatherman)
 defoption(COVERALLS "Generate code coverage using Coveralls.io" OFF)
 defoption(BOOST_STATIC "Use Boost's static libraries" OFF)
 
