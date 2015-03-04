@@ -32,7 +32,6 @@ add_leatherman_dir(locale)
 add_leatherman_dir(logging)
 
 list(REVERSE LEATHERMAN_LIBRARIES)
-list(REMOVE_DUPLICATES LEATHERMAN_LIBRARIES)
 
 export_var(LEATHERMAN_INCLUDE_DIRS)
 export_var(LEATHERMAN_LIBRARIES)
