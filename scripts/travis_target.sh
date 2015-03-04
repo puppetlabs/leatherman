@@ -42,9 +42,9 @@ function travis_make()
             exit 1
         fi
 
-        #if [ $1 == "debug" ]; then
-            #coveralls --gcov-options '\-lp' -r .. >/dev/null
-        #fi
+        if [ $1 == "debug" ]; then
+            coveralls --gcov-options '\-lp' -r .. >/dev/null
+        fi
     fi
 }
 

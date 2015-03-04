@@ -1,7 +1,7 @@
 find_package(Boost 1.54 REQUIRED COMPONENTS log)
 
-include_directories(${Boost_INCLUDE_DIRS})
 add_leatherman_deps("${Boost_LOG_LIBRARY}")
+add_leatherman_includes("${Boost_INCLUDE_DIRS}")
 
 leatherman_dependency(nowide)
 leatherman_dependency(locale)
