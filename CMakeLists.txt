@@ -3,10 +3,6 @@ project(LEATHERMAN)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(internal)
-include(leatherman)
-include(cflags)
-
-add_definitions(${LEATHERMAN_DEFINITIONS})
 
 # If we're the top-level project, we want to ensure the build type is
 # sane, and flag ourselves as such for later checks
@@ -25,6 +21,15 @@ endif()
 defoption(LEATHERMAN_DEFAULT_ENABLE "Should Leatherman libraries all be built by default" ${LEATHERMAN_TOPLEVEL})
 defoption(LEATHERMAN_DEBUG "Enable verbose logging messages from leatherman macros" FALSE)
 defoption(LEATHERMAN_ENABLE_TESTING "Build the leatherman test binary" ${LEATHERMAN_DEFAULT_ENABLE})
+
+#As with most things, we rely on the containing project to set up the
+#common flags
+if (LEATHERMAN_TOPLEVEL)
+    include(options)
+    include(cflags)
+endif()
+
+add_definitions(${LEATHERMAN_DEFINITIONS})
 
 add_leatherman_dir(catch EXCLUDE_FROM_VARS)
 add_leatherman_dir(nowide)
