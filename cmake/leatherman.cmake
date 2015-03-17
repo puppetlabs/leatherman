@@ -108,7 +108,7 @@ macro(enable_cpplint)
             "-build/header_guard"     # Disable header guards (cpplint doesn't yet support enforcing #pragma once)
         )
 
-	set(CPPLINT_ARGS "--extensions=cc,hpp,h")
+	set(CPPLINT_ARGS "--extensions=cc,cpp,hpp,h")
 	if (CPPLINT_FILTER)
             string(REPLACE ";" "," CPPLINT_FILTER "${CPPLINT_FILTER}")
             set(CPPLINT_ARGS "${CPPLINT_ARGS};--filter=${CPPLINT_FILTER}")
