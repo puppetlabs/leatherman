@@ -14,6 +14,7 @@
 #include <boost/log/attributes/scoped_attribute.hpp>
 #include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
+#include <boost/filesystem/path.hpp>
 
 #pragma GCC diagnostic pop
 
@@ -36,14 +37,17 @@ namespace leatherman { namespace logging {
 
     void setup_logging(ostream &dst)
     {
-        // Initialize locale
-        leatherman::locale::set_locale();
-
         // Remove existing sinks before adding a new one
         auto core = boost::log::core::get();
         core->remove_all_sinks();
 
         auto sink = boost::log::add_console_log(dst, keywords::auto_flush = true);
+
+        // Logging uses boost::filesystem, so ensure it uses an expected locale. Imbue the logging sink
+        // with the same locale.
+        auto utf8 = leatherman::locale::get_locale();
+        boost::filesystem::path::imbue(utf8);
+        sink->imbue(utf8);
 
         sink->set_formatter(
             expr::stream
