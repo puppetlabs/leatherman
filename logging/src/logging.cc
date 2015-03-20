@@ -34,16 +34,16 @@ namespace leatherman { namespace logging {
     static bool g_colorize = false;
     static bool g_error_logged = false;
 
-    void setup_logging(ostream &dst)
+    void setup_logging(ostream &dst, string locale)
     {
-        // Initialize locale
-        leatherman::locale::set_locale();
-
         // Remove existing sinks before adding a new one
         auto core = boost::log::core::get();
         core->remove_all_sinks();
 
         auto sink = boost::log::add_console_log(dst, keywords::auto_flush = true);
+
+        // Imbue the logging sink with the requested locale.
+        sink->imbue(leatherman::locale::get_locale(locale));
 
         sink->set_formatter(
             expr::stream

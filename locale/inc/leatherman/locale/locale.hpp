@@ -3,13 +3,14 @@
 * Declares utility functions for setting the locale.
 */
 #pragma once
+#include <locale>
 
 namespace leatherman { namespace locale {
 
     /**
-     * Sets the locale to the specified locale id and imbues it in boost::filesystem.
-     * @param id The locale ID, defaults to the system default.
+     * Gets a locale object for the specified locale id.
+     * @param id The locale ID, defaults to a UTF-8 compatible system default.
      */
-    void set_locale(std::string const& id = "");
+    std::locale get_locale(std::string const& id = "");
 
 }}  // namespace leatherman::locale

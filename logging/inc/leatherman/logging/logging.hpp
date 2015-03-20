@@ -153,8 +153,9 @@ namespace leatherman { namespace logging {
      * Sets up logging for the given stream.
      * The logging level is set to warning by default.
      * @param dst Destination stream for logging output.
+     * @param locale The locale identifier to use for logging.
      */
-    void setup_logging(std::ostream &dst);
+    void setup_logging(std::ostream &dst, std::string locale = "");
 
     /**
      * Sets the current log level.
