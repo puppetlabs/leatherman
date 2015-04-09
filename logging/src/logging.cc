@@ -42,8 +42,11 @@ namespace leatherman { namespace logging {
 
         auto sink = boost::log::add_console_log(dst, keywords::auto_flush = true);
 
+#if !defined(__sun) || !defined(__GNUC__)
         // Imbue the logging sink with the requested locale.
+        // Locale in GCC is busted on Solaris, so skip it.
         sink->imbue(leatherman::locale::get_locale(locale));
+#endif
 
         sink->set_formatter(
             expr::stream
