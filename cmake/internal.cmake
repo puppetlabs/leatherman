@@ -45,25 +45,25 @@ macro(leatherman_dependency library)
     set(dep_include "LEATHERMAN_${name}_INCLUDE")
 
     if(${${option}})
-	debug("Found ${library} as ${name}, using it in current context")
-	if (NOT "" STREQUAL "${${dep_deps}}")
-	    debug("Adding ${${dep_deps}} to deps for ${dirname}")
-	    list(APPEND ${deps_var} ${${dep_deps}})
-	    export_var(${deps_var})
-	endif()
-	if (NOT "" STREQUAL "${${dep_lib}}")
-	    debug("Adding ${${dep_lib}} to deps for ${dirname}")
-	    list(APPEND ${deps_var} ${${dep_lib}})
-	    export_var(${deps_var})
-	endif()
-	if (NOT "" STREQUAL "${${dep_include}}")
-	    debug("Adding ${${dep_include}} to include directories for ${dirname}")
-	    list(APPEND ${include_var} ${${dep_include}})
-	    list(REMOVE_DUPLICATES ${include_var})
-	    export_var(${include_var})
-	endif()
+        debug("Found ${library} as ${name}, using it in current context")
+        if (NOT "" STREQUAL "${${dep_deps}}")
+            debug("Adding ${${dep_deps}} to deps for ${dirname}")
+            list(APPEND ${deps_var} ${${dep_deps}})
+            export_var(${deps_var})
+        endif()
+        if (NOT "" STREQUAL "${${dep_lib}}")
+            debug("Adding ${${dep_lib}} to deps for ${dirname}")
+            list(APPEND ${deps_var} ${${dep_lib}})
+            export_var(${deps_var})
+        endif()
+        if (NOT "" STREQUAL "${${dep_include}}")
+            debug("Adding ${${dep_include}} to include directories for ${dirname}")
+            list(APPEND ${include_var} ${${dep_include}})
+            list(REMOVE_DUPLICATES ${include_var})
+            export_var(${include_var})
+        endif()
     else()
-	message(FATAL_ERROR "${library} not found as a dependency for ${dirname}")
+        message(FATAL_ERROR "${library} not found as a dependency for ${dirname}")
     endif()
 endmacro()
 
@@ -89,11 +89,11 @@ endmacro()
 # leatherman unit test executable.
 macro(add_leatherman_test)
     foreach(FILE ${ARGV})
-	if (IS_ABSOLUTE FILE)
-	    list(APPEND LEATHERMAN_TEST_SRCS "${FILE}")
-	else()
-	    list(APPEND LEATHERMAN_TEST_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${FILE}")
-	endif()
+        if (IS_ABSOLUTE FILE)
+            list(APPEND LEATHERMAN_TEST_SRCS "${FILE}")
+        else()
+            list(APPEND LEATHERMAN_TEST_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${FILE}")
+        endif()
     endforeach()
     export_var(LEATHERMAN_TEST_SRCS)
 endmacro()
@@ -128,49 +128,49 @@ macro(add_leatherman_dir dir)
 
     defoption(${option} "Should ${dir} be built and used?" ${LEATHERMAN_DEFAULT_ENABLE})
     if (${${option}})
-	set(include_var "LEATHERMAN_${id_upper}_INCLUDE")
-	set(lib_var "LEATHERMAN_${id_upper}_LIB")
-	set(deps_var "LEATHERMAN_${id_upper}_DEPS")
+        set(include_var "LEATHERMAN_${id_upper}_INCLUDE")
+        set(lib_var "LEATHERMAN_${id_upper}_LIB")
+        set(deps_var "LEATHERMAN_${id_upper}_DEPS")
  
-	set(${include_var} ${include_dir})
-	set(${lib_var} "") # if library is built, this will be set automatically
+        set(${include_var} ${include_dir})
+        set(${lib_var} "") # if library is built, this will be set automatically
 
-	# By adding the subdirectory after setting all variables, but
-	# before exporting, we give the library an opportunity to
-	# munge them (for example, to add vendor dirs)
-	add_subdirectory("${dir}")
+        # By adding the subdirectory after setting all variables, but
+        # before exporting, we give the library an opportunity to
+        # munge them (for example, to add vendor dirs)
+        add_subdirectory("${dir}")
 
-	# We set this one afterwards because it doesn't need
-	# overriding
-	#
-	# We put deps before libs. This is backwards on purpose. We
-	# later reverse the entire libraries list in order to ensure
-	# proper link order. Ideally we could put things in the
-	# correct order directly, but CMake de-duplicates link lines
-	# in ways that just make this a sad, sad process.
-	set(libs_var "LEATHERMAN_${id_upper}_LIBS")
-	set(${libs_var} ${${deps_var}} ${${lib_var}})
+        # We set this one afterwards because it doesn't need
+        # overriding
+        #
+        # We put deps before libs. This is backwards on purpose. We
+        # later reverse the entire libraries list in order to ensure
+        # proper link order. Ideally we could put things in the
+        # correct order directly, but CMake de-duplicates link lines
+        # in ways that just make this a sad, sad process.
+        set(libs_var "LEATHERMAN_${id_upper}_LIBS")
+        set(${libs_var} ${${deps_var}} ${${lib_var}})
 
-	if(NOT "${ARGV1}" STREQUAL EXCLUDE_FROM_VARS)
-	    debug("Appending values for ${id_upper} to common vars")
-	    list(APPEND LEATHERMAN_INCLUDE_DIRS ${${include_var}})
-	    list(APPEND LEATHERMAN_LIBRARIES ${${libs_var}})
-	else()
-	    debug("Excluding values for ${id_upper} from common vars")
-	endif()
+        if(NOT "${ARGV1}" STREQUAL EXCLUDE_FROM_VARS)
+            debug("Appending values for ${id_upper} to common vars")
+            list(APPEND LEATHERMAN_INCLUDE_DIRS ${${include_var}})
+            list(APPEND LEATHERMAN_LIBRARIES ${${libs_var}})
+        else()
+            debug("Excluding values for ${id_upper} from common vars")
+        endif()
 
 
-	# Put our link line into the right order.
+        # Put our link line into the right order.
         if("${${libs_var}}")
             list(REVERSE ${libs_var})
         endif()
 
-	export_var(${include_var})
-	export_var(${lib_var})
-	export_var(${libs_var})
-	export_var(${deps_var})
+        export_var(${include_var})
+        export_var(${lib_var})
+        export_var(${libs_var})
+        export_var(${deps_var})
 
-	# Enable cppcheck on this library	
-	list(APPEND LEATHERMAN_CPPCHECK_DIRS "${CMAKE_SOURCE_DIR}/${dir}")
+        # Enable cppcheck on this library
+        list(APPEND LEATHERMAN_CPPCHECK_DIRS "${CMAKE_SOURCE_DIR}/${dir}")
     endif()
 endmacro(add_leatherman_dir)
