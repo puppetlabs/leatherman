@@ -80,6 +80,9 @@ macro(add_leatherman_library)
     include_directories(${${include_var}})
     add_library(${libname} STATIC ${ARGV})
     set_target_properties(${libname} PROPERTIES COMPILE_FLAGS "${LEATHERMAN_CXX_FLAGS} ${LEATHERMAN_LIBRARY_FLAGS}")
+    if(LEATHERMAN_INSTALL)
+        install(TARGETS ${libname} EXPORT LeathermanLibraries ARCHIVE DESTINATION lib)
+    endif()
     set(${lib_var} "${libname}" PARENT_SCOPE)
 endmacro()
 
@@ -96,6 +99,19 @@ macro(add_leatherman_test)
         endif()
     endforeach()
     export_var(LEATHERMAN_TEST_SRCS)
+endmacro()
+
+
+# Usage: add_leatherman_headers(${DIRECTORIES})
+#
+# Adds the listed directories to the set which will be installed to
+# $PREFIX/include
+macro(add_leatherman_headers)
+    if(LEATHERMAN_INSTALL)
+        foreach(DIR ${ARGV})
+            install(DIRECTORY "${DIR}" DESTINATION include)
+        endforeach()
+    endif()
 endmacro()
 
 ####
@@ -140,6 +156,16 @@ macro(add_leatherman_dir dir)
         # munge them (for example, to add vendor dirs)
         add_subdirectory("${dir}")
 
+        if (LEATHERMAN_INSTALL)
+            if ("${ARGV1}" STREQUAL EXCLUDE_FROM_VARS)
+                set(COMPONENT_STRING "leatherman_component(${id} EXCLUDE_FROM_VARS)")
+            else()
+                set(COMPONENT_STRING "leatherman_component(${id})")
+            endif()
+            install(FILES "${dir}/CMakeLists.txt" DESTINATION "lib/cmake/leatherman" RENAME "${id}.cmake")
+            set(LEATHERMAN_COMPONENTS "${LEATHERMAN_COMPONENTS}\n${COMPONENT_STRING}")
+        endif()
+
         # We set this one afterwards because it doesn't need
         # overriding
         #
@@ -161,7 +187,7 @@ macro(add_leatherman_dir dir)
 
 
         # Put our link line into the right order.
-        if("${${libs_var}}")
+        if(NOT "${${libs_var}}" STREQUAL "")
             list(REVERSE ${libs_var})
         endif()
 

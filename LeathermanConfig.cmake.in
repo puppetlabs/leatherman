@@ -1,0 +1,33 @@
+get_filename_component(current_directory ${CMAKE_CURRENT_LIST_FILE} DIRECTORY)
+list(APPEND CMAKE_MODULE_PATH "${current_directory}/cmake")
+include(leatherman_config)
+include(options)
+include("${current_directory}/LeathermanLibraries.cmake")
+
+get_filename_component(LEATHERMAN_PREFIX "${current_directory}/../../../" ABSOLUTE)
+
+@LEATHERMAN_COMPONENTS@
+
+debug("Selected components: ${Leatherman_FIND_COMPONENTS}")
+foreach(component ${Leatherman_FIND_COMPONENTS})
+    string(TOUPPER "${component}" id_upper)
+    set(exclude_var "LEATHERMAN_EXCLUDE_${id_upper}")
+    set(include_var "LEATHERMAN_${id_upper}_INCLUDE")
+    set(libs_var "LEATHERMAN_${id_upper}_LIBS")
+    debug("Exclude variable ${exclude_var} is ${${exclude_var}}")
+    if(${${exclude_var}})
+        debug("Excluding values for ${id_upper}")
+        debug("* include is ${include_var}: ${${include_var}}")
+        debug("* library is ${libs_var}: ${${libs_var}}")
+    else()
+        debug("Appending values for ${id_upper} to common vars")
+        debug("* include is ${${include_var}}")
+        debug("* library is ${${libs_var}}")
+        list(APPEND LEATHERMAN_INCLUDE_DIRS ${${include_var}})
+        list(APPEND LEATHERMAN_LIBRARIES ${${libs_var}})
+    endif()
+endforeach()
+
+list(REVERSE LEATHERMAN_LIBRARIES)
+list(REMOVE_DUPLICATES LEATHERMAN_INCLUDE_DIRS)
+set(LEATHERMAN_MODULE_DIR "${current_directory}/cmake")

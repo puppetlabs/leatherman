@@ -13,4 +13,4 @@ if (WIN32)
 endif()
 
 add_leatherman_library(${LEATHERMAN_LOCALE_SRCS})
-
+add_leatherman_headers(inc/leatherman)

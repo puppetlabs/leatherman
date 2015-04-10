@@ -21,6 +21,9 @@ endif()
 defoption(LEATHERMAN_DEFAULT_ENABLE "Should Leatherman libraries all be built by default" ${LEATHERMAN_TOPLEVEL})
 defoption(LEATHERMAN_DEBUG "Enable verbose logging messages from leatherman macros" FALSE)
 defoption(LEATHERMAN_ENABLE_TESTING "Build the leatherman test binary" ${LEATHERMAN_DEFAULT_ENABLE})
+defoption(LEATHERMAN_INSTALL "Install the leatherman libraries and headers" ${LEATHERMAN_DEFAULT_ENABLE})
+
+set(BUILDING_LEATHERMAN TRUE)
 
 #As with most things, we rely on the containing project to set up the
 #common flags
@@ -57,4 +60,19 @@ if(LEATHERMAN_ENABLE_TESTING)
 	enable_cppcheck()
 	enable_cpplint()
     endif()
+endif()
+
+# Install the cmake files we need for consumers
+if (LEATHERMAN_INSTALL)
+    set(CMAKE_FILES
+        cmake/cflags.cmake
+        cmake/leatherman.cmake
+        cmake/options.cmake
+        cmake/leatherman_config.cmake
+    )
+    install(FILES ${CMAKE_FILES} DESTINATION "lib/cmake/leatherman/cmake/")
+
+    configure_file(LeathermanConfig.cmake.in "${PROJECT_BINARY_DIR}/LeathermanConfig.cmake" @ONLY)
+    install(FILES "${PROJECT_BINARY_DIR}/LeathermanConfig.cmake" DESTINATION "lib/cmake/leatherman")
+    install(EXPORT LeathermanLibraries DESTINATION "lib/cmake/leatherman")
 endif()
