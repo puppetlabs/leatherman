@@ -8,8 +8,9 @@ leatherman_dependency(locale)
 
 if (BUILDING_LEATHERMAN)
     leatherman_logging_namespace("leatherman.logging")
+    leatherman_logging_line_numbers()
 endif()
 
 add_leatherman_library(src/logging.cc)
-add_leatherman_test(tests/logging.cc)
+add_leatherman_test(tests/logging.cc tests/logging_lines.cc)
 add_leatherman_headers(inc/leatherman)

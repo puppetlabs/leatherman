@@ -1,4 +1,5 @@
 #include <catch.hpp>
+#define LEATHERMAN_LOGGING_LINE_NUMBERS
 #include <leatherman/logging/logging.hpp>
 #include <boost/log/sinks/sync_frontend.hpp>
 #include <boost/log/sinks/basic_sink_backend.hpp>
@@ -58,79 +59,85 @@ struct logging_test_context
     boost::shared_ptr<sink_t> _sink;
 };
 
-SCENARIO("logging with a TRACE level") {
+SCENARIO("logging with a TRACE level with line numbers") {
     logging_test_context context;
     REQUIRE(LOG_IS_TRACE_ENABLED());
+    int line_num = __LINE__ + 1;
     LOG_TRACE("testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context._appender->_level == "TRACE");
-    REQUIRE(context._appender->_message == string(colorize(log_level::trace)) + " - testing 1 2 3" + colorize());
-    log("test", log_level::trace, "testing %1% %2% %3%", 1, "2", 3.0);
+    REQUIRE(context._appender->_message == string(colorize(log_level::trace)) + ":" + to_string(line_num) + " - testing 1 2 3" + colorize());
+    log("test", log_level::trace, line_num, "testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context._appender->_level == "TRACE");
-    REQUIRE(context._appender->_message == string(colorize(log_level::trace)) + " - testing 1 2 3" + colorize());
+    REQUIRE(context._appender->_message == string(colorize(log_level::trace)) + ":" + to_string(line_num) + " - testing 1 2 3" + colorize());
     REQUIRE_FALSE(error_has_been_logged());
 }
 
-SCENARIO("logging with a DEBUG level") {
+SCENARIO("logging with a DEBUG level with line numbers") {
     logging_test_context context;
     REQUIRE(LOG_IS_DEBUG_ENABLED());
+    int line_num = __LINE__ + 1;
     LOG_DEBUG("testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context._appender->_level == "DEBUG");
-    REQUIRE(context._appender->_message == string(colorize(log_level::debug)) + " - testing 1 2 3" + colorize());
-    log("test", log_level::debug, "testing %1% %2% %3%", 1, "2", 3.0);
+    REQUIRE(context._appender->_message == string(colorize(log_level::debug)) + ":" + to_string(line_num) + " - testing 1 2 3" + colorize());
+    log("test", log_level::debug, line_num, "testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context._appender->_level == "DEBUG");
-    REQUIRE(context._appender->_message == string(colorize(log_level::debug)) + " - testing 1 2 3" + colorize());
+    REQUIRE(context._appender->_message == string(colorize(log_level::debug)) + ":" + to_string(line_num) + " - testing 1 2 3" + colorize());
     REQUIRE_FALSE(error_has_been_logged());
 }
 
-SCENARIO("logging with an INFO level") {
+SCENARIO("logging with an INFO level with line numbers") {
     logging_test_context context;
     REQUIRE(LOG_IS_INFO_ENABLED());
+    int line_num = __LINE__ + 1;
     LOG_INFO("testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context._appender->_level == "INFO");
-    REQUIRE(context._appender->_message == string(colorize(log_level::info)) + " - testing 1 2 3" + colorize());
-    log("test", log_level::info, "testing %1% %2% %3%", 1, "2", 3.0);
+    REQUIRE(context._appender->_message == string(colorize(log_level::info)) + ":" + to_string(line_num) + " - testing 1 2 3" + colorize());
+    log("test", log_level::info, line_num, "testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context._appender->_level == "INFO");
-    REQUIRE(context._appender->_message == string(colorize(log_level::info)) + " - testing 1 2 3" + colorize());
+    REQUIRE(context._appender->_message == string(colorize(log_level::info)) + ":" + to_string(line_num) + " - testing 1 2 3" + colorize());
     REQUIRE_FALSE(error_has_been_logged());
 }
 
-SCENARIO("logging with a WARNING level") {
+SCENARIO("logging with a WARNING level with line numbers") {
     logging_test_context context;
     REQUIRE(LOG_IS_WARNING_ENABLED());
+    int line_num = __LINE__ + 1;
     LOG_WARNING("testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context._appender->_level == "WARN");
-    REQUIRE(context._appender->_message == string(colorize(log_level::warning)) + " - testing 1 2 3" + colorize());
-    log("test", log_level::warning, "testing %1% %2% %3%", 1, "2", 3.0);
+    REQUIRE(context._appender->_message == string(colorize(log_level::warning)) + ":" + to_string(line_num) + " - testing 1 2 3" + colorize());
+    log("test", log_level::warning, line_num, "testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context._appender->_level == "WARN");
-    REQUIRE(context._appender->_message == string(colorize(log_level::warning)) + " - testing 1 2 3" + colorize());
+    REQUIRE(context._appender->_message == string(colorize(log_level::warning)) + ":" + to_string(line_num) + " - testing 1 2 3" + colorize());
     REQUIRE_FALSE(error_has_been_logged());
 }
 
-SCENARIO("logging with an ERROR level") {
+SCENARIO("logging with an ERROR level with line numbers") {
     logging_test_context context;
     REQUIRE(LOG_IS_ERROR_ENABLED());
+    int line_num = __LINE__ + 1;
     LOG_ERROR("testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context._appender->_level == "ERROR");
-    REQUIRE(context._appender->_message == string(colorize(log_level::error)) + " - testing 1 2 3" + colorize());
-    log("test", log_level::error, "testing %1% %2% %3%", 1, "2", 3.0);
+    REQUIRE(context._appender->_message == string(colorize(log_level::error)) + ":" + to_string(line_num) + " - testing 1 2 3" + colorize());
+    log("test", log_level::error, line_num, "testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context._appender->_level == "ERROR");
-    REQUIRE(context._appender->_message == string(colorize(log_level::error)) + " - testing 1 2 3" + colorize());
+    REQUIRE(context._appender->_message == string(colorize(log_level::error)) + ":" + to_string(line_num) + " - testing 1 2 3" + colorize());
     REQUIRE(error_has_been_logged());
 }
 
-SCENARIO("logging with a FATAL level") {
+SCENARIO("logging with a FATAL level with line numbers") {
     logging_test_context context;
     REQUIRE(LOG_IS_FATAL_ENABLED());
+    int line_num = __LINE__ + 1;
     LOG_FATAL("testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context._appender->_level == "FATAL");
-    REQUIRE(context._appender->_message == string(colorize(log_level::fatal)) + " - testing 1 2 3" + colorize());
-    log("test", log_level::fatal, "testing %1% %2% %3%", 1, "2", 3.0);
+    REQUIRE(context._appender->_message == string(colorize(log_level::fatal)) + ":" + to_string(line_num) + " - testing 1 2 3" + colorize());
+    log("test", log_level::fatal, line_num, "testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context._appender->_level == "FATAL");
-    REQUIRE(context._appender->_message == string(colorize(log_level::fatal)) + " - testing 1 2 3" + colorize());
+    REQUIRE(context._appender->_message == string(colorize(log_level::fatal)) + ":" + to_string(line_num) + " - testing 1 2 3" + colorize());
     REQUIRE(error_has_been_logged());
 }
 
-SCENARIO("logging with on_message") {
+SCENARIO("logging with on_message with line numbers") {
     logging_test_context context;
     string message;
     log_level level;
