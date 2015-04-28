@@ -30,49 +30,50 @@
 /**
  * Logs a message.
  * @param level The logging level for the message.
+ * @param line_num The source line number of the logging call.
  * @param format The format message.
  * @param ... The format message parameters.
  */
-#define LOG_MESSAGE(level, format, ...) \
+#define LOG_MESSAGE(level, line_num, format, ...) \
     if (leatherman::logging::is_enabled(level)) { \
-        leatherman::logging::log(LOG_NAMESPACE, level, format, ##__VA_ARGS__); \
+        leatherman::logging::log(LOG_NAMESPACE, level, line_num, format, ##__VA_ARGS__); \
     }
 /**
  * Logs a trace message.
  * @param format The format message.
  * @param ... The format message parameters.
  */
-#define LOG_TRACE(format, ...) LOG_MESSAGE(leatherman::logging::log_level::trace, format, ##__VA_ARGS__)
+#define LOG_TRACE(format, ...) LOG_MESSAGE(leatherman::logging::log_level::trace, __LINE__, format, ##__VA_ARGS__)
 /**
  * Logs a debug message.
  * @param format The format message.
  * @param ... The format message parameters.
  */
-#define LOG_DEBUG(format, ...) LOG_MESSAGE(leatherman::logging::log_level::debug, format, ##__VA_ARGS__)
+#define LOG_DEBUG(format, ...) LOG_MESSAGE(leatherman::logging::log_level::debug, __LINE__, format, ##__VA_ARGS__)
 /**
  * Logs an info message.
  * @param format The format message.
  * @param ... The format message parameters.
  */
-#define LOG_INFO(format, ...) LOG_MESSAGE(leatherman::logging::log_level::info, format, ##__VA_ARGS__)
+#define LOG_INFO(format, ...) LOG_MESSAGE(leatherman::logging::log_level::info, __LINE__, format, ##__VA_ARGS__)
 /**
  * Logs a warning message.
  * @param format The format message.
  * @param ... The format message parameters.
  */
-#define LOG_WARNING(format, ...) LOG_MESSAGE(leatherman::logging::log_level::warning, format, ##__VA_ARGS__)
+#define LOG_WARNING(format, ...) LOG_MESSAGE(leatherman::logging::log_level::warning, __LINE__, format, ##__VA_ARGS__)
 /**
  * Logs an error message.
  * @param format The format message.
  * @param ... The format message parameters.
  */
-#define LOG_ERROR(format, ...) LOG_MESSAGE(leatherman::logging::log_level::error, format, ##__VA_ARGS__)
+#define LOG_ERROR(format, ...) LOG_MESSAGE(leatherman::logging::log_level::error, __LINE__, format, ##__VA_ARGS__)
 /**
  * Logs a fatal message.
  * @param format The format message.
  * @param ... The format message parameters.
  */
-#define LOG_FATAL(format, ...) LOG_MESSAGE(leatherman::logging::log_level::fatal, format, ##__VA_ARGS__)
+#define LOG_FATAL(format, ...) LOG_MESSAGE(leatherman::logging::log_level::fatal, __LINE__, format, ##__VA_ARGS__)
 /**
  * Determines if the trace logging level is enabled.
  * @returns Returns true if trace logging is enabled or false if it is not enabled.
@@ -212,17 +213,19 @@ namespace leatherman { namespace logging {
      * Logs a given message to the given logger.
      * @param logger The logger to log the message to.
      * @param level The logging level to log with.
+     * @param line_num The source line number of the logging call.
      * @param message The message to log.
      */
-    void log(const std::string &logger, log_level level, std::string const& message);
+    void log(const std::string &logger, log_level level, int line_num, std::string const& message);
 
     /**
      * Logs a given format message to the given logger.
      * @param logger The logger to log the message to.
      * @param level The logging level to log with.
+     * @param line_num The source line number of the logging call.
      * @param message The message being formatted.
      */
-    void log(const std::string &logger, log_level level, boost::format& message);
+    void log(const std::string &logger, log_level level, int line_num, boost::format& message);
 
     /**
      * Logs a given format message to the given logger.
@@ -230,15 +233,16 @@ namespace leatherman { namespace logging {
      * @tparam TArgs The types of the remaining arguments.
      * @param logger The logger to log to.
      * @param level The logging level to log with.
+     * @param line_num The source line number of the logging call.
      * @param message The message being formatted.
      * @param arg The first argument to the message.
      * @param args The remaining arguments to the message.
      */
     template <typename T, typename... TArgs>
-    void log(const std::string &logger, log_level level, boost::format& message, T arg, TArgs... args)
+    void log(const std::string &logger, log_level level, int line_num, boost::format& message, T arg, TArgs... args)
     {
         message % arg;
-        log(logger, level, message, std::forward<TArgs>(args)...);
+        log(logger, level, line_num, message, std::forward<TArgs>(args)...);
     }
 
     /**
@@ -246,14 +250,15 @@ namespace leatherman { namespace logging {
      * @tparam TArgs The types of the arguments to format the message with.
      * @param logger The logger to log to.
      * @param level The logging level to log with.
+     * @param line_num The source line number of the logging call.
      * @param format The message format.
      * @param args The remaining arguments to the message.
      */
     template <typename... TArgs>
-    void log(const std::string &logger, log_level level, std::string const& format, TArgs... args)
+    void log(const std::string &logger, log_level level, int line_num, std::string const& format, TArgs... args)
     {
         boost::format message(format);
-        log(logger, level, message, std::forward<TArgs>(args)...);
+        log(logger, level, line_num, message, std::forward<TArgs>(args)...);
     }
 
     /**
