@@ -139,28 +139,9 @@ namespace leatherman { namespace logging {
         return g_colorize ? reset : none;
     }
 
-    void log(const string &logger, log_level level, boost::format& message)
-    {
-        log(logger, level, message.str());
-    }
-
     void log(const string &logger, log_level level, int line_num, boost::format& message)
     {
         log(logger, level, line_num, message.str());
-    }
-
-    void log(const string &logger, log_level level, string const& message)
-    {
-        if (level >= log_level::error) {
-            g_error_logged = true;
-        }
-        if (!is_enabled(level) || (g_callback && !g_callback(level, message))) {
-            return;
-        }
-
-        src::severity_logger<log_level> slg;
-        slg.add_attribute("Namespace", attrs::constant<string>(logger));
-        BOOST_LOG_SEV(slg, level) << " - "  << colorize(level) << message << colorize();
     }
 
     void log(const string &logger, log_level level, int line_num, string const& message)
@@ -174,7 +155,7 @@ namespace leatherman { namespace logging {
 
         src::severity_logger<log_level> slg;
         slg.add_attribute("Namespace", attrs::constant<string>(logger));
-        BOOST_LOG_SEV(slg, level) << ":" << line_num << " - "  << colorize(level) << message << colorize();
+        BOOST_LOG_SEV(slg, level) << (line_num > 0 ? ":"+to_string(line_num) : "") << " - "  << colorize(level) << message << colorize();
     }
 
     istream& operator>>(istream& in, log_level& level)

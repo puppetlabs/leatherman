@@ -42,7 +42,7 @@
 #else
 #define LOG_MESSAGE(level, line_num, format, ...) \
     if (leatherman::logging::is_enabled(level)) { \
-        leatherman::logging::log(LOG_NAMESPACE, level, format, ##__VA_ARGS__); \
+        leatherman::logging::log(LOG_NAMESPACE, level, 0, format, ##__VA_ARGS__); \
     }
 #endif
 /**
@@ -217,15 +217,7 @@ namespace leatherman { namespace logging {
     void clear_error_logged_flag();
 
     /**
-     * Logs a given message to the given logger.
-     * @param logger The logger to log the message to.
-     * @param level The logging level to log with.
-     * @param message The message to log.
-     */
-    void log(const std::string &logger, log_level level, std::string const& message);
-
-    /**
-     * Logs a given message to the given logger with the specified line number.
+     * Logs a given message to the given logger with the specified line number (if > 0).
      * @param logger The logger to log the message to.
      * @param level The logging level to log with.
      * @param line_num The source line number of the logging call.
@@ -234,15 +226,7 @@ namespace leatherman { namespace logging {
     void log(const std::string &logger, log_level level, int line_num, std::string const& message);
 
     /**
-     * Logs a given format message to the given logger.
-     * @param logger The logger to log the message to.
-     * @param level The logging level to log with.
-     * @param message The message being formatted.
-     */
-    void log(const std::string &logger, log_level level, boost::format& message);
-
-    /**
-     * Logs a given format message to the given logger with the specified line number.
+     * Logs a given format message to the given logger with the specified line number (if > 0).
      * @param logger The logger to log the message to.
      * @param level The logging level to log with.
      * @param line_num The source line number of the logging call.
@@ -251,24 +235,7 @@ namespace leatherman { namespace logging {
     void log(const std::string &logger, log_level level, int line_num, boost::format& message);
 
     /**
-     * Logs a given format message to the given logger.
-     * @tparam T The type of the first argument.
-     * @tparam TArgs The types of the remaining arguments.
-     * @param logger The logger to log to.
-     * @param level The logging level to log with.
-     * @param message The message being formatted.
-     * @param arg The first argument to the message.
-     * @param args The remaining arguments to the message.
-     */
-    template <typename T, typename... TArgs>
-    void log(const std::string &logger, log_level level, boost::format& message, T arg, TArgs... args)
-    {
-        message % arg;
-        log(logger, level, message, std::forward<TArgs>(args)...);
-    }
-
-    /**
-     * Logs a given format message to the given logger with the specified line number.
+     * Logs a given format message to the given logger with the specified line number (if > 0).
      * @tparam T The type of the first argument.
      * @tparam TArgs The types of the remaining arguments.
      * @param logger The logger to log to.
@@ -286,22 +253,7 @@ namespace leatherman { namespace logging {
     }
 
     /**
-     * Logs a given format message to the given logger.
-     * @tparam TArgs The types of the arguments to format the message with.
-     * @param logger The logger to log to.
-     * @param level The logging level to log with.
-     * @param format The message format.
-     * @param args The remaining arguments to the message.
-     */
-    template <typename... TArgs>
-    void log(const std::string &logger, log_level level, std::string const& format, TArgs... args)
-    {
-        boost::format message(format);
-        log(logger, level, message, std::forward<TArgs>(args)...);
-    }
-
-    /**
-     * Logs a given format message to the given logger with the specified line number.
+     * Logs a given format message to the given logger with the specified line number (if > 0).
      * @tparam TArgs The types of the arguments to format the message with.
      * @param logger The logger to log to.
      * @param level The logging level to log with.
