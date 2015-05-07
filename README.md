@@ -2,8 +2,54 @@
 
 ## Usage
 
-Leatherman is intended to be included as a git submodule and added as
-a CMake subdirectory. Consider the following:
+Leatherman can be used in one of two ways: It can be installed as a
+regular library, and included using the normal CMake `find_package`
+syntax, or it can be setup as a submodule. The recommended method is
+to install Leatherman and use it as a regular system library.
+
+Leatherman is broken up into a number of focused component
+libraries. Both methods of using Leatherman allow you to control which
+components are built and used.
+
+### Dependencies
+
+* Boost, at least version 1.54
+
+### As a Standalone Library
+
+The recommended way to use Leatherman is as a library built and
+installed on your system.
+
+#### Building Leatherman
+
+Leatherman is built like any other cmake project:
+
+    mkdir build
+    cd build
+    cmake ..
+    make
+    sudo make install
+
+By default, all of the component libraries are built when Leatherman
+is used standalone. To disable a component, you can set
+`LEATHERMAN_ENABLE_<LIBRARY>` to any of CMake's falsy values.
+
+#### Using Leatherman
+
+Leatherman's `make install` deploys a standard CMake config file to
+`lib/cmake/leatherman`. This allows the normal CMake `find_package`
+workflow to be used.
+
+    find_package(Leatherman COMPONENTS foo bar baz REQUIRED)
+
+If Leatherman is not installed to a standard system prefix, or on
+Windows where there is no standard prefix, you can set
+`CMAKE_PREFIX_PATH` to the location of Leatherman's install.
+
+### As a Submodule
+
+Leatherman can be included as a git submodule and added as a CMake
+subdirectory. Consider the following:
 
     CMakeLists.txt
     lib/
@@ -17,10 +63,7 @@ In this setup, your CMakeLists.txt would need to contain the following:
     add_subdirectory(vendor/leatherman)
     ...
 
-### Enabling leatherman components
-
-Leatherman is broken up into a number of small, focused
-libraries. Each of these can be individually enabled with
+To enable individual Leatherman components, you must set
 `LEATHERMAN_ENABLE_<LIBRARY>`. Any libraries not explicitly enabled
 will not be built or available to the containing project.
 
@@ -29,7 +72,7 @@ will not be built or available to the containing project.
     add_subdirectory(vendor/leatherman)
     ...
 
-### Variables set by leatherman
+### Variables Set by Leatherman
 
 Leatherman sets two top-level CMake variables:
 
@@ -52,6 +95,24 @@ variables:
 * `LEATHERMAN_<LIBRARY>_LIBS` The contents of both
   `LEATHERMAN_<LIBRARY>_LIB` and `LEATHERMAN_<LIBRARY>_DEPS`
 
+### CMake Helpers Provided by Leatherman
+
+In addition to the C++ library components, Leatherman provides a few
+CMake helpers. These will be automatically added to your
+`CMAKE_MODULE_PATH` when `find_package` is processed.
+
+* `options`: Common CMake options for leatherman features. Should
+  almost always be used.
+* `cflags`: Sets a `LEATHERMAN_CXX_FLAGS` variable containing the
+  Puppet Labs standard CXXFLAGS for your compiler and platform.
+
+* `leatherman`: Additional functionality provided by Leatherman for
+  consumers. Includes:
+  * Helpers for dealing with variables and scopes
+  * Debugging macros
+  * `cpplint` and `cppcheck` configuration
+  * Logging configuration
+
 ### Using Logging
 
 Each `.cc` file that uses logging (or includes a header which uses
@@ -68,33 +129,49 @@ globally. This can be used as follows:
     leatherman_logging_namespace("logging.namespace")
     ...
 
-## Extending leatherman
+## Extending Leatherman
 
 Adding a new library to leatherman is easy!
 
 * Add a new subdirectory with the name of your library
 * Add an appropriate `add_leatherman_dir` invocation to the top-level
-  CMakeLists.txt
+  `CMakeLists.txt`
 * Fill in the headers, sources, and tests of your library. The typical
   directory structure is below.
 
-### Typical leatherman directory structure
+The `CmakeLists.txt` file for a library is used both at build time and
+during a `find_package` call for Leatherman. This allows library
+dependencies to be handled identically during both build and find
+operations. Because of this, certain build configuration settings
+might need to be gated on a check for `BUILDING_LEATHERMAN`. See the
+`logging` library for an example of how this is done.
+
+### Typical Leatherman Directory Structure
 
     leatherman/
         libname/
             CMakeLists.txt
             src/
                 srcfile.cc
-            inc/
+            inc/leatherman/
                 header.hpp
             tests/
                 testfile.cc
 
-### Sample library CMakeLists.txt file
+### Sample Library CMakeLists.txt file
 
     add_leatherman_library("src/srcfile.cc")
     add_leatherman_test("tests/testfile.cc")
+    add_leatherman_headers("inc/leatherman")
 
 More complex libraries may have dependencies. See the `locale` library
-for an example of how dependencies are handled by leatherman
+for a simple example of how dependencies are handled by leatherman
 libraries.
+
+### Vendoring Other Libraries
+
+Sometimes it's necessary to vendor a 3rd-party library in
+Leatherman. In these cases the standard Leatherman macros probably
+won't help you, and you'll need to write a lower-level CMake
+file. This README can't cover all the possible situations here, but
+the `nowide` and `catch` CMake files are both solid examples.

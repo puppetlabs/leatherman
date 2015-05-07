@@ -6,6 +6,10 @@ add_leatherman_includes("${Boost_INCLUDE_DIRS}")
 leatherman_dependency(nowide)
 leatherman_dependency(locale)
 
-leatherman_logging_namespace("leatherman.logging")
+if (BUILDING_LEATHERMAN)
+    leatherman_logging_namespace("leatherman.logging")
+endif()
+
 add_leatherman_library(src/logging.cc)
 add_leatherman_test(tests/logging.cc)
+add_leatherman_headers(inc/leatherman)
