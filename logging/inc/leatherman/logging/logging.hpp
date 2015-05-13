@@ -34,10 +34,17 @@
  * @param format The format message.
  * @param ... The format message parameters.
  */
+#ifdef LEATHERMAN_LOGGING_LINE_NUMBERS
 #define LOG_MESSAGE(level, line_num, format, ...) \
     if (leatherman::logging::is_enabled(level)) { \
         leatherman::logging::log(LOG_NAMESPACE, level, line_num, format, ##__VA_ARGS__); \
     }
+#else
+#define LOG_MESSAGE(level, line_num, format, ...) \
+    if (leatherman::logging::is_enabled(level)) { \
+        leatherman::logging::log(LOG_NAMESPACE, level, 0, format, ##__VA_ARGS__); \
+    }
+#endif
 /**
  * Logs a trace message.
  * @param format The format message.
@@ -210,7 +217,7 @@ namespace leatherman { namespace logging {
     void clear_error_logged_flag();
 
     /**
-     * Logs a given message to the given logger.
+     * Logs a given message to the given logger with the specified line number (if > 0).
      * @param logger The logger to log the message to.
      * @param level The logging level to log with.
      * @param line_num The source line number of the logging call.
@@ -219,7 +226,7 @@ namespace leatherman { namespace logging {
     void log(const std::string &logger, log_level level, int line_num, std::string const& message);
 
     /**
-     * Logs a given format message to the given logger.
+     * Logs a given format message to the given logger with the specified line number (if > 0).
      * @param logger The logger to log the message to.
      * @param level The logging level to log with.
      * @param line_num The source line number of the logging call.
@@ -228,7 +235,7 @@ namespace leatherman { namespace logging {
     void log(const std::string &logger, log_level level, int line_num, boost::format& message);
 
     /**
-     * Logs a given format message to the given logger.
+     * Logs a given format message to the given logger with the specified line number (if > 0).
      * @tparam T The type of the first argument.
      * @tparam TArgs The types of the remaining arguments.
      * @param logger The logger to log to.
@@ -246,7 +253,7 @@ namespace leatherman { namespace logging {
     }
 
     /**
-     * Logs a given format message to the given logger.
+     * Logs a given format message to the given logger with the specified line number (if > 0).
      * @tparam TArgs The types of the arguments to format the message with.
      * @param logger The logger to log to.
      * @param level The logging level to log with.

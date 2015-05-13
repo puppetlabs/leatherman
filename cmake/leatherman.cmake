@@ -9,6 +9,13 @@ macro(leatherman_logging_namespace namespace)
     add_definitions("-DLEATHERMAN_LOGGING_NAMESPACE=\"${namespace}\"")
 endmacro()
 
+# Usage: leatherman_logging_line_numbers()
+#
+# Sets the LEATHERMAN_LOGGING_LINE_NUMBERS preprocessor definition.
+macro(leatherman_logging_line_numbers)
+    add_definitions("-DLEATHERMAN_LOGGING_LINE_NUMBERS")
+endmacro()
+
 # Usage: debug("Something cool is happening")
 #
 # Print message if LEATHERMAN_DEBUG is set. Used to introspect macro

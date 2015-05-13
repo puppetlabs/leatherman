@@ -53,7 +53,7 @@ namespace leatherman { namespace logging {
                 << expr::format_date_time<boost::posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S.%f")
                 << " " << left << setfill(' ') << setw(5) << leatherman::logging::log_level_attr
                 << " " << leatherman::logging::namespace_attr
-                << ":" << expr::smessage);
+                << expr::smessage);
 
         boost::log::add_common_attributes();
 
@@ -155,7 +155,7 @@ namespace leatherman { namespace logging {
 
         src::severity_logger<log_level> slg;
         slg.add_attribute("Namespace", attrs::constant<string>(logger));
-        BOOST_LOG_SEV(slg, level) << line_num << " - "  << colorize(level) << message << colorize();
+        BOOST_LOG_SEV(slg, level) << (line_num > 0 ? ":"+to_string(line_num) : "") << " - "  << colorize(level) << message << colorize();
     }
 
     istream& operator>>(istream& in, log_level& level)
