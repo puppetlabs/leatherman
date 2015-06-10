@@ -38,6 +38,8 @@ add_leatherman_dir(catch EXCLUDE_FROM_VARS)
 add_leatherman_dir(nowide)
 add_leatherman_dir(locale)
 add_leatherman_dir(logging)
+add_leatherman_dir(rapidjson)
+add_leatherman_dir(json_container)
 
 list(REVERSE LEATHERMAN_LIBRARIES)
 list(REMOVE_DUPLICATES LEATHERMAN_INCLUDE_DIRS)
