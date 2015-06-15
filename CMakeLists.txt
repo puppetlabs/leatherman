@@ -41,7 +41,10 @@ add_leatherman_dir(logging)
 add_leatherman_dir(rapidjson)
 add_leatherman_dir(json_container)
 
-list(REVERSE LEATHERMAN_LIBRARIES)
+# Ensure no LEATHERMAN_LIBS are in LEATHERMAN_DEPS, LEATHERMAN_LIBS should be declared in dependency
+# order above, and we don't want them to come after other dependencies.
+list(REMOVE_ITEM LEATHERMAN_DEPS ${LEATHERMAN_LIBS})
+list(APPEND LEATHERMAN_LIBRARIES ${LEATHERMAN_LIBS} ${LEATHERMAN_DEPS})
 list(REMOVE_DUPLICATES LEATHERMAN_INCLUDE_DIRS)
 
 export_var(LEATHERMAN_INCLUDE_DIRS)
