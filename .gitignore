@@ -5,9 +5,9 @@ Gemfile.local
 Gemfile.lock
 /nbproject
 compile_commands.json
-/build/
 
 # Generated files
 /debug*/
 /release*/
 /.idea/
+/build/
