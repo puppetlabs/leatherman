@@ -129,6 +129,15 @@ globally. This can be used as follows:
     leatherman_logging_namespace("logging.namespace")
     ...
 
+### Using Catch
+
+Since Catch is a testing-only utility, its include directory is
+excluded from LEATHERMAN_INCLUDE_DIRS. To use Catch, explicitly add
+
+    include_directories(${LEATHERMAN_CATCH_INCLUDE})
+
+to the CMakeLists.txt file of your testing directory.
+
 ## Extending Leatherman
 
 Adding a new library to leatherman is easy!
