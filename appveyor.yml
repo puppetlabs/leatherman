@@ -3,8 +3,8 @@ install:
   - git submodule update --init --recursive
   - ps: Get-Date
 
-  - ps: choco install 7zip.commandline -source https://www.myget.org/F/puppetlabs
-  - ps: choco install mingw-w64 -Version 4.8.3 -source https://www.myget.org/F/puppetlabs
+  - ps: choco install 7zip.commandline -source https://www.myget.org/F/puppetlabs -y
+  - ps: choco install mingw-w64 -Version 4.8.3 -source https://www.myget.org/F/puppetlabs -y
   - ps: $env:PATH = "C:\tools\mingw64\bin;" + $env:PATH
   - ps: Get-Date
 
