@@ -7,5 +7,12 @@ leatherman_dependency(nowide)
 leatherman_dependency(locale)
 
 leatherman_logging_namespace("leatherman.logging")
-add_leatherman_library(src/logging.cc)
+
+if(WIN32)
+    set(PLATFORM_SRCS "src/windows/logging.cc")
+else()
+    set(PLATFORM_SRCS "src/posix/logging.cc")
+endif()
+
+add_leatherman_library(src/logging.cc ${PLATFORM_SRCS})
 add_leatherman_test(tests/logging.cc)

@@ -57,8 +57,6 @@ if (WIN32)
     # We define security sufficient to get the current user's info.
     # Also force use of UNICODE APIs, following the pattern outlined at http://utf8everywhere.org/.
     set(LEATHERMAN_DEFINITIONS -DUNICODE -D_UNICODE -DSECURITY_WIN32)
-else()
-    set(LEATHERMAN_DEFINITIONS -DUSE_POSIX_FUNCTIONS)
 endif()
 
 list(APPEND LEATHERMAN_DEFINITIONS -DBOOST_LOG_WITHOUT_WCHAR_T)

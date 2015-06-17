@@ -7,25 +7,24 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wextra"
 
-#include <boost/log/support/date_time.hpp>
-#include <boost/log/expressions/formatters/date_time.hpp>
 #include <boost/log/utility/setup/console.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/attributes/scoped_attribute.hpp>
 #include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/sinks/sync_frontend.hpp>
+#include <boost/log/sinks/basic_sink_backend.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/gregorian/gregorian.hpp>
 
 #pragma GCC diagnostic pop
-
-#ifdef USE_POSIX_FUNCTIONS
-#include <unistd.h>
-#endif
 
 using namespace std;
 namespace expr = boost::log::expressions;
 namespace src = boost::log::sources;
 namespace attrs = boost::log::attributes;
 namespace keywords = boost::log::keywords;
+namespace sinks = boost::log::sinks;
 
 namespace leatherman { namespace logging {
 
@@ -34,26 +33,49 @@ namespace leatherman { namespace logging {
     static bool g_colorize = false;
     static bool g_error_logged = false;
 
+    class color_writer : public sinks::basic_sink_backend<sinks::synchronized_feeding>
+    {
+     public:
+        color_writer(ostream *dst);
+        void consume(boost::log::record_view const& rec);
+     private:
+        ostream *_dst;
+    };
+
+    color_writer::color_writer(ostream *dst) : _dst(dst) {}
+
+    void color_writer::consume(boost::log::record_view const& rec)
+    {
+        auto level = boost::log::extract<log_level>("Severity", rec);
+        auto name_space = boost::log::extract<string>("Namespace", rec);
+        auto timestamp = boost::log::extract<boost::posix_time::ptime>("TimeStamp", rec);
+        auto message = rec[expr::smessage];
+
+        (*_dst) << boost::gregorian::to_iso_extended_string(timestamp->date());
+        (*_dst) << " " << boost::posix_time::to_simple_string(timestamp->time_of_day());
+        (*_dst) << " " << left << setfill(' ') << setw(5) << level << " " << *name_space;
+        (*_dst) << " - ";
+        colorize(*_dst, *level);
+        (*_dst) << *message;
+        colorize(*_dst);
+        (*_dst) << endl;
+    }
+
     void setup_logging(ostream &dst, string locale)
     {
         // Remove existing sinks before adding a new one
         auto core = boost::log::core::get();
         core->remove_all_sinks();
 
-        auto sink = boost::log::add_console_log(dst, keywords::auto_flush = true);
+        using sink_t = sinks::synchronous_sink<color_writer>;
+        boost::shared_ptr<sink_t> sink(new sink_t(&dst));
+        core->add_sink(sink);
 
 #if !defined(__sun) || !defined(__GNUC__)
         // Imbue the logging sink with the requested locale.
         // Locale in GCC is busted on Solaris, so skip it.
-        sink->imbue(leatherman::locale::get_locale(locale));
+        dst.imbue(leatherman::locale::get_locale(locale));
 #endif
-
-        sink->set_formatter(
-            expr::stream
-                << expr::format_date_time<boost::posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S.%f")
-                << " " << left << setfill(' ') << setw(5) << leatherman::logging::log_level_attr
-                << " " << leatherman::logging::namespace_attr
-                << " - " << expr::smessage);
 
         boost::log::add_common_attributes();
 
@@ -61,11 +83,7 @@ namespace leatherman { namespace logging {
         set_level(log_level::warning);
 
         // Set whether or not to use colorization depending if the destination is a tty
-#ifdef USE_POSIX_FUNCTIONS
-        g_colorize = (&dst == &cout && isatty(fileno(stdout))) || (&dst == &cerr && isatty(fileno(stderr)));
-#else
-        g_colorize = false;
-#endif
+        g_colorize = color_supported(dst);
     }
 
     void set_level(log_level level)
@@ -108,37 +126,6 @@ namespace leatherman { namespace logging {
         g_callback = callback;
     }
 
-    string const& colorize(log_level level)
-    {
-        static const string none = "";
-        static const string cyan = "\33[0;36m";
-        static const string green = "\33[0;32m";
-        static const string yellow = "\33[0;33m";
-        static const string red = "\33[0;31m";
-
-        if (!g_colorize) {
-            return none;
-        }
-
-        if (level == log_level::trace || level == log_level::debug) {
-            return cyan;
-        } else if (level == log_level::info) {
-            return green;
-        } else if (level == log_level::warning) {
-            return yellow;
-        } else if (level == log_level::error || level == log_level::fatal) {
-            return red;
-        }
-        return none;
-    }
-
-    string const& colorize()
-    {
-        static const string none = "";
-        static const string reset = "\33[0m";
-        return g_colorize ? reset : none;
-    }
-
     void log(const string &logger, log_level level, boost::format& message)
     {
         log(logger, level, message.str());
@@ -155,7 +142,8 @@ namespace leatherman { namespace logging {
 
         src::severity_logger<log_level> slg;
         slg.add_attribute("Namespace", attrs::constant<string>(logger));
-        BOOST_LOG_SEV(slg, level) << colorize(level) << message << colorize();
+
+        BOOST_LOG_SEV(slg, level) << message;
     }
 
     istream& operator>>(istream& in, log_level& level)
@@ -209,4 +197,3 @@ namespace leatherman { namespace logging {
     }
 
 }}  // namespace leatherman::logging
-
