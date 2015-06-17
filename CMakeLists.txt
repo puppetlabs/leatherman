@@ -40,10 +40,10 @@ add_leatherman_dir(locale)
 add_leatherman_dir(logging)
 add_leatherman_dir(rapidjson)
 add_leatherman_dir(json_container)
+add_leatherman_dir(file_util)
 add_leatherman_dir(util)
 if(WIN32)
   add_leatherman_dir(windows)
-endif()
 
 
 list(REVERSE LEATHERMAN_LIBRARIES)
