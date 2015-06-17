@@ -129,18 +129,6 @@ namespace leatherman { namespace logging {
     };
 
     /**
-     * The Boost.Log attribute for log level (severity).
-     * The BOOST_LOG_SEV macro implicitly adds a source-specific attribute
-     * "Severity" of the template type on construction, so the attribute
-     * name "Severity" of log_level_attr is tied to BOOST_LOG_SEV.
-     */
-    BOOST_LOG_ATTRIBUTE_KEYWORD(log_level_attr, "Severity", log_level);
-    /**
-     * The Boost.Log attribute for namespace.
-     */
-    BOOST_LOG_ATTRIBUTE_KEYWORD(namespace_attr, "Namespace", std::string);
-
-    /**
      * Reads a log level from an input stream.
      * This is used in boost::lexical_cast<log_level>.
      * @param in The input stream.
@@ -271,16 +259,16 @@ namespace leatherman { namespace logging {
     /**
      * Starts colorizing for the given log level.
      * This is a no-op on platforms that don't natively support terminal colors.
-     * @param level The log level to colorize for.
-     * @return Returns the start code for colorization or an empty string if not supported.
+     * @param dst The stream to colorize.
+     * @param level The log level to colorize for. Defaults to none, which resets colorization.
      */
-    const std::string& colorize(log_level level);
+    void colorize(std::ostream &dst, log_level level = log_level::none);
 
     /**
-     * Resets the colorization.
-     * This is a no-op on platforms that don't natively support terminal colors.
-     * @return Returns the reset code for colorization or an empty string if not supported.
+     * Returns whether terminal colors are supported.
+     * @param dst The stream to check.
+     * @return True if terminal colors are supported for the specified stream on this platform, else false.
      */
-    const std::string& colorize();
+    bool color_supported(std::ostream &dst);
 
 }}  // namespace leatherman::logging
