@@ -1,5 +1,5 @@
 #include <leatherman/file_util/directory.hpp>
-#include <leather/regex.hpp>
+#include <leatherman/file_util/regex.hpp>
 #include <boost/filesystem.hpp>
 
 using namespace std;

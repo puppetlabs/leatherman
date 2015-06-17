@@ -3,5 +3,7 @@ find_package(Boost 1.54 REQUIRED COMPONENTS filesystem)
 add_leatherman_deps("${Boost_FILESYSTEM_LIBRARY}")
 add_leatherman_includes("${Boost_INCLUDE_DIRS}")
 
-add_leatherman_library("src/directory.cc")
+leatherman_dependency(nowide)
+
+add_leatherman_library("src/directory.cc" "src/file.cc")
 add_leatherman_headers("inc/leatherman")
