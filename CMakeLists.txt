@@ -59,8 +59,8 @@ if(LEATHERMAN_ENABLE_TESTING)
     # If we're toplevel we want to own these targets. If not we assume
     # that containing project will set them up for us.
     if (LEATHERMAN_TOPLEVEL)
-	enable_cppcheck()
-	enable_cpplint()
+        enable_cppcheck()
+        enable_cpplint()
     endif()
 endif()
 
