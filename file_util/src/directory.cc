@@ -59,4 +59,13 @@ namespace leatherman { namespace file_util {
         }
     }
 
+    bool createDirectory(const std::string& dirname) {
+        boost::filesystem::path dir(dirname);
+        if (boost::filesystem::create_directory(dir)) {
+            return true;
+        }
+
+        return false;
+    }
+
 }}  // namespace leatherman::file_util

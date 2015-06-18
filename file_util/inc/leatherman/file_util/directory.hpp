@@ -31,4 +31,8 @@ namespace leatherman { namespace file_util {
         static void each_subdirectory(std::string const& path, std::function<bool(std::string const&)> callback, std::string const& pattern = {});
     };
 
+    /// Create a directory.
+    /// Returns true on success, false on failure.
+    bool createDirectory(const std::string& dirname);
+
 }}  // namespace leatherman::file_util
