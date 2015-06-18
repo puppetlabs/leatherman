@@ -138,6 +138,10 @@ excluded from LEATHERMAN_INCLUDE_DIRS. To use Catch, explicitly add
 
 to the CMakeLists.txt file of your testing directory.
 
+### Using Windows
+
+In order to use the Windows libraries, Logging must be set up.
+
 ## Extending Leatherman
 
 Adding a new library to leatherman is easy!
