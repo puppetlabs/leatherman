@@ -67,11 +67,7 @@ macro(leatherman_component id)
     include("${current_directory}/${id}.cmake")
 
     set(libs_var "LEATHERMAN_${id_upper}_LIBS")
-    set(${libs_var} ${${deps_var}} ${${lib_var}})
-
-    if(NOT "${${libs_var}}" STREQUAL "")
-        list(REVERSE ${libs_var})
-    endif()
+    set(${libs_var} ${${lib_var}} ${${deps_var}})
 
     if("${ARGV1}" STREQUAL EXCLUDE_FROM_VARS)
         set(exclude_var "LEATHERMAN_EXCLUDE_${id_upper}")

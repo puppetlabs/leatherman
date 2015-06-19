@@ -168,27 +168,19 @@ macro(add_leatherman_dir dir)
 
         # We set this one afterwards because it doesn't need
         # overriding
-        #
-        # We put deps before libs. This is backwards on purpose. We
-        # later reverse the entire libraries list in order to ensure
-        # proper link order. Ideally we could put things in the
-        # correct order directly, but CMake de-duplicates link lines
-        # in ways that just make this a sad, sad process.
         set(libs_var "LEATHERMAN_${id_upper}_LIBS")
-        set(${libs_var} ${${deps_var}} ${${lib_var}})
+        set(${libs_var} ${${lib_var}} ${${deps_var}})
 
         if(NOT "${ARGV1}" STREQUAL EXCLUDE_FROM_VARS)
             debug("Appending values for ${id_upper} to common vars")
             list(APPEND LEATHERMAN_INCLUDE_DIRS ${${include_var}})
-            list(APPEND LEATHERMAN_LIBRARIES ${${libs_var}})
+            if (NOT "" STREQUAL "${${lib_var}}")
+                # Prepend leatherman libraries, as later libs may depend on earlier libs.
+                list(INSERT LEATHERMAN_LIBS 0 ${${lib_var}})
+            endif()
+            list(APPEND LEATHERMAN_DEPS ${${deps_var}})
         else()
             debug("Excluding values for ${id_upper} from common vars")
-        endif()
-
-
-        # Put our link line into the right order.
-        if(NOT "${${libs_var}}" STREQUAL "")
-            list(REVERSE ${libs_var})
         endif()
 
         export_var(${include_var})
