@@ -1,6 +1,6 @@
-find_package(Boost 1.54 REQUIRED COMPONENTS system filesystem thread date_time log chrono)
+find_package(Boost 1.54 REQUIRED COMPONENTS system filesystem thread date_time log chrono regex)
 
-add_leatherman_deps("${Boost_SYSTEM_LIBRARY}" "${Boost_FILESYSTEM_LIBRARY}" "${Boost_THREAD_LIBRARY}" "${Boost_DATE_TIME_LIBRARY}" "${Boost_LOG_LIBRARY}" "${Boost_CHRONO}")
+add_leatherman_deps("${Boost_SYSTEM_LIBRARY}" "${Boost_FILESYSTEM_LIBRARY}" "${Boost_THREAD_LIBRARY}" "${Boost_DATE_TIME_LIBRARY}" "${Boost_LOG_LIBRARY}" "${Boost_CHRONO_LIBRARY}" "${Boost_REGEX_LIBRARY}")
 add_leatherman_includes("${Boost_INCLUDE_DIRS}")
 
 leatherman_dependency(nowide)
@@ -11,6 +11,14 @@ if (BUILDING_LEATHERMAN)
     leatherman_logging_line_numbers()
 endif()
 
-add_leatherman_library(src/logging.cc)
-add_leatherman_test(tests/logging.cc tests/logging_lines.cc)
+if(WIN32)
+    set(PLATFORM_SRCS "src/windows/logging.cc")
+    set(PLATFORM_TEST_SRCS "tests/windows/logging.cc")
+else()
+    set(PLATFORM_SRCS "src/posix/logging.cc")
+    set(PLATFORM_TEST_SRCS "tests/posix/logging.cc")
+endif()
+
+add_leatherman_library(src/logging.cc ${PLATFORM_SRCS})
+add_leatherman_test(tests/logging.cc tests/logging_sink.cc tests/logging_stream.cc tests/logging_stream_lines.cc ${PLATFORM_TEST_SRCS})
 add_leatherman_headers(inc/leatherman)

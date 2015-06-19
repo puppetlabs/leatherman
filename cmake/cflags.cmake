@@ -34,7 +34,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
     # On unix systems we want to be sure to specify -fPIC for libraries
     if (NOT WIN32)
-	set(LEATHERMAN_LIBRARY_FLAGS "-fPIC -nostdlib -nodefaultlibs")
+        set(LEATHERMAN_LIBRARY_FLAGS "-fPIC -nostdlib -nodefaultlibs")
     endif()
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
@@ -57,8 +57,6 @@ if (WIN32)
     # We define security sufficient to get the current user's info.
     # Also force use of UNICODE APIs, following the pattern outlined at http://utf8everywhere.org/.
     set(LEATHERMAN_DEFINITIONS -DUNICODE -D_UNICODE -DSECURITY_WIN32)
-else()
-    set(LEATHERMAN_DEFINITIONS -DUSE_POSIX_FUNCTIONS)
 endif()
 
 list(APPEND LEATHERMAN_DEFINITIONS -DBOOST_LOG_WITHOUT_WCHAR_T)
@@ -66,4 +64,13 @@ list(APPEND LEATHERMAN_DEFINITIONS -DBOOST_LOG_WITHOUT_WCHAR_T)
 if (NOT BOOST_STATIC)
     # Boost.Log requires that BOOST_LOG_DYN_LINK is set when using dynamic linking. We set ALL for consistency.
     list(APPEND LEATHERMAN_DEFINITIONS -DBOOST_ALL_DYN_LINK)
+endif()
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+if (WIN32)
+    # On Windows, DLL paths aren't hardcoded in the executable. We place all the executables and libraries
+    # in the same directory to avoid having to setup the DLL search path in the dev environment.
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+else()
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 endif()

@@ -1,193 +1,85 @@
-#include <catch.hpp>
-#include <leatherman/logging/logging.hpp>
-#include <boost/log/sinks/sync_frontend.hpp>
-#include <boost/log/sinks/basic_sink_backend.hpp>
-#include <boost/nowide/convert.hpp>
+#include "logging.hpp"
 #include <boost/nowide/iostream.hpp>
 
-using namespace std;
-using namespace leatherman::logging;
-namespace sinks = boost::log::sinks;
+namespace leatherman { namespace test {
 
-struct custom_log_appender :
-    sinks::basic_formatted_sink_backend<char, sinks::synchronized_feeding>
-{
-    void consume(boost::log::record_view const& rec, string_type const& message)
+    bool operator== (boost::regex const& lhs, string const& rhs)
     {
-        stringstream s;
-        s << rec[log_level_attr];
-        _level = s.str();
-        _message = message;
+        return boost::regex_match(rhs, lhs);
     }
 
-    string _level;
-    string _message;
-};
-
-struct logging_test_context
-{
-    using sink_t = sinks::synchronous_sink<custom_log_appender>;
-
-    logging_test_context()
+    bool operator== (string const& lhs, boost::regex const& rhs)
     {
+        return boost::regex_match(lhs, rhs);
+    }
+
+    std::streamsize colored_tokenizing_stringbuf::xsputn(char_type const* s, std::streamsize count)
+    {
+        tokens.emplace_back(s, count);
+        return stringbuf::xsputn(s, count);
+    }
+
+    logging_format_context::logging_format_context(log_level lvl, string ns, int line_num)
+    {
+        _strm_buf = boost::nowide::cout.rdbuf();
+        boost::nowide::cout.rdbuf(&_buf);
+
+        setup_logging(boost::nowide::cout);
         set_level(log_level::trace);
+        set_colorization(true);
         clear_error_logged_flag();
 
-        _appender.reset(new custom_log_appender());
-        _sink.reset(new sink_t(_appender));
+        stringstream lvl_str;
+        lvl_str << lvl;
 
-        auto core = boost::log::core::get();
-        core->add_sink(_sink);
+        using R = boost::regex;
+        static const boost::regex rdate("\\d{4}-\\d{2}-\\d{2}");
+        static const boost::regex rtime("[0-2]\\d:[0-5]\\d:\\d{2}\\.\\d{6}");
+
+        _expected = {rdate, R(" "), rtime, R(" "), R(lvl_str.str()), R(" "), R(ns, R::literal)};
+
+        if (line_num > 0) {
+            _expected.emplace_back(":");
+            _expected.emplace_back(to_string(line_num));
+        }
+        _expected.emplace_back(" - ");
+
+        auto color = get_color(lvl);
+        if (!color.empty()) {
+            _expected.emplace_back(color, R::literal);
+        }
+        _expected.emplace_back("testing 1 2 3");
+        if (!color.empty()) {
+            _expected.emplace_back(get_color(log_level::none), R::literal);
+        }
     }
 
-    ~logging_test_context()
+    logging_format_context::~logging_format_context()
     {
+        boost::nowide::cout.rdbuf(_strm_buf);
+
         set_level(log_level::none);
         on_message(nullptr);
         clear_error_logged_flag();
 
         auto core = boost::log::core::get();
         core->reset_filter();
-        core->remove_sink(_sink);
-
-        _sink.reset();
-        _appender.reset();
+        core->remove_all_sinks();
     }
 
-    boost::shared_ptr<custom_log_appender> _appender;
-    boost::shared_ptr<sink_t> _sink;
-};
-
-SCENARIO("logging with a TRACE level") {
-    logging_test_context context;
-    REQUIRE(LOG_IS_TRACE_ENABLED());
-    LOG_TRACE("testing %1% %2% %3%", 1, "2", 3.0);
-    REQUIRE(context._appender->_level == "TRACE");
-    REQUIRE(context._appender->_message == string(colorize(log_level::trace)) + " - testing 1 2 3" + colorize());
-    log("test", log_level::trace, 0, "testing %1% %2% %3%", 1, "2", 3.0);
-    REQUIRE(context._appender->_level == "TRACE");
-    REQUIRE(context._appender->_message == string(colorize(log_level::trace)) + " - testing 1 2 3" + colorize());
-    REQUIRE_FALSE(error_has_been_logged());
-}
-
-SCENARIO("logging with a DEBUG level") {
-    logging_test_context context;
-    REQUIRE(LOG_IS_DEBUG_ENABLED());
-    LOG_DEBUG("testing %1% %2% %3%", 1, "2", 3.0);
-    REQUIRE(context._appender->_level == "DEBUG");
-    REQUIRE(context._appender->_message == string(colorize(log_level::debug)) + " - testing 1 2 3" + colorize());
-    log("test", log_level::debug, 0, "testing %1% %2% %3%", 1, "2", 3.0);
-    REQUIRE(context._appender->_level == "DEBUG");
-    REQUIRE(context._appender->_message == string(colorize(log_level::debug)) + " - testing 1 2 3" + colorize());
-    REQUIRE_FALSE(error_has_been_logged());
-}
-
-SCENARIO("logging with an INFO level") {
-    logging_test_context context;
-    REQUIRE(LOG_IS_INFO_ENABLED());
-    LOG_INFO("testing %1% %2% %3%", 1, "2", 3.0);
-    REQUIRE(context._appender->_level == "INFO");
-    REQUIRE(context._appender->_message == string(colorize(log_level::info)) + " - testing 1 2 3" + colorize());
-    log("test", log_level::info, 0, "testing %1% %2% %3%", 1, "2", 3.0);
-    REQUIRE(context._appender->_level == "INFO");
-    REQUIRE(context._appender->_message == string(colorize(log_level::info)) + " - testing 1 2 3" + colorize());
-    REQUIRE_FALSE(error_has_been_logged());
-}
-
-SCENARIO("logging with a WARNING level") {
-    logging_test_context context;
-    REQUIRE(LOG_IS_WARNING_ENABLED());
-    LOG_WARNING("testing %1% %2% %3%", 1, "2", 3.0);
-    REQUIRE(context._appender->_level == "WARN");
-    REQUIRE(context._appender->_message == string(colorize(log_level::warning)) + " - testing 1 2 3" + colorize());
-    log("test", log_level::warning, 0, "testing %1% %2% %3%", 1, "2", 3.0);
-    REQUIRE(context._appender->_level == "WARN");
-    REQUIRE(context._appender->_message == string(colorize(log_level::warning)) + " - testing 1 2 3" + colorize());
-    REQUIRE_FALSE(error_has_been_logged());
-}
-
-SCENARIO("logging with an ERROR level") {
-    logging_test_context context;
-    REQUIRE(LOG_IS_ERROR_ENABLED());
-    LOG_ERROR("testing %1% %2% %3%", 1, "2", 3.0);
-    REQUIRE(context._appender->_level == "ERROR");
-    REQUIRE(context._appender->_message == string(colorize(log_level::error)) + " - testing 1 2 3" + colorize());
-    log("test", log_level::error, 0, "testing %1% %2% %3%", 1, "2", 3.0);
-    REQUIRE(context._appender->_level == "ERROR");
-    REQUIRE(context._appender->_message == string(colorize(log_level::error)) + " - testing 1 2 3" + colorize());
-    REQUIRE(error_has_been_logged());
-}
-
-SCENARIO("logging with a FATAL level") {
-    logging_test_context context;
-    REQUIRE(LOG_IS_FATAL_ENABLED());
-    LOG_FATAL("testing %1% %2% %3%", 1, "2", 3.0);
-    REQUIRE(context._appender->_level == "FATAL");
-    REQUIRE(context._appender->_message == string(colorize(log_level::fatal)) + " - testing 1 2 3" + colorize());
-    log("test", log_level::fatal, 0, "testing %1% %2% %3%", 1, "2", 3.0);
-    REQUIRE(context._appender->_level == "FATAL");
-    REQUIRE(context._appender->_message == string(colorize(log_level::fatal)) + " - testing 1 2 3" + colorize());
-    REQUIRE(error_has_been_logged());
-}
-
-SCENARIO("logging with on_message") {
-    logging_test_context context;
-    string message;
-    log_level level;
-    on_message([&](log_level lvl, string const& msg) {
-        level = lvl;
-        message = msg;
-        return false;
-    });
-    GIVEN("a TRACE message to log") {
-        LOG_TRACE("trace message");
-        THEN("on_message is called with the message") {
-            REQUIRE(level == log_level::trace);
-            REQUIRE(message == "trace message");
-        }
+    vector<string> const& logging_format_context::tokens() const
+    {
+        return _buf.tokens;
     }
-    GIVEN("a DEBUG message to log") {
-        LOG_DEBUG("debug message");
-        THEN("on_message is called with the message") {
-            REQUIRE(level == log_level::debug);
-            REQUIRE(message == "debug message");
-        }
+
+    string logging_format_context::message() const
+    {
+        return _buf.str();
     }
-    GIVEN("a INFO message to log") {
-        LOG_INFO("info message");
-        THEN("on_message is called with the message") {
-            REQUIRE(level == log_level::info);
-            REQUIRE(message == "info message");
-        }
+
+    vector<boost::regex> const& logging_format_context::expected() const
+    {
+        return _expected;
     }
-    GIVEN("a WARNING message to log") {
-        LOG_WARNING("warning message");
-        THEN("on_message is called with the message") {
-            REQUIRE(level == log_level::warning);
-            REQUIRE(message == "warning message");
-        }
-    }
-    GIVEN("a ERROR message to log") {
-        LOG_ERROR("error message");
-        THEN("on_message is called with the message") {
-            REQUIRE(level == log_level::error);
-            REQUIRE(message == "error message");
-        }
-    }
-    GIVEN("a FATAL message to log") {
-        LOG_FATAL("fatal message");
-        THEN("on_message is called with the message") {
-            REQUIRE(level == log_level::fatal);
-            REQUIRE(message == "fatal message");
-        }
-    }
-    GIVEN("a unicode characters to log") {
-        const wstring symbols[] = {L"\u2122", L"\u2744", L"\u039b"};
-        for (auto const& s : symbols) {
-            auto utf8 = boost::nowide::narrow(s);
-            LOG_INFO(utf8);
-            REQUIRE(level == log_level::info);
-            REQUIRE(message == utf8);
-        }
-    }
-}
+
+}}  // namespace leatherman::test
