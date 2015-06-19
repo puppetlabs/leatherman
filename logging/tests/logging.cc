@@ -1,4 +1,5 @@
 #include "logging.hpp"
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/nowide/iostream.hpp>
 
 namespace boost {
@@ -17,9 +18,21 @@ namespace boost {
 
 namespace leatherman { namespace test {
 
+    static bool all_spaces(string const& s)
+    {
+        return boost::algorithm::all(s, [](char c) { return c == ' '; });
+    }
+
     std::streamsize colored_tokenizing_stringbuf::xsputn(char_type const* s, std::streamsize count)
     {
-        tokens.emplace_back(s, count);
+        auto str = string(s, count);
+        if (all_spaces(str) && !tokens.empty() && all_spaces(tokens.back())) {
+            // Lump all white space strings together.
+            tokens.back() += move(str);
+        } else {
+            tokens.emplace_back(move(str));
+        }
+
         return stringbuf::xsputn(s, count);
     }
 
@@ -40,7 +53,7 @@ namespace leatherman { namespace test {
         static const boost::regex rdate("\\d{4}-\\d{2}-\\d{2}");
         static const boost::regex rtime("[0-2]\\d:[0-5]\\d:\\d{2}\\.\\d{6}");
 
-        _expected = {rdate, R(" "), rtime, R(" "), R(lvl_str.str()), R(" "), R(ns, R::literal)};
+        _expected = {rdate, R(" "), rtime, R(" "), R(lvl_str.str()), R("[ ]+"), R(ns, R::literal)};
 
         if (line_num > 0) {
             _expected.emplace_back(":");
