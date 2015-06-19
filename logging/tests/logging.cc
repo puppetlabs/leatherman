@@ -1,17 +1,21 @@
 #include "logging.hpp"
 #include <boost/nowide/iostream.hpp>
 
-namespace leatherman { namespace test {
+namespace boost {
 
-    bool operator== (boost::regex const& lhs, string const& rhs)
+    bool operator== (boost::regex const& lhs, std::string const& rhs)
     {
         return boost::regex_match(rhs, lhs);
     }
 
-    bool operator== (string const& lhs, boost::regex const& rhs)
+    bool operator== (std::string const& lhs, boost::regex const& rhs)
     {
         return boost::regex_match(lhs, rhs);
     }
+
+}  // namespace boost
+
+namespace leatherman { namespace test {
 
     std::streamsize colored_tokenizing_stringbuf::xsputn(char_type const* s, std::streamsize count)
     {

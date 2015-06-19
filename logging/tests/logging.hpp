@@ -8,6 +8,14 @@
 #include <boost/iterator/zip_iterator.hpp>
 #include <boost/range.hpp>
 
+namespace boost {
+    /**
+     * Regex comparison, so catch can print pretty failure messages
+     */
+    bool operator== (boost::regex const& lhs, std::string const& rhs);
+    bool operator== (std::string const& lhs, boost::regex const& rhs);
+}  // namespace boost
+
 namespace leatherman { namespace test {
     using namespace std;
     using namespace leatherman::logging;
@@ -20,12 +28,6 @@ namespace leatherman { namespace test {
     constexpr char yellow[] = "\33[0;33m";
     constexpr char red[] = "\33[0;31m";
     constexpr char reset[] = "\33[0m";
-
-    /**
-     * Regex comparison, so catch can print pretty failure messages
-     */
-    bool operator== (boost::regex const& lhs, string const& rhs);
-    bool operator== (string const& lhs, boost::regex const& rhs);
 
     /**
      * Zip view for iterating over multiple containers at once
