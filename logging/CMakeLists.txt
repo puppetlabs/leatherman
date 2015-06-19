@@ -1,6 +1,6 @@
-find_package(Boost 1.54 REQUIRED COMPONENTS system filesystem thread date_time log chrono regex)
+find_package(Boost 1.54 REQUIRED COMPONENTS log log_setup thread date_time filesystem system chrono regex)
 
-add_leatherman_deps("${Boost_SYSTEM_LIBRARY}" "${Boost_FILESYSTEM_LIBRARY}" "${Boost_THREAD_LIBRARY}" "${Boost_DATE_TIME_LIBRARY}" "${Boost_LOG_LIBRARY}" "${Boost_CHRONO_LIBRARY}" "${Boost_REGEX_LIBRARY}")
+add_leatherman_deps(${Boost_LIBRARIES})
 add_leatherman_includes("${Boost_INCLUDE_DIRS}")
 
 leatherman_dependency(nowide)
