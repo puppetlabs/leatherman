@@ -1,10 +1,7 @@
 #include <leatherman/file_util/file.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/nowide/fstream.hpp>
 #include <sstream>
 #include <leatherman/logging/logging.hpp>
-
-#include <wordexp.h>
 
 using namespace std;
 
@@ -119,60 +116,47 @@ namespace leatherman { namespace file_util {
         return content;
     }
 
-        std::string slurpFile(std::string path) {
-            std::ifstream ifs { path };
-            std::string content;
-            std::string buffer;
+    std::string tildeExpand(std::string path) {
+        if (path[0] == '~' && (path.size() == 1 || path[1] == '/')) {
+            #ifdef _WIN32
+                std::string result { getenv("USERPROFILE") };
+            #else
+                std::string result { getenv("HOME") };
+            #endif
 
-            while (std::getline(ifs, buffer)) {
-                content += buffer;
-                content.push_back('\n');
-            }
+            result.append(path.begin() + 1, path.end());
+            return result;
+        }
+        return path;
+    }
 
-            return content;
+    std::string shellQuote(std::string path) {
+        std::stringstream ss;
+        ss << boost::io::quoted(path);
+        return ss.str();
+    }
+
+    FileList relativeFileList(boost::filesystem::path path) {
+        FileList list;
+
+        std::string common_prefix { path.string() };
+        std::string prefix_filename { path.filename().string() };
+
+        list.emplace_back(FileCopy { path, path.filename().string() });
+
+        if (prefix_filename == ".") {
+            // when we're scanning '.' remove all the prefix
+            prefix_filename = "";
         }
 
-        std::string tildeExpand(std::string path) {
-            if (path[0] == '~' && (path.size() == 1 || path[1] == '/')) {
-                #ifdef _WIN32
-                    std::string result { getenv("USERPROFILE") };
-                #else
-                    std::string result { getenv("HOME") };
-                #endif
-
-                result.append(path.begin() + 1, path.end());
-                return result;
-            }
-            return path;
+        boost::filesystem::recursive_directory_iterator walker { path };
+        for (const auto& dirent : walker) {
+            std::string target_path { dirent.path().string() };
+            assert((std::string { target_path, 0, common_prefix.size() } == common_prefix));
+            target_path.replace(0, common_prefix.size(), prefix_filename);
+            list.emplace_back(FileCopy { dirent, target_path });
         }
-
-        std::string shellQuote(std::string path) {
-            std::stringstream ss;
-            ss << boost::io::quoted(path);
-            return ss.str();
-        }
-
-        FileList relativeFileList(boost::filesystem::path path) {
-            FileList list;
-
-            std::string common_prefix { path.string() };
-            std::string prefix_filename { path.filename().string() };
-
-            list.emplace_back(FileCopy { path, path.filename().string() });
-
-            if (prefix_filename == ".") {
-                // when we're scanning '.' remove all the prefix
-                prefix_filename = "";
-            }
-
-            boost::filesystem::recursive_directory_iterator walker { path };
-            for (const auto& dirent : walker) {
-                std::string target_path { dirent.path().string() };
-                assert((std::string { target_path, 0, common_prefix.size() } == common_prefix));
-                target_path.replace(0, common_prefix.size(), prefix_filename);
-                list.emplace_back(FileCopy { dirent, target_path });
-            }
-            return list;
-        }
+        return list;
+    }
 
 }}  // namespace leatherman::file_util

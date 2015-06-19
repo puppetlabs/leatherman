@@ -49,37 +49,56 @@ namespace leatherman { namespace file_util {
         static bool read(std::string const& path, std::string& contents);
     };
 
-    /// Perform a shell expansion of txt.
-    /// Return an empty string in case of failure.
+    /**
+     * Performs a shell expansion of txt.
+     * @return Returns an empty string in case of failure.
+     */
     std::string shellExpand(std::string txt);
 
-    /// Return true if the specified file exists.
+    /**
+     *@return Return true if the specified file exists.
+     */
     bool fileExists(const std::string& file_path);
 
-    /// Remove a file (regular file, symlink, or empty dir) if exists.
-    /// Throw a file_error if the removal fails.
+    /**
+     * Remove a file (regular file, symlink, or empty dir) if exists.
+     * Throw a file_error if the removal fails.
+     */
     void removeFile(const std::string& file_path);
 
-    /// Write content to file in the specified mode.
-    /// Throw a file_error in case it fails to open the file to write.
+    /**
+     * Write content to file in the specified mode.
+     * Throw a file_error in case it fails to open the file to write.
+     */
     void streamToFile(const std::string& text,
                       const std::string& file_path,
                       std::ios_base::openmode mode);
 
-    /// Write content to file. If file exists, its previous content will
-    /// be deleted.
-    /// Throw a file_error in case it fails to open file to write.
+    /**
+     * Write content to file. If file exists, its previous content will
+     * be deleted.
+     * Throw a file_error in case it fails to open file to write.
+     */
     void writeToFile(const std::string& text,
                      const std::string& file_path);
 
-    /// Read the content of a file and returns it as a string.
+    /**
+     * Read the content of a file.
+     * @return Returns file content as a string. Returns the empty string
+     *         if the file does not exist.
+     */
     std::string readFileAsString(std::string path);
 
-    /// Expand a leading tilde to the users home directory
-    /// Returns the original string in case the expansion fails.
+    /**
+     * Expand a leading tilde to the user's home directory
+     * @return Returns the expanded path, or the original string
+     *         in case the expansion fails.
+     */
     std::string tildeExpand(std::string path);
 
-    /// Returns a shell-safe version of the path
+    /**
+     * Returns a shell-safe version of the path
+     */
     std::string shellQuote(std::string path);
 
     struct FileCopy {
@@ -89,9 +108,10 @@ namespace leatherman { namespace file_util {
 
     using FileList = std::vector<FileCopy>;
 
-    // Return a set of files suitable for copying
+    /**
+     * Returns a set of files suitable for copying
+     */
     FileList relativeFileList(boost::filesystem::path path);
 
-    std::string slurpFile(std::string path);
 
 }}  // namespace leatherman::file_util
