@@ -4,6 +4,8 @@
  */
 #pragma once
 
+#include <boost/filesystem.hpp>
+
 #include <string>
 #include <stdexcept>
 #include <functional>
@@ -72,5 +74,24 @@ namespace leatherman { namespace file_util {
 
     /// Read the content of a file and returns it as a string.
     std::string readFileAsString(std::string path);
+
+    /// Expand a leading tilde to the users home directory
+    /// Returns the original string in case the expansion fails.
+    std::string tildeExpand(std::string path);
+
+    /// Returns a shell-safe version of the path
+    std::string shellQuote(std::string path);
+
+    struct FileCopy {
+        boost::filesystem::path source;
+        std::string relativeName;
+    };
+
+    using FileList = std::vector<FileCopy>;
+
+    // Return a set of files suitable for copying
+    FileList relativeFileList(boost::filesystem::path path);
+
+    std::string slurpFile(std::string path);
 
 }}  // namespace leatherman::file_util

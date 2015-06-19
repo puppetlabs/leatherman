@@ -13,3 +13,4 @@ endif()
 
 add_leatherman_library("src/directory.cc" "src/file.cc")
 add_leatherman_headers("inc/leatherman")
+add_leatherman_test(tests/file_utils_test.cc)
