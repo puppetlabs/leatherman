@@ -117,7 +117,7 @@ namespace leatherman { namespace json_container {
                         // Inner object: add new line, increment padding
                         formatted_data += "\n";
                         formatted_data += get<JsonContainer>(key).toPrettyString(
-                                                                                 left_padding + LEFT_PADDING_INCREMENT);
+                                            left_padding + LEFT_PADDING_INCREMENT);
                         break;
                     case DataType::Array:
                         // Array: add raw string, regardless of its items
