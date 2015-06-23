@@ -20,7 +20,7 @@ namespace leatherman { namespace json_container {
         return buffer.GetString();
     }
 
-    //public interface
+    // public interface
 
     JsonContainer::JsonContainer() : document_root_ { new rapidjson::Document() } {
         document_root_->SetObject();
@@ -221,7 +221,7 @@ namespace leatherman { namespace json_container {
         return getValueType(*jval);
     }
 
-    //Private functions
+    // Private functions
 
     DataType JsonContainer::getValueType(const rapidjson::Value& jval) const {
         switch (jval.GetType()) {
@@ -551,4 +551,4 @@ namespace leatherman { namespace json_container {
         jval.CopyFrom(new_value.getRaw(), document_root_->GetAllocator());
     }
 
-}} //namespace leatherman::json_container
+}}  // namespace leatherman::json_container
