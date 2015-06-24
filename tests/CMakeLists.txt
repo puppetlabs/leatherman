@@ -1,9 +1,7 @@
-find_package(Threads)
-
 include_directories(${LEATHERMAN_CATCH_INCLUDE} ${LEATHERMAN_INCLUDE_DIRS})
 add_executable(leatherman_test main.cc ${LEATHERMAN_TEST_SRCS})
 
-target_link_libraries(leatherman_test ${LEATHERMAN_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(leatherman_test ${LEATHERMAN_LIBRARIES})
 if (COVERALLS)
     target_link_libraries(leatherman_test gcov)
 endif()

@@ -1,6 +1,7 @@
 find_package(Boost 1.54 REQUIRED COMPONENTS log log_setup thread date_time filesystem system chrono regex)
+find_package(Threads)
 
-add_leatherman_deps(${Boost_LIBRARIES})
+add_leatherman_deps(${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 add_leatherman_includes("${Boost_INCLUDE_DIRS}")
 
 leatherman_dependency(nowide)
