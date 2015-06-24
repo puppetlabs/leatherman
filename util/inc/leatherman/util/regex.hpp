@@ -77,4 +77,4 @@ namespace leatherman { namespace util {
         return re_search_helper(txt, what, 1, std::forward<Args>(args)...);
     }
 
-}}  // namespace leatherman::file_util
+}}  // namespace leatherman::util

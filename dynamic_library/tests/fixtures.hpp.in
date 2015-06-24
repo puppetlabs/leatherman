@@ -1,0 +1,3 @@
+#pragma once
+
+#define TEST_LIB_DIRECTORY "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@"
