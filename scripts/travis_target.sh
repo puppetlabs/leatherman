@@ -20,7 +20,7 @@ function travis_make()
         exit 1
     fi
 
-    # Build cfacter
+    # Build project
     if [ $1 == "cpplint" ]; then
         export MAKE_TARGET="cpplint"
     elif [ $1 == "cppcheck" ]; then
