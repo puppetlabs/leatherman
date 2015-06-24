@@ -61,7 +61,7 @@ if(LEATHERMAN_ENABLE_TESTING)
 
     add_cppcheck_dirs(${LEATHERMAN_CPPCHECK_DIRS})
 
-    file(GLOB_RECURSE ALL_LEATHERMAN_SOURCES */src/*.cc */src/*./h */src/*.hpp */inc/*.hpp */inc/*.h)
+    file(GLOB_RECURSE ALL_LEATHERMAN_SOURCES */src/*.cpp */src/*.cc */src/*.h */src/*.hpp */inc/*.hpp */inc/*.h)
     add_cpplint_files(${ALL_LEATHERMAN_SOURCES})
 
     # If we're toplevel we want to own these targets. If not we assume
