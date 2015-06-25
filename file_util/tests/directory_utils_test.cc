@@ -14,15 +14,18 @@ namespace leatherman { namespace file_util {
         atomic_write_to_file("3\n", directory.get_dir_name() + "/test3");
 
         SECTION("each file should be visited") {
-            int ind = 0;
-            each_file(directory.get_dir_name(), [&ind](std::string const &path) {
-                ind++;
-                return read(path) == (std::to_string(ind) + "\n");
+            std::set<std::string> file_contents;
+            each_file(directory.get_dir_name(), [&file_contents](std::string const &path) {
+                file_contents.insert(read(path));
+                return true;
             });
-            REQUIRE(ind == 3);
+            REQUIRE(file_contents.size() == 3);
+            REQUIRE(file_contents.find("1\n") != file_contents.end());
+            REQUIRE(file_contents.find("2\n") != file_contents.end());
+            REQUIRE(file_contents.find("3\n") != file_contents.end());
         }
 
-        SECTION("can find a file to match a pattern") {
+	SECTION("can find a file to match a pattern") {
             std::string content = "N/A";
             each_file(directory.get_dir_name(), [&content](std::string const &path) {
                 return read(path, content);
