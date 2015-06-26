@@ -4,6 +4,7 @@
 
 using namespace std;
 using namespace boost::filesystem;
+using namespace leatherman::util;
 
 namespace leatherman { namespace file_util {
 

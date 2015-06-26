@@ -7,6 +7,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/compare.hpp>
 #include <string>
+#include <vector>
 
 namespace leatherman { namespace util {
 
@@ -25,5 +26,21 @@ namespace leatherman { namespace util {
                 return boost::lexicographical_compare(s1, s2, boost::is_iless());
             }
         };
-}}  // namespace leatherman::util
 
+        /**
+         * @return Returns the "s" string in case of more than one thing,
+         *      an empty string otherwise.
+         */
+        std::string plural(int num_of_things);
+
+        /**
+         * @return Returns the "s" string if vector contains more than one item,
+         *      an empty string otherwise.
+         */
+        template<typename T>
+        std::string plural(std::vector<T> const& things);
+
+        /** @return Returns universally unique identifier string. */
+        std::string get_UUID();
+
+}}  // namespace leatherman::util
