@@ -131,7 +131,7 @@ globally. This can be used as follows:
 
 ### Using Catch
 
-Since Catch is a testing-only utility, its include directory is
+Since [Catch][1] is a testing-only utility, its include directory is
 excluded from LEATHERMAN_INCLUDE_DIRS. To use Catch, explicitly add
 
     include_directories(${LEATHERMAN_CATCH_INCLUDE})
@@ -141,6 +141,12 @@ to the CMakeLists.txt file of your testing directory.
 ### Using Windows
 
 In order to use the Windows libraries, Logging must be set up.
+
+### Using JsonContainer
+
+To use JsonContainer, you must enable [RapidJSON][2] that is included
+as a leatherman component.
+Please refer to the [JsonContainer documentation][3] for API details.
 
 ## Extending Leatherman
 
@@ -188,3 +194,7 @@ Leatherman. In these cases the standard Leatherman macros probably
 won't help you, and you'll need to write a lower-level CMake
 file. This README can't cover all the possible situations here, but
 the `nowide` and `catch` CMake files are both solid examples.
+
+[1]: https://github.com/philsquared/Catch
+[2]: https://github.com/miloyip/rapidjson
+[3]: json_container/README.md
