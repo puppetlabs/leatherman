@@ -25,12 +25,21 @@ namespace leatherman { namespace file_util {
             REQUIRE(file_contents.find("3\n") != file_contents.end());
         }
 
-	SECTION("can find a file to match a pattern") {
+        SECTION("can find a file to match a pattern") {
             std::string content = "N/A";
             each_file(directory.get_dir_name(), [&content](std::string const &path) {
                 return read(path, content);
-            }, "1");
+            }, "[0-1]");
             REQUIRE(content == "1\n");
+        }
+
+        SECTION("only one file returned from false callback"){
+            int count = 0;
+            each_file(directory.get_dir_name(), [&count](std::string const& path){
+                count++;
+                return false;
+            });
+            REQUIRE(count == 1);
         }
 
     }
@@ -63,8 +72,17 @@ namespace leatherman { namespace file_util {
                     return true;
                 });
                 return true;
-            }, "2");
+            }, "[2-3]");
             REQUIRE(counter == 2);
+        }
+
+        SECTION("only one directory found from false callback"){
+            int count = 0;
+            each_subdirectory(directory.get_dir_name(), [&count](std::string const& path){
+                count++;
+                return false;
+            });
+            REQUIRE(count == 1);
         }
     }
 
