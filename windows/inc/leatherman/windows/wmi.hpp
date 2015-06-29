@@ -32,7 +32,7 @@ namespace leatherman { namespace windows {
     /**
      * A class for initiating a WMI connection over COM and querying it.
      */
-    struct wmi {
+    struct WMI {
         /**
          * Identifier for the WMI class Win32_ComputerSystem
          */
@@ -124,9 +124,9 @@ namespace leatherman { namespace windows {
         using kv_range = boost::iterator_range<imap::const_iterator>;
 
         /**
-         * Initializes a COM connection for WMI queries. Throws a wmi_exception on failure.
+         * Initializes a COM connection for WMI queries. Throws a WMI_exception on failure.
          */
-        wmi();
+        WMI();
 
         /**
          * This is a utility for querying WMI classes. Windows queries are case-insensitive,
@@ -180,9 +180,9 @@ namespace leatherman { namespace windows {
         static kv_range get_range(imaps const& kvmaps, std::string const& key);
 
      private:
-        util::scoped_resource<bool> _coInit;
-        util::scoped_resource<IWbemLocator *> _pLoc;
-        util::scoped_resource<IWbemServices *> _pSvc;
+        util::ScopedResource<bool> _coInit;
+        util::ScopedResource<IWbemLocator *> _pLoc;
+        util::ScopedResource<IWbemServices *> _pSvc;
     };
 
 }}  // namespace leatherman::windows

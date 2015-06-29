@@ -68,17 +68,17 @@ namespace leatherman { namespace file_util {
      */
     std::string shell_quote(std::string path);
 
-    struct file_copy {
+    struct FileCopy {
         boost::filesystem::path source;
         std::string relativeName;
     };
 
-    using file_list = std::vector<file_copy>;
+    using FileList = std::vector<FileCopy>;
 
     /**
      * @return Returns a set of files suitable for copying
      */
-    file_list relative_file_list(boost::filesystem::path path);
+    FileList relative_file_list(boost::filesystem::path path);
 
     /**
      * @return Returns the home path for the current platform.

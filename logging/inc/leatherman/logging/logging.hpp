@@ -50,74 +50,74 @@
  * @param format The format message.
  * @param ... The format message parameters.
  */
-#define LOG_TRACE(format, ...) LOG_MESSAGE(leatherman::logging::log_level::trace, __LINE__, format, ##__VA_ARGS__)
+#define LOG_TRACE(format, ...) LOG_MESSAGE(leatherman::logging::LogLevel::trace, __LINE__, format, ##__VA_ARGS__)
 /**
  * Logs a debug message.
  * @param format The format message.
  * @param ... The format message parameters.
  */
-#define LOG_DEBUG(format, ...) LOG_MESSAGE(leatherman::logging::log_level::debug, __LINE__, format, ##__VA_ARGS__)
+#define LOG_DEBUG(format, ...) LOG_MESSAGE(leatherman::logging::LogLevel::debug, __LINE__, format, ##__VA_ARGS__)
 /**
  * Logs an info message.
  * @param format The format message.
  * @param ... The format message parameters.
  */
-#define LOG_INFO(format, ...) LOG_MESSAGE(leatherman::logging::log_level::info, __LINE__, format, ##__VA_ARGS__)
+#define LOG_INFO(format, ...) LOG_MESSAGE(leatherman::logging::LogLevel::info, __LINE__, format, ##__VA_ARGS__)
 /**
  * Logs a warning message.
  * @param format The format message.
  * @param ... The format message parameters.
  */
-#define LOG_WARNING(format, ...) LOG_MESSAGE(leatherman::logging::log_level::warning, __LINE__, format, ##__VA_ARGS__)
+#define LOG_WARNING(format, ...) LOG_MESSAGE(leatherman::logging::LogLevel::warning, __LINE__, format, ##__VA_ARGS__)
 /**
  * Logs an error message.
  * @param format The format message.
  * @param ... The format message parameters.
  */
-#define LOG_ERROR(format, ...) LOG_MESSAGE(leatherman::logging::log_level::error, __LINE__, format, ##__VA_ARGS__)
+#define LOG_ERROR(format, ...) LOG_MESSAGE(leatherman::logging::LogLevel::error, __LINE__, format, ##__VA_ARGS__)
 /**
  * Logs a fatal message.
  * @param format The format message.
  * @param ... The format message parameters.
  */
-#define LOG_FATAL(format, ...) LOG_MESSAGE(leatherman::logging::log_level::fatal, __LINE__, format, ##__VA_ARGS__)
+#define LOG_FATAL(format, ...) LOG_MESSAGE(leatherman::logging::LogLevel::fatal, __LINE__, format, ##__VA_ARGS__)
 /**
  * Determines if the trace logging level is enabled.
  * @returns Returns true if trace logging is enabled or false if it is not enabled.
  */
-#define LOG_IS_TRACE_ENABLED() leatherman::logging::is_enabled(leatherman::logging::log_level::trace)
+#define LOG_IS_TRACE_ENABLED() leatherman::logging::is_enabled(leatherman::logging::LogLevel::trace)
 /**
  * Determines if the debug logging level is enabled.
  * @returns Returns true if debug logging is enabled or false if it is not enabled.
  */
-#define LOG_IS_DEBUG_ENABLED() leatherman::logging::is_enabled(leatherman::logging::log_level::debug)
+#define LOG_IS_DEBUG_ENABLED() leatherman::logging::is_enabled(leatherman::logging::LogLevel::debug)
 /**
  * Determines if the info logging level is enabled.
  * @returns Returns true if info logging is enabled or false if it is not enabled.
  */
-#define LOG_IS_INFO_ENABLED() leatherman::logging::is_enabled(leatherman::logging::log_level::info)
+#define LOG_IS_INFO_ENABLED() leatherman::logging::is_enabled(leatherman::logging::LogLevel::info)
 /**
  * Determines if the warning logging level is enabled.
  * @returns Returns true if warning logging is enabled or false if it is not enabled.
  */
-#define LOG_IS_WARNING_ENABLED() leatherman::logging::is_enabled(leatherman::logging::log_level::warning)
+#define LOG_IS_WARNING_ENABLED() leatherman::logging::is_enabled(leatherman::logging::LogLevel::warning)
 /**
  * Determines if the error logging level is enabled.
  * @returns Returns true if error logging is enabled or false if it is not enabled.
  */
-#define LOG_IS_ERROR_ENABLED() leatherman::logging::is_enabled(leatherman::logging::log_level::error)
+#define LOG_IS_ERROR_ENABLED() leatherman::logging::is_enabled(leatherman::logging::LogLevel::error)
 /**
  * Determines if the fatal logging level is enabled.
  * @returns Returns true if fatal logging is enabled or false if it is not enabled.
  */
-#define LOG_IS_FATAL_ENABLED() leatherman::logging::is_enabled(leatherman::logging::log_level::fatal)
+#define LOG_IS_FATAL_ENABLED() leatherman::logging::is_enabled(leatherman::logging::LogLevel::fatal)
 
 namespace leatherman { namespace logging {
 
     /**
      * Represents the supported logging levels.
      */
-    enum class log_level
+    enum class LogLevel
     {
         none,
         trace,
@@ -130,12 +130,12 @@ namespace leatherman { namespace logging {
 
     /**
      * Reads a log level from an input stream.
-     * This is used in boost::lexical_cast<log_level>.
+     * This is used in boost::lexical_cast<LogLevel>.
      * @param in The input stream.
      * @param level The returned log level.
      * @returns Returns the input stream.
      */
-    std::istream& operator>>(std::istream& in, log_level& level);
+    std::istream& operator>>(std::istream& in, LogLevel& level);
 
     /**
      * Produces the printed representation of logging level.
@@ -143,7 +143,7 @@ namespace leatherman { namespace logging {
      * @param level The logging level to print.
      * @return Returns the stream after writing to it.
      */
-    std::ostream& operator<<(std::ostream& strm, log_level level);
+    std::ostream& operator<<(std::ostream& strm, LogLevel level);
 
     /**
      * Sets up logging for the given stream.
@@ -157,13 +157,13 @@ namespace leatherman { namespace logging {
      * Sets the current log level.
      * @param level The new current log level to set.
      */
-    void set_level(log_level level);
+    void set_level(LogLevel level);
 
     /**
      * Gets the current log level.
      * @return Returns the current log level.
      */
-    log_level get_level();
+    LogLevel get_level();
 
     /**
      * Sets whether or not log output is colorized.
@@ -182,14 +182,14 @@ namespace leatherman { namespace logging {
      * If the callback returns false, the message will not be logged.
      * @param callback The callback to call when a message is about to be logged.
      */
-    void on_message(std::function<bool(log_level, std::string const&)> callback);
+    void on_message(std::function<bool(LogLevel, std::string const&)> callback);
 
     /**
      * Determines if the given log level is enabled for the given logger.
      * @param level The logging level to check.
      * @return Returns true if the logging level is enabled or false if it is not.
      */
-    bool is_enabled(log_level level);
+    bool is_enabled(LogLevel level);
 
     /**
      * Determine if an error has been logged
@@ -211,7 +211,7 @@ namespace leatherman { namespace logging {
      * @param line_num The source line number of the logging call.
      * @param message The message to log.
      */
-    void log(const std::string &logger, log_level level, int line_num, std::string const& message);
+    void log(const std::string &logger, LogLevel level, int line_num, std::string const& message);
 
     /**
      * Logs a given format message to the given logger with the specified line number (if > 0).
@@ -220,7 +220,7 @@ namespace leatherman { namespace logging {
      * @param line_num The source line number of the logging call.
      * @param message The message being formatted.
      */
-    void log(const std::string &logger, log_level level, int line_num, boost::format& message);
+    void log(const std::string &logger, LogLevel level, int line_num, boost::format& message);
 
     /**
      * Logs a given format message to the given logger with the specified line number (if > 0).
@@ -234,7 +234,7 @@ namespace leatherman { namespace logging {
      * @param args The remaining arguments to the message.
      */
     template <typename T, typename... TArgs>
-    void log(const std::string &logger, log_level level, int line_num, boost::format& message, T arg, TArgs... args)
+    void log(const std::string &logger, LogLevel level, int line_num, boost::format& message, T arg, TArgs... args)
     {
         message % arg;
         log(logger, level, line_num, message, std::forward<TArgs>(args)...);
@@ -250,7 +250,7 @@ namespace leatherman { namespace logging {
      * @param args The remaining arguments to the message.
      */
     template <typename... TArgs>
-    void log(const std::string &logger, log_level level, int line_num, std::string const& format, TArgs... args)
+    void log(const std::string &logger, LogLevel level, int line_num, std::string const& format, TArgs... args)
     {
         boost::format message(format);
         log(logger, level, line_num, message, std::forward<TArgs>(args)...);
@@ -262,7 +262,7 @@ namespace leatherman { namespace logging {
      * @param dst The stream to colorize.
      * @param level The log level to colorize for. Defaults to none, which resets colorization.
      */
-    void colorize(std::ostream &dst, log_level level = log_level::none);
+    void colorize(std::ostream &dst, LogLevel level = LogLevel::none);
 
     /**
      * Returns whether terminal colors are supported.

@@ -18,7 +18,7 @@ namespace leatherman { namespace windows {
         }
 
         // boost format could throw, so ensure the buffer is freed.
-        util::scoped_resource<LPWSTR> guard(buffer, [](LPWSTR ptr) { if (ptr) LocalFree(ptr); });
+        util::ScopedResource<LPWSTR> guard(buffer, [](LPWSTR ptr) { if (ptr) LocalFree(ptr); });
         return (boost::format("%1% (%2%)") % boost::nowide::narrow(buffer) % err).str();
     }
 

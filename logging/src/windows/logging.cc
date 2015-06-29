@@ -8,7 +8,7 @@ namespace leatherman { namespace logging {
     static HANDLE stdHandle;
     static WORD originalAttributes;
 
-    void colorize(ostream& dst, log_level level)
+    void colorize(ostream& dst, LogLevel level)
     {
         if (!get_colorization()) {
             return;
@@ -17,13 +17,13 @@ namespace leatherman { namespace logging {
         // The ostream may have buffered data, and changing the console color will affect any buffered data written
         // later. Ensure the buffer is flushed before changing the console color.
         dst.flush();
-        if (level == log_level::trace || level == log_level::debug) {
+        if (level == LogLevel::trace || level == LogLevel::debug) {
             SetConsoleTextAttribute(stdHandle, FOREGROUND_BLUE | FOREGROUND_GREEN);
-        } else if (level == log_level::info) {
+        } else if (level == LogLevel::info) {
             SetConsoleTextAttribute(stdHandle, FOREGROUND_GREEN);
-        } else if (level == log_level::warning) {
+        } else if (level == LogLevel::warning) {
             SetConsoleTextAttribute(stdHandle, FOREGROUND_RED | FOREGROUND_GREEN);
-        } else if (level == log_level::error || level == log_level::fatal) {
+        } else if (level == LogLevel::error || level == LogLevel::fatal) {
             SetConsoleTextAttribute(stdHandle, FOREGROUND_RED);
         } else {
             SetConsoleTextAttribute(stdHandle, originalAttributes);

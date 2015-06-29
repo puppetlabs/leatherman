@@ -59,7 +59,7 @@ namespace leatherman { namespace test {
      */
     struct logging_format_context
     {
-        logging_format_context(log_level lvl, std::string ns, int line_num = 0);
+        logging_format_context(LogLevel lvl, std::string ns, int line_num = 0);
         ~logging_format_context();
 
         vector<string> const& tokens() const;
@@ -68,7 +68,7 @@ namespace leatherman { namespace test {
         vector<boost::regex> const& expected() const;
 
      private:
-        string get_color(log_level lvl) const;
+        string get_color(LogLevel lvl) const;
 
         colored_tokenizing_stringbuf _buf;
         streambuf *_strm_buf;

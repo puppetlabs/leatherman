@@ -96,12 +96,12 @@ namespace boost_file = boost::filesystem;
         return ss.str();
     }
 
-    file_list relative_file_list(boost_file::path path) {
-        file_list list;
+    FileList relative_file_list(boost_file::path path) {
+        FileList list;
         std::string common_prefix { path.string() };
         std::string prefix_filename { path.filename().string() };
 
-        list.emplace_back(file_copy { path, path.filename().string() });
+        list.emplace_back(FileCopy { path, path.filename().string() });
 
         if (prefix_filename == ".") {
             // when we're scanning '.' remove all the prefix
@@ -113,7 +113,7 @@ namespace boost_file = boost::filesystem;
             std::string target_path { walker->path().string() };
             assert((std::string { target_path, 0, common_prefix.size() } == common_prefix));
             target_path.replace(0, common_prefix.size(), prefix_filename);
-            list.emplace_back(file_copy { walker->path(), target_path });
+            list.emplace_back(FileCopy { walker->path(), target_path });
         }
         return list;
     }

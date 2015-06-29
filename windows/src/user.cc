@@ -50,7 +50,7 @@ namespace leatherman { namespace windows { namespace user {
             LOG_DEBUG("OpenProcessToken call failed: %1%", system_error());
             return {};
         }
-        util::scoped_resource <HANDLE> token(temp_token, CloseHandle);
+        util::ScopedResource <HANDLE> token(temp_token, CloseHandle);
 
         DWORD pathLen = 0u;
         if (GetUserProfileDirectoryW(token, nullptr, &pathLen)) {
