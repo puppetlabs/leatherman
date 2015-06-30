@@ -7,7 +7,7 @@
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 
-namespace leatherman { namespace file_util {
+namespace leatherman { namespace util {
 
     /**
      * Helper function for resolving variadic arguments to re_search.

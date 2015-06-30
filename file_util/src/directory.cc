@@ -25,7 +25,7 @@ namespace leatherman { namespace file_util {
             if (!is_regular_file(it->status(ec))) {
                 continue;
             }
-            if (re_search(it->path().filename().string(), regex)) {
+            if (util::re_search(it->path().filename().string(), regex)) {
                 if (!callback(it->path().string())) {
                     break;
                 }
@@ -51,7 +51,7 @@ namespace leatherman { namespace file_util {
             if (!is_directory(it->status(ec))) {
                 continue;
             }
-            if (re_search(it->path().filename().string(), regex)) {
+            if (util::re_search(it->path().filename().string(), regex)) {
                 if (!callback(it->path().string())) {
                     break;
                 }
