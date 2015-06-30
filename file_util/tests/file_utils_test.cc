@@ -129,6 +129,14 @@ _putenv("USERPROFILE=/testhome");
     }
 
     TEST_CASE("file_util::read", "[utils]") {
+
+        SECTION("trying to read a nonexistent file returns the empty string"){
+            std::string contents;
+            REQUIRE(read("does_not_exist") == "");
+            REQUIRE_FALSE(read("does_not_exist", contents));
+            REQUIRE(contents.empty());
+        }
+
         SECTION("it can read from a file") {
             auto file_path = unique_fixture_path().string();
             atomic_write_to_file("test\n", file_path);
@@ -142,6 +150,14 @@ _putenv("USERPROFILE=/testhome");
     }
 
     TEST_CASE("file_util::each_line", "[utils]") {
+
+        SECTION("trying to read a nonexistent file returns false") {
+            REQUIRE_FALSE(each_line("does_not_exist", [](std::string &line) {
+                FAIL("should not be called");
+                return true;
+            }));
+        }
+
         SECTION("an action is performed on each line of a file") {
             temp_file file("test1\ntest2\ntest3\n");
             int i = 0;
@@ -150,6 +166,17 @@ _putenv("USERPROFILE=/testhome");
                 return line == ("test" + std::to_string(i));
             }));
             REQUIRE(i == 3);
+        }
+
+        SECTION("a callback that returns false stops at the first line"){
+            temp_file file("test1\ntest2\ntest3\n");
+            std::vector<std::string> lines;
+            REQUIRE(each_line(file.get_file_name(), [&](std::string& line) {
+                lines.emplace_back(move(line));
+                return false;
+            }));
+            REQUIRE(lines.size() == 1u);
+            REQUIRE(lines[0] == "test1");
         }
     }
 
