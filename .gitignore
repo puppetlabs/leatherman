@@ -10,6 +10,5 @@ compile_commands.json
 /debug*/
 /release*/
 /.idea/
-/build/
-/linux-build/
+/*build/
 /dynamic_library/tests/fixtures.hpp

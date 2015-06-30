@@ -148,6 +148,27 @@ To use JsonContainer, you must enable [RapidJSON][2] that is included
 as a leatherman component.
 Please refer to the [JsonContainer documentation][3] for API details.
 
+### Using curl
+
+To use the curl wrapper library, libcurl must be installed.
+
+On Ubuntu use the following:
+
+    apt-get install libcurl4-openssl-dev
+    
+On Windows, in Powershell, use:
+
+    (New-Object net.webclient).DownloadFile("http://curl.haxx.se/download/curl-7.42.1.zip", "C:\tools\curl-7.42.1.zip")
+    & 7za x "curl-7.42.1.zip" | FIND /V "ing "
+    cd curl-7.42.1
+    mkdir -Path C:\tools\curl-7.42.1-x86_64_mingw-w64_4.8.4_win32_seh\include
+    cp -r include\curl C:\tools\curl-7.42.1-x86_64_mingw-w64_4.8.4_win32_seh\include
+    mkdir -Path C:\tools\curl-7.42.1-x86_64_mingw-w64_4.8.4_win32_seh\lib
+    cp lib\libcurl.a C:\tools\curl-7.42.1-x86_64_mingw-w64_4.8.4_win32_seh\lib
+    
+On Windows CMake must also be manually pointed to the correct directory by passing the argument 
+`-DCMAKE_PREFIX_PATH="C:\tools\curl-7.42.1-x86_64_mingw-w64_4.8.4_win32_seh`.
+
 ## Extending Leatherman
 
 Adding a new library to leatherman is easy!
