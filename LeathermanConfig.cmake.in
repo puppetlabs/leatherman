@@ -34,5 +34,7 @@ foreach(component ${Leatherman_FIND_COMPONENTS})
     endif()
 endforeach()
 
+set(LEATHERMAN_LIBRARIES ${LEATHERMAN_LIBS} ${LEATHERMAN_DEPS})
+
 list(REMOVE_DUPLICATES LEATHERMAN_INCLUDE_DIRS)
 set(LEATHERMAN_MODULE_DIR "${current_directory}/cmake")
