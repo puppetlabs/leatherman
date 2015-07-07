@@ -27,8 +27,8 @@ namespace sinks = boost::log::sinks;
 
 namespace leatherman { namespace logging {
 
-    static function<bool(log_level, string const&)> g_callback;
-    static log_level g_level = log_level::none;
+    static function<bool(LogLevel, string const&)> g_callback;
+    static LogLevel g_level = LogLevel::none;
     static bool g_colorize = false;
     static bool g_error_logged = false;
 
@@ -45,7 +45,7 @@ namespace leatherman { namespace logging {
 
     void color_writer::consume(boost::log::record_view const& rec)
     {
-        auto level = boost::log::extract<log_level>("Severity", rec);
+        auto level = boost::log::extract<LogLevel>("Severity", rec);
         auto line_num = boost::log::extract<int>("LineNum", rec);
         auto name_space = boost::log::extract<string>("Namespace", rec);
         auto timestamp = boost::log::extract<boost::posix_time::ptime>("TimeStamp", rec);
@@ -83,20 +83,20 @@ namespace leatherman { namespace logging {
         boost::log::add_common_attributes();
 
         // Default to the warning level
-        set_level(log_level::warning);
+        set_level(LogLevel::warning);
 
         // Set whether or not to use colorization depending if the destination is a tty
         g_colorize = color_supported(dst);
     }
 
-    void set_level(log_level level)
+    void set_level(LogLevel level)
     {
         auto core = boost::log::core::get();
-        core->set_logging_enabled(level != log_level::none);
+        core->set_logging_enabled(level != LogLevel::none);
         g_level = level;
     }
 
-    log_level get_level()
+    LogLevel get_level()
     {
         return g_level;
     }
@@ -111,9 +111,9 @@ namespace leatherman { namespace logging {
         return g_colorize;
     }
 
-    bool is_enabled(log_level level)
+    bool is_enabled(LogLevel level)
     {
-        return g_level != log_level::none && static_cast<int>(level) >= static_cast<int>(g_level);
+        return g_level != LogLevel::none && static_cast<int>(level) >= static_cast<int>(g_level);
     }
 
     bool error_has_been_logged() {
@@ -124,26 +124,26 @@ namespace leatherman { namespace logging {
         g_error_logged = false;
     }
 
-    void on_message(function<bool(log_level, string const&)> callback)
+    void on_message(function<bool(LogLevel, string const&)> callback)
     {
         g_callback = callback;
     }
 
-    void log(const string &logger, log_level level, int line_num, boost::format& message)
+    void log(const string &logger, LogLevel level, int line_num, boost::format& message)
     {
         log(logger, level, line_num, message.str());
     }
 
-    void log(const string &logger, log_level level, int line_num, string const& message)
+    void log(const string &logger, LogLevel level, int line_num, string const& message)
     {
-        if (level >= log_level::error) {
+        if (level >= LogLevel::error) {
             g_error_logged = true;
         }
         if (!is_enabled(level) || (g_callback && !g_callback(level, message))) {
             return;
         }
 
-        src::severity_logger<log_level> slg;
+        src::severity_logger<LogLevel> slg;
         slg.add_attribute("Namespace", attrs::constant<string>(logger));
         if (line_num > 0) {
             slg.add_attribute("LineNum", attrs::constant<int>(line_num));
@@ -152,47 +152,47 @@ namespace leatherman { namespace logging {
         BOOST_LOG_SEV(slg, level) << message;
     }
 
-    istream& operator>>(istream& in, log_level& level)
+    istream& operator>>(istream& in, LogLevel & level)
     {
         string value;
         if (in >> value) {
             if (value == "none") {
-                level = log_level::none;
+                level = LogLevel::none;
                 return in;
             }
             if (value == "trace") {
-                level = log_level::trace;
+                level = LogLevel::trace;
                 return in;
             }
             if (value == "debug") {
-                level = log_level::debug;
+                level = LogLevel::debug;
                 return in;
             }
             if (value == "info") {
-                level = log_level::info;
+                level = LogLevel::info;
                 return in;
             }
             if (value == "warn") {
-                level = log_level::warning;
+                level = LogLevel::warning;
                 return in;
             }
             if (value == "error") {
-                level = log_level::error;
+                level = LogLevel::error;
                 return in;
             }
             if (value == "fatal") {
-                level = log_level::fatal;
+                level = LogLevel::fatal;
                 return in;
             }
         }
         throw runtime_error("invalid log level: expected none, trace, debug, info, warn, error, or fatal.");
     }
 
-    ostream& operator<<(ostream& strm, log_level level)
+    ostream& operator<<(ostream& strm, LogLevel level)
     {
         static const vector<string> strings = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
 
-        if (level != log_level::none) {
+        if (level != LogLevel::none) {
             size_t index = static_cast<size_t>(level) - 1;
             if (index < strings.size()) {
                 strm << strings[index];

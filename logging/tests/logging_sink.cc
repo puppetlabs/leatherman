@@ -14,7 +14,7 @@ struct custom_log_appender :
     void consume(boost::log::record_view const& rec, string_type const& message)
     {
         stringstream s;
-        s << boost::log::extract<log_level>("Severity", rec);
+        s << boost::log::extract<LogLevel>("Severity", rec);
         _level = s.str();
         _message = message;
     }
@@ -27,7 +27,7 @@ struct logging_test_context
 {
     using sink_t = sinks::synchronous_sink<custom_log_appender>;
 
-    logging_test_context(log_level lvl = log_level::trace)
+    logging_test_context(LogLevel lvl = LogLevel::trace)
     {
         set_level(lvl);
         clear_error_logged_flag();
@@ -44,7 +44,7 @@ struct logging_test_context
 
     ~logging_test_context()
     {
-        set_level(log_level::none);
+        set_level(LogLevel::none);
         on_message(nullptr);
         clear_error_logged_flag();
 
@@ -83,72 +83,72 @@ struct logging_test_context
 };
 
 SCENARIO("logging with a TRACE level") {
-    logging_test_context context(log_level::trace);
+    logging_test_context context(LogLevel::trace);
     REQUIRE(LOG_IS_TRACE_ENABLED());
     LOG_TRACE("testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context.level() == "TRACE");
     REQUIRE(context.message() == context.color() + "testing 1 2 3" + context.none());
-    log("test", log_level::trace, 0, "testing %1% %2% %3%", 1, "2", 3.0);
+    log("test", LogLevel::trace, 0, "testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context.level() == "TRACE");
     REQUIRE(context.message() == context.color() + "testing 1 2 3" + context.none());
     REQUIRE_FALSE(error_has_been_logged());
 }
 
 SCENARIO("logging with a DEBUG level") {
-    logging_test_context context(log_level::debug);
+    logging_test_context context(LogLevel::debug);
     REQUIRE(LOG_IS_DEBUG_ENABLED());
     LOG_DEBUG("testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context.level() == "DEBUG");
     REQUIRE(context.message() == context.color() + "testing 1 2 3" + context.none());
-    log("test", log_level::debug, 0, "testing %1% %2% %3%", 1, "2", 3.0);
+    log("test", LogLevel::debug, 0, "testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context.level() == "DEBUG");
     REQUIRE(context.message() == context.color() + "testing 1 2 3" + context.none());
     REQUIRE_FALSE(error_has_been_logged());
 }
 
 SCENARIO("logging with an INFO level") {
-    logging_test_context context(log_level::info);
+    logging_test_context context(LogLevel::info);
     REQUIRE(LOG_IS_INFO_ENABLED());
     LOG_INFO("testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context.level() == "INFO");
     REQUIRE(context.message() == context.color() + "testing 1 2 3" + context.none());
-    log("test", log_level::info, 0, "testing %1% %2% %3%", 1, "2", 3.0);
+    log("test", LogLevel::info, 0, "testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context.level() == "INFO");
     REQUIRE(context.message() == context.color() + "testing 1 2 3" + context.none());
     REQUIRE_FALSE(error_has_been_logged());
 }
 
 SCENARIO("logging with a WARNING level") {
-    logging_test_context context(log_level::warning);
+    logging_test_context context(LogLevel::warning);
     REQUIRE(LOG_IS_WARNING_ENABLED());
     LOG_WARNING("testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context.level() == "WARN");
     REQUIRE(context.message() == context.color() + "testing 1 2 3" + context.none());
-    log("test", log_level::warning, 0, "testing %1% %2% %3%", 1, "2", 3.0);
+    log("test", LogLevel::warning, 0, "testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context.level() == "WARN");
     REQUIRE(context.message() == context.color() + "testing 1 2 3" + context.none());
     REQUIRE_FALSE(error_has_been_logged());
 }
 
 SCENARIO("logging with an ERROR level") {
-    logging_test_context context(log_level::error);
+    logging_test_context context(LogLevel::error);
     REQUIRE(LOG_IS_ERROR_ENABLED());
     LOG_ERROR("testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context.level() == "ERROR");
     REQUIRE(context.message() == context.color() + "testing 1 2 3" + context.none());
-    log("test", log_level::error, 0, "testing %1% %2% %3%", 1, "2", 3.0);
+    log("test", LogLevel::error, 0, "testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context.level() == "ERROR");
     REQUIRE(context.message() == context.color() + "testing 1 2 3" + context.none());
     REQUIRE(error_has_been_logged());
 }
 
 SCENARIO("logging with a FATAL level") {
-    logging_test_context context(log_level::fatal);
+    logging_test_context context(LogLevel::fatal);
     REQUIRE(LOG_IS_FATAL_ENABLED());
     LOG_FATAL("testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context.level() == "FATAL");
     REQUIRE(context.message() == context.color() + "testing 1 2 3" + context.none());
-    log("test", log_level::fatal, 0, "testing %1% %2% %3%", 1, "2", 3.0);
+    log("test", LogLevel::fatal, 0, "testing %1% %2% %3%", 1, "2", 3.0);
     REQUIRE(context.level() == "FATAL");
     REQUIRE(context.message() == context.color() + "testing 1 2 3" + context.none());
     REQUIRE(error_has_been_logged());
@@ -157,8 +157,8 @@ SCENARIO("logging with a FATAL level") {
 SCENARIO("logging with on_message") {
     logging_test_context context;
     string message;
-    log_level level;
-    on_message([&](log_level lvl, string const& msg) {
+    LogLevel level;
+    on_message([&](LogLevel lvl, string const& msg) {
         level = lvl;
         message = msg;
         return false;
@@ -166,42 +166,42 @@ SCENARIO("logging with on_message") {
     GIVEN("a TRACE message to log") {
         LOG_TRACE("trace message");
         THEN("on_message is called with the message") {
-            REQUIRE(level == log_level::trace);
+            REQUIRE(level == LogLevel::trace);
             REQUIRE(message == "trace message");
         }
     }
     GIVEN("a DEBUG message to log") {
         LOG_DEBUG("debug message");
         THEN("on_message is called with the message") {
-            REQUIRE(level == log_level::debug);
+            REQUIRE(level == LogLevel::debug);
             REQUIRE(message == "debug message");
         }
     }
     GIVEN("a INFO message to log") {
         LOG_INFO("info message");
         THEN("on_message is called with the message") {
-            REQUIRE(level == log_level::info);
+            REQUIRE(level == LogLevel::info);
             REQUIRE(message == "info message");
         }
     }
     GIVEN("a WARNING message to log") {
         LOG_WARNING("warning message");
         THEN("on_message is called with the message") {
-            REQUIRE(level == log_level::warning);
+            REQUIRE(level == LogLevel::warning);
             REQUIRE(message == "warning message");
         }
     }
     GIVEN("a ERROR message to log") {
         LOG_ERROR("error message");
         THEN("on_message is called with the message") {
-            REQUIRE(level == log_level::error);
+            REQUIRE(level == LogLevel::error);
             REQUIRE(message == "error message");
         }
     }
     GIVEN("a FATAL message to log") {
         LOG_FATAL("fatal message");
         THEN("on_message is called with the message") {
-            REQUIRE(level == log_level::fatal);
+            REQUIRE(level == LogLevel::fatal);
             REQUIRE(message == "fatal message");
         }
     }
@@ -210,7 +210,7 @@ SCENARIO("logging with on_message") {
         for (auto const& s : symbols) {
             auto utf8 = boost::nowide::narrow(s);
             LOG_INFO(utf8);
-            REQUIRE(level == log_level::info);
+            REQUIRE(level == LogLevel::info);
             REQUIRE(message == utf8);
         }
     }

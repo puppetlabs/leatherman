@@ -15,54 +15,54 @@ namespace leatherman { namespace util {
      * @tparam T The type of resource being scoped.
     */
     template<typename T>
-    struct scoped_resource
+    struct ScopedResource
     {
         /**
-         * Constructs an uninitialized scoped_resource.
+         * Constructs an uninitialized ScopedResource.
          * Can be initialized via move assignment.
          */
-        scoped_resource() :
+        ScopedResource() :
             _resource(),
             _deleter(nullptr)
         {
         }
 
         /**
-         * Constructs a scoped_resource.
+         * Constructs a ScopedResource.
          * Takes ownership of the given resource.
          * @param resource The resource to scope.
          * @param deleter The function to call when the resource goes out of scope.
          */
-        scoped_resource(T resource, std::function<void(T&)> deleter) :
+        ScopedResource(T resource, std::function<void(T&)> deleter) :
             _resource(std::move(resource)),
             _deleter(deleter)
         {
         }
 
         /**
-         * Prevents the scoped_resource from being copied.
+         * Prevents the ScopedResource from being copied.
          */
-        explicit scoped_resource(scoped_resource<T> const&) = delete;
+        explicit ScopedResource(ScopedResource<T> const&) = delete;
         /**
-         * Prevents the scoped_resource from being copied.
-         * @returns Returns this scoped_resource.
+         * Prevents the ScopedResource from being copied.
+         * @returns Returns this ScopedResource.
          */
-        scoped_resource& operator=(scoped_resource<T> const&) = delete;
+        ScopedResource& operator=(ScopedResource<T> const&) = delete;
         /**
-         * Moves the given scoped_resource into this scoped_resource.
-         * @param other The scoped_resource to move into this scoped_resource.
+         * Moves the given ScopedResource into this ScopedResource.
+         * @param other The ScopedResource to move into this ScopedResource.
          */
-        scoped_resource(scoped_resource<T>&& other)
+        ScopedResource(ScopedResource<T>&& other)
         {
             *this = std::move(other);
         }
 
         /**
-         * Moves the given scoped_resource into this scoped_resource.
-         * @param other The scoped_resource to move into this scoped_resource.
-         * @return Returns this scoped_resource.
+         * Moves the given ScopedResource into this ScopedResource.
+         * @param other The ScopedResource to move into this ScopedResource.
+         * @return Returns this ScopedResource.
          */
-        scoped_resource& operator=(scoped_resource<T>&& other)
+        ScopedResource& operator=(ScopedResource<T>&& other)
         {
             release();
             _resource = std::move(other._resource);
@@ -74,9 +74,9 @@ namespace leatherman { namespace util {
         }
 
         /**
-         * Destructs a scoped_resource.
+         * Destructs a ScopedResource.
          */
-        ~scoped_resource()
+        ~ScopedResource()
         {
             release();
         }

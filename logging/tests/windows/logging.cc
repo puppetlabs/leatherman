@@ -3,7 +3,7 @@
 
 namespace leatherman { namespace test {
 
-    string logging_format_context::get_color(log_level lvl) const
+    string logging_format_context::get_color(LogLevel lvl) const
     {
         // So far I've found no way to successfully test console color when output is redirected,
         // as happens when running with ctest or make test.

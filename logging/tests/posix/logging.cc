@@ -2,18 +2,18 @@
 
 namespace leatherman { namespace test {
 
-    string logging_format_context::get_color(log_level lvl) const
+    string logging_format_context::get_color(LogLevel lvl) const
     {
         switch (lvl) {
-            case log_level::trace:
-            case log_level::debug:
+            case LogLevel::trace:
+            case LogLevel::debug:
                 return cyan;
-            case log_level::info:
+            case LogLevel::info:
                 return green;
-            case log_level::warning:
+            case LogLevel::warning:
                 return yellow;
-            case log_level::error:
-            case log_level::fatal:
+            case LogLevel::error:
+            case LogLevel::fatal:
                 return red;
             default:
                 return reset;

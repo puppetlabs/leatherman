@@ -28,7 +28,7 @@ namespace leatherman { namespace windows {
     // doesn't define it, but obscures the Windows Platform SDK version of wbemuuid.lib.
     constexpr static CLSID MyCLSID_WbemLocator = {0x4590f811, 0x1d3a, 0x11d0, 0x89, 0x1f, 0x00, 0xaa, 0x00, 0x4b, 0x2e, 0x24};
 
-    wmi::wmi()
+    WMI::WMI()
     {
         LOG_DEBUG("initializing WMI");
         auto hres = CoInitializeEx(0, COINIT_APARTMENTTHREADED);
@@ -39,7 +39,7 @@ namespace leatherman { namespace windows {
                 throw wmi_exception(format_hresult("failed to initialize COM library", hres));
             }
         } else {
-            _coInit = util::scoped_resource<bool>(true, [](bool b) { CoUninitialize(); });
+            _coInit = util::ScopedResource<bool>(true, [](bool b) { CoUninitialize(); });
         }
 
         IWbemLocator *pLoc;
@@ -48,7 +48,7 @@ namespace leatherman { namespace windows {
         if (FAILED(hres)) {
             throw wmi_exception(format_hresult("failed to create IWbemLocator object", hres));
         }
-        _pLoc = util::scoped_resource<IWbemLocator *>(pLoc,
+        _pLoc = util::ScopedResource<IWbemLocator *>(pLoc,
             [](IWbemLocator *loc) { if (loc) loc->Release(); });
 
         IWbemServices *pSvc;
@@ -56,7 +56,7 @@ namespace leatherman { namespace windows {
         if (FAILED(hres)) {
             throw wmi_exception(format_hresult("could not connect to WMI server", hres));
         }
-        _pSvc = util::scoped_resource<IWbemServices *>(pSvc,
+        _pSvc = util::ScopedResource<IWbemServices *>(pSvc,
             [](IWbemServices *svc) { if (svc) svc->Release(); });
 
         hres = CoSetProxyBlanket(_pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL,
@@ -66,7 +66,7 @@ namespace leatherman { namespace windows {
         }
     }
 
-    static void wmi_add_result(wmi::imap &vals, string const& group, string const& s, VARIANT *vtProp)
+    static void wmi_add_result(WMI::imap &vals, string const& group, string const& s, VARIANT *vtProp)
     {
         if (V_VT(vtProp) == (VT_ARRAY | VT_BSTR)) {
             // It's an array of elements; serialize the array as elements with the same key in the imap.
@@ -96,7 +96,7 @@ namespace leatherman { namespace windows {
         }
     }
 
-    wmi::imaps wmi::query(string const& group, vector<string> const& keys, string const& extended) const
+    WMI::imaps WMI::query(string const& group, vector<string> const& keys, string const& extended) const
     {
         IEnumWbemClassObject *_pEnum = NULL;
         string qry = "SELECT " + boost::join(keys, ",") + " FROM " + group;
@@ -110,7 +110,7 @@ namespace leatherman { namespace windows {
             LOG_DEBUG("query %1% failed", qry);
             return {};
         }
-        util::scoped_resource<IEnumWbemClassObject *> pEnum(_pEnum,
+        util::ScopedResource<IEnumWbemClassObject *> pEnum(_pEnum,
             [](IEnumWbemClassObject *rsc) { if (rsc) rsc->Release(); });
 
         imaps array_of_vals;
@@ -145,7 +145,7 @@ namespace leatherman { namespace windows {
         return array_of_vals;
     }
 
-    string const& wmi::get(wmi::imap const& kvmap, string const& key)
+    string const& WMI::get(WMI::imap const& kvmap, string const& key)
     {
         static const string empty = {};
         auto valIt = kvmap.find(key);
@@ -159,12 +159,12 @@ namespace leatherman { namespace windows {
         }
     }
 
-    wmi::kv_range wmi::get_range(wmi::imap const& kvmap, string const& key)
+    WMI::kv_range WMI::get_range(WMI::imap const& kvmap, string const& key)
     {
         return kv_range(kvmap.equal_range(key));
     }
 
-    string const& wmi::get(wmi::imaps const& kvmaps, string const& key)
+    string const& WMI::get(WMI::imaps const& kvmaps, string const& key)
     {
         if (kvmaps.size() > 0) {
             if (kvmaps.size() > 1) {
@@ -176,7 +176,7 @@ namespace leatherman { namespace windows {
         }
     }
 
-    wmi::kv_range wmi::get_range(wmi::imaps const& kvmaps, string const& key)
+    WMI::kv_range WMI::get_range(WMI::imaps const& kvmaps, string const& key)
     {
         if (kvmaps.size() > 0) {
             if (kvmaps.size() > 1) {

@@ -36,13 +36,13 @@ namespace leatherman { namespace test {
         return stringbuf::xsputn(s, count);
     }
 
-    logging_format_context::logging_format_context(log_level lvl, string ns, int line_num)
+    logging_format_context::logging_format_context(LogLevel lvl, string ns, int line_num)
     {
         _strm_buf = boost::nowide::cout.rdbuf();
         boost::nowide::cout.rdbuf(&_buf);
 
         setup_logging(boost::nowide::cout);
-        set_level(log_level::trace);
+        set_level(LogLevel::trace);
         set_colorization(true);
         clear_error_logged_flag();
 
@@ -67,7 +67,7 @@ namespace leatherman { namespace test {
         }
         _expected.emplace_back("testing 1 2 3");
         if (!color.empty()) {
-            _expected.emplace_back(get_color(log_level::none), R::literal);
+            _expected.emplace_back(get_color(LogLevel::none), R::literal);
         }
     }
 
@@ -75,7 +75,7 @@ namespace leatherman { namespace test {
     {
         boost::nowide::cout.rdbuf(_strm_buf);
 
-        set_level(log_level::none);
+        set_level(LogLevel::none);
         on_message(nullptr);
         clear_error_logged_flag();
 

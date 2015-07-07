@@ -27,7 +27,7 @@ namespace leatherman { namespace windows { namespace process {
             LOG_DEBUG("OpenProcessToken call failed: %1%", system_error());
             return false;
         }
-        util::scoped_resource<HANDLE> token(temp_token, CloseHandle);
+        util::ScopedResource<HANDLE> token(temp_token, CloseHandle);
 
         TOKEN_ELEVATION token_elevation;
         DWORD token_elevation_length;

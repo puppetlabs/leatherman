@@ -6,7 +6,7 @@ using namespace std;
 
 namespace leatherman { namespace logging {
 
-    void colorize(ostream& dst, log_level level)
+    void colorize(ostream& dst, LogLevel level)
     {
         if (!get_colorization()) {
             return;
@@ -18,13 +18,13 @@ namespace leatherman { namespace logging {
         static const string red = "\33[0;31m";
         static const string reset = "\33[0m";
 
-        if (level == log_level::trace || level == log_level::debug) {
+        if (level == LogLevel::trace || level == LogLevel::debug) {
             dst << cyan;
-        } else if (level == log_level::info) {
+        } else if (level == LogLevel::info) {
             dst << green;
-        } else if (level == log_level::warning) {
+        } else if (level == LogLevel::warning) {
             dst << yellow;
-        } else if (level == log_level::error || level == log_level::fatal) {
+        } else if (level == LogLevel::error || level == LogLevel::fatal) {
             dst << red;
         } else {
             dst << reset;
