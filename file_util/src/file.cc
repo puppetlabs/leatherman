@@ -96,28 +96,6 @@ namespace boost_file = boost::filesystem;
         return ss.str();
     }
 
-    file_list relative_file_list(boost_file::path path) {
-        file_list list;
-        std::string common_prefix { path.string() };
-        std::string prefix_filename { path.filename().string() };
-
-        list.emplace_back(file_copy { path, path.filename().string() });
-
-        if (prefix_filename == ".") {
-            // when we're scanning '.' remove all the prefix
-            prefix_filename = "";
-        }
-
-        boost_file::recursive_directory_iterator walker { path };
-        for (; walker != boost_file::recursive_directory_iterator(); walker++) {
-            std::string target_path { walker->path().string() };
-            assert((std::string { target_path, 0, common_prefix.size() } == common_prefix));
-            target_path.replace(0, common_prefix.size(), prefix_filename);
-            list.emplace_back(file_copy { walker->path(), target_path });
-        }
-        return list;
-    }
-
     std::string get_home_path() {
         #ifdef _WIN32
             auto home_var = "USERPROFILE";

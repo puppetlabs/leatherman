@@ -11,3 +11,4 @@ compile_commands.json
 /release*/
 /.idea/
 /build/
+/linux-build/
