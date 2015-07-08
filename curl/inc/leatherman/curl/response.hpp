@@ -13,12 +13,12 @@ namespace leatherman { namespace curl {
     /**
      * Implements the HTTP response.
      */
-    struct Response
+    struct response
     {
         /**
          * Constructs a HTTP response.
          */
-        Response();
+        response();
 
         /**
          * Adds a header to the response.

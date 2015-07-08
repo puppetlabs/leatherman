@@ -12,14 +12,14 @@ using namespace std;
 namespace leatherman { namespace curl {
 
     // Helper for globally initializing curl
-    struct CurlInitHelper
+    struct curl_init_helper
     {
-        CurlInitHelper()
+        curl_init_helper()
         {
             _result = curl_global_init(CURL_GLOBAL_DEFAULT);
         }
 
-        ~CurlInitHelper()
+        ~curl_init_helper()
         {
             if (_result == CURLE_OK) {
                 curl_global_cleanup();
@@ -35,11 +35,11 @@ namespace leatherman { namespace curl {
         CURLcode _result;
     };
 
-    CurlHandle::CurlHandle() :
+    curl_handle::curl_handle() :
         scoped_resource(nullptr, cleanup)
     {
         // Perform initialization
-        static CurlInitHelper init_helper;
+        static curl_init_helper init_helper;
         if (init_helper.result() != CURLE_OK) {
             throw http_exception(curl_easy_strerror(init_helper.result()));
         }
@@ -47,31 +47,31 @@ namespace leatherman { namespace curl {
         _resource = curl_easy_init();
     }
 
-    void CurlHandle::cleanup(CURL* curl)
+    void curl_handle::cleanup(CURL* curl)
     {
         if (curl) {
             curl_easy_cleanup(curl);
         }
     }
 
-    CurlList::CurlList() :
+    curl_list::curl_list() :
         scoped_resource(nullptr, cleanup)
     {
     }
 
-    void CurlList::append(string const& value)
+    void curl_list::append(string const& value)
     {
         _resource = curl_slist_append(_resource, value.c_str());
     }
 
-    void CurlList::cleanup(curl_slist* list)
+    void curl_list::cleanup(curl_slist* list)
     {
         if (list) {
             curl_slist_free_all(list);
         }
     }
 
-    CurlEscapedString::CurlEscapedString(CurlHandle const& handle, string const& str) :
+    curl_escaped_string::curl_escaped_string(curl_handle const& handle, string const& str) :
         scoped_resource(nullptr, cleanup)
     {
         _resource = curl_easy_escape(handle, str.c_str(), str.size());
@@ -80,49 +80,49 @@ namespace leatherman { namespace curl {
         }
     }
 
-    void CurlEscapedString::cleanup(char const* str)
+    void curl_escaped_string::cleanup(char const* str)
     {
         if (str) {
             curl_free(const_cast<char*>(str));
         }
     }
 
-    Client::Client()
+    client::client()
     {
         if (!_handle) {
             throw http_exception("failed to create cURL handle.");
         }
     }
 
-    Client::Client(Client && other)
+    client::client(client && other)
     {
         *this = move(other);
     }
 
-    Client &Client::operator=(Client && other)
+    client &client::operator=(client && other)
     {
         _handle = move(other._handle);
         return *this;
     }
 
-    Response Client::get(Request const& req)
+    response client::get(request const& req)
     {
         return perform(http_method::get, req);
     }
 
-    Response Client::post(Request const& req)
+    response client::post(request const& req)
     {
         return perform(http_method::post, req);
     }
 
-    Response Client::put(Request const& req)
+    response client::put(request const& req)
     {
         return perform(http_method::put, req);
     }
 
-    Response Client::perform(http_method method, Request const& req)
+    response client::perform(http_method method, request const& req)
     {
-        Response res;
+        response res;
         context ctx(req, res);
 
         // Reset the options
@@ -168,18 +168,18 @@ namespace leatherman { namespace curl {
         return res;
     }
 
-    void Client::set_ca_cert(string const& cert_file)
+    void client::set_ca_cert(string const& cert_file)
     {
         _ca_cert = cert_file;
     }
 
-    void Client::set_client_cert(string const& client_cert, string const& client_key)
+    void client::set_client_cert(string const& client_cert, string const& client_key)
     {
         _client_cert = client_cert;
         _client_key = client_key;
     }
 
-    void Client::set_method(context& ctx, http_method method)
+    void client::set_method(context& ctx, http_method method)
     {
         switch (method) {
             case http_method::get:
@@ -207,7 +207,7 @@ namespace leatherman { namespace curl {
         }
     }
 
-    void Client::set_url(context& ctx)
+    void client::set_url(context& ctx)
     {
         // TODO: support an easy interface for setting escaped query parameters
         auto result = curl_easy_setopt(_handle, CURLOPT_URL, ctx.req.url().c_str());
@@ -218,7 +218,7 @@ namespace leatherman { namespace curl {
         LOG_DEBUG("requesting %1%.", ctx.req.url());
     }
 
-    void Client::set_headers(context& ctx)
+    void client::set_headers(context& ctx)
     {
         ctx.req.each_header([&](string const& name, string const& value) {
             ctx.request_headers.append(name + ": " + value);
@@ -230,7 +230,7 @@ namespace leatherman { namespace curl {
         }
     }
 
-    void Client::set_cookies(context& ctx)
+    void client::set_cookies(context& ctx)
     {
         ostringstream cookies;
         ctx.req.each_cookie([&](string const& name, string const& value) {
@@ -246,7 +246,7 @@ namespace leatherman { namespace curl {
         }
     }
 
-    void Client::set_body(context& ctx)
+    void client::set_body(context& ctx)
     {
         auto result = curl_easy_setopt(_handle, CURLOPT_READFUNCTION, read_body);
         if (result != CURLE_OK) {
@@ -258,7 +258,7 @@ namespace leatherman { namespace curl {
         }
     }
 
-    void Client::set_timeouts(context& ctx)
+    void client::set_timeouts(context& ctx)
     {
         auto result = curl_easy_setopt(_handle, CURLOPT_CONNECTTIMEOUT_MS, ctx.req.connection_timeout());
         if (result != CURLE_OK) {
@@ -270,7 +270,7 @@ namespace leatherman { namespace curl {
         }
     }
 
-    void Client::set_write_callbacks(context& ctx)
+    void client::set_write_callbacks(context& ctx)
     {
         auto result = curl_easy_setopt(_handle, CURLOPT_HEADERFUNCTION, write_header);
         if (result != CURLE_OK) {
@@ -290,7 +290,7 @@ namespace leatherman { namespace curl {
         }
     }
 
-    void Client::set_ca_info(context& ctx){
+    void client::set_ca_info(context& ctx){
         if (_ca_cert != ""){
             auto result = curl_easy_setopt(_handle, CURLOPT_CAINFO, _ca_cert.c_str());
             if (result != CURLE_OK) {
@@ -299,7 +299,7 @@ namespace leatherman { namespace curl {
         }
     }
 
-    void Client::set_client_info(context &ctx) {
+    void client::set_client_info(context &ctx) {
         if (_client_cert != "" && _client_key != ""){
             auto result = curl_easy_setopt(_handle, CURLOPT_SSLCERT, _client_cert.c_str());
             if (result != CURLE_OK) {
@@ -312,7 +312,7 @@ namespace leatherman { namespace curl {
         }
     }
 
-    size_t Client::read_body(char* buffer, size_t size, size_t count, void* ptr)
+    size_t client::read_body(char* buffer, size_t size, size_t count, void* ptr)
     {
         auto ctx = reinterpret_cast<context*>(ptr);
         size_t requested = size * count;
@@ -329,7 +329,7 @@ namespace leatherman { namespace curl {
         return requested;
     }
 
-    size_t Client::write_header(char* buffer, size_t size, size_t count, void* ptr)
+    size_t client::write_header(char* buffer, size_t size, size_t count, void* ptr)
     {
         size_t written = size * count;
         boost::string_ref input(buffer, written);
@@ -376,7 +376,7 @@ namespace leatherman { namespace curl {
         return written;
     }
 
-    size_t Client::write_body(char* buffer, size_t size, size_t count, void* ptr)
+    size_t client::write_body(char* buffer, size_t size, size_t count, void* ptr)
     {
         size_t written = size * count;
 
@@ -388,7 +388,7 @@ namespace leatherman { namespace curl {
         return written;
     }
 
-    int Client::debug(CURL* handle, curl_infotype type, char* data, size_t size, void* ptr)
+    int client::debug(CURL* handle, curl_infotype type, char* data, size_t size, void* ptr)
     {
         if (type > CURLINFO_DATA_OUT) {
             return 0;

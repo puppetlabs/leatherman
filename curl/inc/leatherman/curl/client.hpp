@@ -15,12 +15,12 @@ namespace leatherman { namespace curl {
     /**
      * Resource for a cURL handle.
      */
-    struct CurlHandle : util::scoped_resource<CURL*>
+    struct curl_handle : util::scoped_resource<CURL*>
     {
         /**
          * Constructs a cURL handle.
          */
-        CurlHandle();
+        curl_handle();
 
      private:
         static void cleanup(CURL* curl);
@@ -29,12 +29,12 @@ namespace leatherman { namespace curl {
     /**
      * Resource for a cURL linked-list.
      */
-    struct CurlList : util::scoped_resource<curl_slist*>
+    struct curl_list : util::scoped_resource<curl_slist*>
     {
         /**
          * Constructs a curl_list.
          */
-        CurlList();
+        curl_list();
 
         /**
          * Appends the given string onto the list.
@@ -49,14 +49,14 @@ namespace leatherman { namespace curl {
     /**
      * Resource for a cURL escaped string.
      */
-    struct CurlEscapedString : util::scoped_resource<char const*>
+    struct curl_escaped_string : util::scoped_resource<char const*>
     {
         /**
          * Constructs a cURL escaped string.
          * @param handle The cURL handle to use to perform the escape.
          * @param str The string to escape.
          */
-        CurlEscapedString(CurlHandle const& handle, std::string const& str);
+        curl_escaped_string(curl_handle const& handle, std::string const& str);
 
      private:
         static void cleanup(char const* str);
@@ -87,7 +87,7 @@ namespace leatherman { namespace curl {
          * @param req The HTTP request that caused the exception.
          * @param message The exception message.
          */
-        http_request_exception(Request req, std::string const &message) :
+        http_request_exception(request req, std::string const &message) :
             http_exception(message),
             _req(std::move(req))
         {
@@ -97,59 +97,59 @@ namespace leatherman { namespace curl {
          * Gets the request associated with the exception
          * @return Returns the request associated with the exception.
          */
-        Request const& req() const
+        request const& req() const
         {
             return _req;
         }
 
      private:
-        Request _req;
+        request _req;
     };
 
     /**
      * Implements a client for HTTP.
      * Note: this class is not thread-safe.
      */
-    struct Client
+    struct client
     {
         /**
          * Constructs an HTTP client.
          */
-        Client();
+        client();
 
         /**
          * Moves the given client into this client.
          * @param other The client to move into this client.
          */
-        Client(Client&& other);
+        client(client&& other);
 
         /**
          * Moves the given client into this client.
          * @param other The client to move into this client.
          * @return Returns this client.
          */
-        Client& operator=(Client&& other);
+        client& operator=(client&& other);
 
         /**
          * Performs a GET with the given request.
          * @param req The HTTP request to perform.
          * @return Returns the HTTP response.
          */
-        Response get(Request const& req);
+        response get(request const& req);
 
         /**
          * Performs a POST with the given request.
          * @param req The HTTP request to perform.
          * @return Returns the HTTP response.
          */
-        Response post(Request const& req);
+        response post(request const& req);
 
         /**
          * Performs a PUT with the given request.
          * @param req The HTTP request to perform.
          * @return Returns the HTTP response.
          */
-        Response put(Request const& req);
+        response put(request const& req);
 
         /**
          * Sets the path to the CA certificate file.
@@ -165,8 +165,8 @@ namespace leatherman { namespace curl {
         void set_client_cert(std::string const& client_cert, std::string const& client_key);
 
      private:
-        Client(Client const&) = delete;
-        Client& operator=(Client const&) = delete;
+        client(client const&) = delete;
+        client& operator=(client const&) = delete;
 
         enum struct http_method
         {
@@ -177,17 +177,17 @@ namespace leatherman { namespace curl {
 
         struct context
         {
-            context(Request const& req, Response& res) :
+            context(request const& req, response& res) :
                 req(req),
                 res(res),
                 read_offset(0)
             {
             }
 
-            Request const& req;
-            Response& res;
+            request const& req;
+            response& res;
             size_t read_offset;
-            CurlList request_headers;
+            curl_list request_headers;
             std::string response_buffer;
         };
 
@@ -195,7 +195,7 @@ namespace leatherman { namespace curl {
         std::string _client_cert;
         std::string _client_key;
 
-        Response perform(http_method method, Request const& req);
+        response perform(http_method method, request const& req);
         void set_method(context& ctx, http_method method);
         void set_url(context& ctx);
         void set_headers(context& ctx);
@@ -211,7 +211,7 @@ namespace leatherman { namespace curl {
         static size_t write_body(char* buffer, size_t size, size_t count, void* ptr);
         static int debug(CURL* handle, curl_infotype type, char* data, size_t size, void* ptr);
 
-        CurlHandle _handle;
+        curl_handle _handle;
     };
 
 }}  // namespace leatherman::curl

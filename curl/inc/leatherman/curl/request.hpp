@@ -13,13 +13,13 @@ namespace leatherman { namespace curl {
     /**
      * Implements the HTTP request.
      */
-    struct Request
+    struct request
     {
         /**
          * Constructs a HTTP request.
          * @param url The URL for the request.
          */
-        explicit Request(std::string url);
+        explicit request(std::string url);
 
         /**
          * Gets the URL for the request.
