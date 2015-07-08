@@ -25,51 +25,51 @@ namespace leatherman { namespace dynamic_library {
     /**
      * Represents a dynamic library.
      */
-    struct DynamicLibrary
+    struct dynamic_library
     {
         /**
-         * Constructs a DynamicLibrary.
+         * Constructs a dynamic_library.
          */
-        DynamicLibrary();
+        dynamic_library();
 
         /**
-         * Destructs a DynamicLibrary.
+         * Destructs a dynamic_library.
          */
-        ~DynamicLibrary();
+        ~dynamic_library();
 
         /**
-         * Prevents the DynamicLibrary from being copied.
+         * Prevents the dynamic_library from being copied.
          */
-        DynamicLibrary(DynamicLibrary const&) = delete;
+        dynamic_library(dynamic_library const&) = delete;
         /**
-         * Prevents the DynamicLibrary from being copied.
-         * @returns Returns this DynamicLibrary.
+         * Prevents the dynamic_library from being copied.
+         * @returns Returns this dynamic_library.
          */
-        DynamicLibrary& operator=(DynamicLibrary const&) = delete;
+        dynamic_library& operator=(dynamic_library const&) = delete;
         /**
-         * Moves the given DynamicLibrary into this DynamicLibrary.
-         * @param other The DynamicLibrary to move into this DynamicLibrary.
+         * Moves the given dynamic_library into this dynamic_library.
+         * @param other The dynamic_library to move into this dynamic_library.
          */
-        DynamicLibrary(DynamicLibrary&& other);
+        dynamic_library(dynamic_library&& other);
         /**
-         * Moves the given DynamicLibrary into this DynamicLibrary.
-         * @param other The DynamicLibrary to move into this DynamicLibrary.
-         * @return Returns this DynamicLibrary.
+         * Moves the given dynamic_library into this dynamic_library.
+         * @param other The dynamic_library to move into this dynamic_library.
+         * @return Returns this dynamic_library.
          */
-        DynamicLibrary& operator=(DynamicLibrary&& other);
+        dynamic_library& operator=(dynamic_library&& other);
 
         /**
          * Finds an already loaded library by file name regex pattern.
          * @param pattern The regex pattern of the library to find.
          * @return Returns the already loaded library if found or an unloaded library if not found.
          */
-        static DynamicLibrary find_by_pattern(std::string const& pattern);
+        static dynamic_library find_by_pattern(std::string const& pattern);
         /**
          * Finds an already loaded library by symbol.
          * @param symbol The symbol to find.
          * @return Returns the already loaded library if found or an unloaded library if not found.
          */
-        static DynamicLibrary find_by_symbol(std::string const& symbol);
+        static dynamic_library find_by_symbol(std::string const& symbol);
 
         /**
          * Loads the given dynamic library.

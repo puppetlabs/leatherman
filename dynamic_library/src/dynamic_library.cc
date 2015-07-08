@@ -9,25 +9,25 @@ namespace leatherman { namespace dynamic_library {
     {
     }
 
-    DynamicLibrary::DynamicLibrary() :
+    dynamic_library::dynamic_library() :
         _handle(nullptr),
         _first_load(false)
     {
     }
 
-    DynamicLibrary::~DynamicLibrary()
+    dynamic_library::~dynamic_library()
     {
         close();
     }
 
-    DynamicLibrary::DynamicLibrary(DynamicLibrary && other) :
+    dynamic_library::dynamic_library(dynamic_library && other) :
         _handle(nullptr),
         _first_load(false)
     {
         *this = move(other);
     }
 
-    DynamicLibrary &DynamicLibrary::operator=(DynamicLibrary && other)
+    dynamic_library &dynamic_library::operator=(dynamic_library && other)
     {
         close();
         _handle = other._handle;
@@ -39,17 +39,17 @@ namespace leatherman { namespace dynamic_library {
         return *this;
     }
 
-    bool DynamicLibrary::loaded() const
+    bool dynamic_library::loaded() const
     {
         return _handle != nullptr;
     }
 
-    bool DynamicLibrary::first_load() const
+    bool dynamic_library::first_load() const
     {
         return _first_load;
     }
 
-    string const& DynamicLibrary::name() const
+    string const& dynamic_library::name() const
     {
         return _name;
     }

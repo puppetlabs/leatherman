@@ -11,12 +11,12 @@ namespace leatherman { namespace dynamic_library {
 
     TEST_CASE("dynamic_library::load and dynamic_library::close", "[dyn-lib]") {
         SECTION("should not be loaded by default") {
-            DynamicLibrary lib;
+            dynamic_library lib;
             REQUIRE_FALSE(lib.loaded());
         }
 
-        SECTION("should load library from path, then close it") {
-            DynamicLibrary lib;
+        SECTION("should load library from path, then close it"){
+            dynamic_library lib;
             REQUIRE(lib.load(lib_path));
             REQUIRE(lib.loaded());
             REQUIRE(lib.first_load());
@@ -25,13 +25,13 @@ namespace leatherman { namespace dynamic_library {
         }
 
         SECTION("should fail to load a nonexistent library") {
-            DynamicLibrary lib;
+            dynamic_library lib;
             REQUIRE_FALSE(lib.load("no_such_library"));
         }
     }
 
     TEST_CASE("dynamic_library::find_symbol", "[dyn-lib]"){
-        DynamicLibrary lib;
+        dynamic_library lib;
         REQUIRE(lib.load(lib_path));
 
         SECTION("should fail to find nonexistent symbol") {
@@ -44,7 +44,7 @@ namespace leatherman { namespace dynamic_library {
         }
 
         SECTION("should find aliased symbol"){
-            DynamicLibrary lib2;
+            dynamic_library lib2;
             REQUIRE(lib2.load(lib_path2));
             REQUIRE(lib2.find_symbol("not_here", false, "goodbye"));
         }
@@ -52,10 +52,10 @@ namespace leatherman { namespace dynamic_library {
 
     TEST_CASE("dynamic_library::dyanmic_library(dynamic_library && other)", "[dyn-lib]") {
             SECTION("should move library to new variable") {
-                DynamicLibrary lib;
+                dynamic_library lib;
                 REQUIRE(lib.load(lib_path));
                 REQUIRE(lib.loaded());
-                DynamicLibrary lib2 = std::move(lib);
+                dynamic_library lib2 = std::move(lib);
                 REQUIRE(lib2.loaded());
                 REQUIRE(lib2.name() == lib_path);
                 REQUIRE_FALSE(lib.loaded());
@@ -65,32 +65,32 @@ namespace leatherman { namespace dynamic_library {
 #ifdef _WIN32
     TEST_CASE("dynamic_library::find_by_pattern", "[dyn-lib]"){
         SECTION("should fail to find a missing library"){
-            REQUIRE_FALSE(DynamicLibrary::find_by_pattern("libtest1").loaded());
+            REQUIRE_FALSE(dynamic_library::find_by_pattern("libtest1").loaded());
         }
 
         SECTION("should find a library matching a pattern"){
-            DynamicLibrary lib;
+            dynamic_library lib;
             lib.load(lib_path);
-            REQUIRE_FALSE(DynamicLibrary::find_by_pattern("libtest1").loaded());
-            DynamicLibrary lib2;
+            REQUIRE_FALSE(dynamic_library::find_by_pattern("libtest1").loaded());
+            dynamic_library lib2;
             lib2.load(lib_path2);
-            REQUIRE(DynamicLibrary::find_by_pattern("libtest1").loaded());
+            REQUIRE(dynamic_library::find_by_pattern("libtest1").loaded());
         }
     }
 #else
     TEST_CASE("dynamic_library::find_by_symbol", "[dyn-lib]"){
         SECTION("should fail to find a missing symbol"){
-            REQUIRE_FALSE(DynamicLibrary::find_by_symbol("no_such_symbol").loaded());
+            REQUIRE_FALSE(dynamic_library::find_by_symbol("no_such_symbol").loaded());
         }
 
         SECTION("should find a library with the given symbol"){
-            DynamicLibrary lib;
+            dynamic_library lib;
             REQUIRE(lib.load(lib_path));
-            REQUIRE_FALSE(DynamicLibrary::find_by_symbol("goodbye").loaded());
-            DynamicLibrary lib2;
+            REQUIRE_FALSE(dynamic_library::find_by_symbol("goodbye").loaded());
+            dynamic_library lib2;
             REQUIRE(lib2.load(lib_path2, true));
             REQUIRE(lib2.find_symbol("goodbye"));
-            REQUIRE(DynamicLibrary::find_by_symbol("goodbye").loaded());
+            REQUIRE(dynamic_library::find_by_symbol("goodbye").loaded());
         }
     }
 #endif

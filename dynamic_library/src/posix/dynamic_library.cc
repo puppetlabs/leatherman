@@ -6,15 +6,15 @@ using namespace std;
 
 namespace leatherman { namespace dynamic_library {
 
-    DynamicLibrary DynamicLibrary::find_by_pattern(std::string const& pattern)
+    dynamic_library dynamic_library::find_by_pattern(std::string const& pattern)
     {
         // POSIX doesn't have this capability
-        return DynamicLibrary();
+        return dynamic_library();
     }
 
-    DynamicLibrary DynamicLibrary::find_by_symbol(std::string const& symbol)
+    dynamic_library dynamic_library::find_by_symbol(std::string const& symbol)
     {
-        DynamicLibrary library;
+        dynamic_library library;
 
         // Load the "null" library; this will cause dlsym to search for the symbol
         void* handle = dlopen(nullptr, RTLD_GLOBAL | RTLD_LAZY);
@@ -35,7 +35,7 @@ namespace leatherman { namespace dynamic_library {
         return library;
     }
 
-    bool DynamicLibrary::load(string const& name, bool global)
+    bool dynamic_library::load(string const& name, bool global)
     {
         close();
 
@@ -65,7 +65,7 @@ namespace leatherman { namespace dynamic_library {
         return true;
     }
 
-    void DynamicLibrary::close()
+    void dynamic_library::close()
     {
         if (_handle) {
             dlclose(_handle);
@@ -75,7 +75,7 @@ namespace leatherman { namespace dynamic_library {
         _first_load = false;
     }
 
-    void* DynamicLibrary::find_symbol(string const& name, bool throw_if_missing, string const& alias) const
+    void* dynamic_library::find_symbol(string const& name, bool throw_if_missing, string const& alias) const
     {
         if (!_handle) {
             if (throw_if_missing) {

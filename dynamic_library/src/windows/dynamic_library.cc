@@ -14,9 +14,9 @@ using namespace leatherman::windows;
 
 namespace leatherman { namespace dynamic_library {
 
-    DynamicLibrary DynamicLibrary::find_by_pattern(std::string const& pattern)
+    dynamic_library dynamic_library::find_by_pattern(std::string const& pattern)
     {
-        DynamicLibrary library;
+        dynamic_library library;
 
         // Check to see if the library is loaded. Walk the list of loaded modules and match against pattern.
         // See http://msdn.microsoft.com/en-us/library/windows/desktop/ms686849(v=vs.85).aspx for details on
@@ -56,13 +56,13 @@ namespace leatherman { namespace dynamic_library {
         return library;
     }
 
-    DynamicLibrary DynamicLibrary::find_by_symbol(std::string const& symbol)
+    dynamic_library dynamic_library::find_by_symbol(std::string const& symbol)
     {
         // Windows doesn't have this capability.
-        return DynamicLibrary();
+        return dynamic_library();
     }
 
-    bool DynamicLibrary::load(string const& name, bool global)
+    bool dynamic_library::load(string const& name, bool global)
     {
         close();
 
@@ -83,7 +83,7 @@ namespace leatherman { namespace dynamic_library {
         return true;
     }
 
-    void DynamicLibrary::close()
+    void dynamic_library::close()
     {
         if (_handle) {
             FreeLibrary(static_cast<HMODULE>(_handle));
@@ -93,7 +93,7 @@ namespace leatherman { namespace dynamic_library {
         _first_load = false;
     }
 
-    void* DynamicLibrary::find_symbol(string const& name, bool throw_if_missing, string const& alias) const
+    void* dynamic_library::find_symbol(string const& name, bool throw_if_missing, string const& alias) const
     {
         if (!_handle) {
             if (throw_if_missing) {
