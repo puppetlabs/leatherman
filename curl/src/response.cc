@@ -26,7 +26,7 @@ namespace leatherman { namespace curl {
         }
     }
 
-    string* Response::header(std::string const& name)
+    string* Response::header(string const& name)
     {
         auto header = _headers.find(name);
         if (header == _headers.end()) {

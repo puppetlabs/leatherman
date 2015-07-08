@@ -33,7 +33,7 @@ namespace leatherman { namespace curl {
         }
     }
 
-    string* Request::header(std::string const& name)
+    string* Request::header(string const& name)
     {
         auto header = _headers.find(name);
         if (header == _headers.end()) {
@@ -64,7 +64,7 @@ namespace leatherman { namespace curl {
         }
     }
 
-    string* Request::cookie(std::string const& name)
+    string* Request::cookie(string const& name)
     {
         auto cookie = _cookies.find(name);
         if (cookie == _cookies.end()) {

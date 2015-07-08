@@ -71,7 +71,7 @@ namespace leatherman { namespace curl {
          * Constructs an http_exception.
          * @param message The exception message.
          */
-        http_exception(std::string const &message) :
+        http_exception(std::string const& message) :
             runtime_error(message)
         {
         }
@@ -151,6 +151,19 @@ namespace leatherman { namespace curl {
          */
         Response put(Request const& req);
 
+        /**
+         * Sets the path to the CA certificate file.
+         * @param cert_file The path to the CA certificate file.
+         */
+        void set_ca_cert(std::string const& cert_file);
+
+        /**
+         * Set client SSL certificate and key.
+         * @param client_cert The path to the client's certificate file.
+         * @param client_key The path to the client's key file.
+         */
+        void set_client_cert(std::string const& client_cert, std::string const& client_key);
+
      private:
         Client(Client const&) = delete;
         Client& operator=(Client const&) = delete;
@@ -178,6 +191,10 @@ namespace leatherman { namespace curl {
             std::string response_buffer;
         };
 
+        std::string _ca_cert;
+        std::string _client_cert;
+        std::string _client_key;
+
         Response perform(http_method method, Request const& req);
         void set_method(context& ctx, http_method method);
         void set_url(context& ctx);
@@ -186,6 +203,8 @@ namespace leatherman { namespace curl {
         void set_body(context& ctx);
         void set_timeouts(context& ctx);
         void set_write_callbacks(context& ctx);
+        void set_client_info(context &ctx);
+        void set_ca_info(context& ctx);
 
         static size_t read_body(char* buffer, size_t size, size_t count, void* ptr);
         static size_t write_header(char* buffer, size_t size, size_t count, void* ptr);

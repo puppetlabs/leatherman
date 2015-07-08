@@ -96,7 +96,7 @@ namespace leatherman { namespace curl {
 
     Client::Client(Client && other)
     {
-        *this = std::move(other);
+        *this = move(other);
     }
 
     Client &Client::operator=(Client && other)
@@ -152,6 +152,8 @@ namespace leatherman { namespace curl {
         set_body(ctx);
         set_timeouts(ctx);
         set_write_callbacks(ctx);
+        set_ca_info(ctx);
+        set_client_info(ctx);
 
         // Perform the request
         result = curl_easy_perform(_handle);
@@ -164,6 +166,17 @@ namespace leatherman { namespace curl {
         // Set the body of the response
         res.body(move(ctx.response_buffer));
         return res;
+    }
+
+    void Client::set_ca_cert(string const& cert_file)
+    {
+        _ca_cert = cert_file;
+    }
+
+    void Client::set_client_cert(string const& client_cert, string const& client_key)
+    {
+        _client_cert = client_cert;
+        _client_key = client_key;
     }
 
     void Client::set_method(context& ctx, http_method method)
@@ -274,6 +287,28 @@ namespace leatherman { namespace curl {
         result = curl_easy_setopt(_handle, CURLOPT_WRITEDATA, &ctx);
         if (result != CURLE_OK) {
             throw http_request_exception(ctx.req, curl_easy_strerror(result));
+        }
+    }
+
+    void Client::set_ca_info(context& ctx){
+        if (_ca_cert != ""){
+            auto result = curl_easy_setopt(_handle, CURLOPT_CAINFO, _ca_cert.c_str());
+            if (result != CURLE_OK) {
+                throw http_request_exception(ctx.req, curl_easy_strerror(result));
+            }
+        }
+    }
+
+    void Client::set_client_info(context &ctx) {
+        if (_client_cert != "" && _client_key != ""){
+            auto result = curl_easy_setopt(_handle, CURLOPT_SSLCERT, _client_cert.c_str());
+            if (result != CURLE_OK) {
+                throw http_request_exception(ctx.req, curl_easy_strerror(result));
+            }
+            result = curl_easy_setopt(_handle, CURLOPT_SSLKEY, _client_key.c_str());
+            if (result != CURLE_OK) {
+                throw http_request_exception(ctx.req, curl_easy_strerror(result));
+            }
         }
     }
 
