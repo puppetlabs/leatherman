@@ -9,7 +9,7 @@ function travis_make()
 {
     mkdir $1 && cd $1
 
-    # Set compiler to  GCC 4.8 here, as Travis overrides the global variables.
+    # Set compiler to GCC 4.8 here, as Travis overrides the global variables.
     export CC=gcc-4.8 CXX=g++-4.8
     # Generate build files
     [ $1 == "debug" ] && export CMAKE_VARS="-DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON"
