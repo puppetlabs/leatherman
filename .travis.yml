@@ -18,7 +18,6 @@ addons:
       - libboost-log1.55-dev
       - libboost-locale1.55-dev
       - libboost-chrono1.55-dev
-      - libblkid1
 
 before_install:
   # Use a predefined install location; cppcheck requires the cfg location is defined at compile-time.
