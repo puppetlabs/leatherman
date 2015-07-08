@@ -45,6 +45,7 @@ add_leatherman_dir(file_util)
 if(WIN32)
   add_leatherman_dir(windows)
 endif()
+add_leatherman_dir(dynamic_library)
 
 
 # Ensure no LEATHERMAN_LIBS are in LEATHERMAN_DEPS, LEATHERMAN_LIBS should be declared in dependency
