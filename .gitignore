@@ -11,4 +11,4 @@ compile_commands.json
 /release*/
 /.idea/
 /*build/
-/dynamic_library/tests/fixtures.hpp
+/*/tests/fixtures.hpp
