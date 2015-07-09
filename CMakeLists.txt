@@ -48,6 +48,7 @@ if(WIN32)
 endif()
 add_leatherman_dir(dynamic_library)
 add_leatherman_dir(execution)
+add_leatherman_dir(ruby)
 
 
 # Ensure no LEATHERMAN_LIBS are in LEATHERMAN_DEPS, LEATHERMAN_LIBS should be declared in dependency
