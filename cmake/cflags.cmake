@@ -21,6 +21,12 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "\\w*Clang")
     else()
         set(LEATHERMAN_CXX_FLAGS "${LEATHERMAN_CXX_FLAGS} -Wno-deprecated")
     endif()
+
+    # FreeBSD needs -fPIC
+    if(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+        set(LEATHERMAN_LIBRARY_FLAGS "-fPIC")
+    endif()
+
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     # maybe-uninitialized is a relatively new GCC warning that Boost 1.57 violates; disable it for now until it's available in Clang as well
     # it's also sometimes wrong
