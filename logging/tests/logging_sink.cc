@@ -13,8 +13,14 @@ struct custom_log_appender :
 {
     void consume(boost::log::record_view const& rec, string_type const& message)
     {
+        auto lvl = boost::log::extract<log_level>("Severity", rec);
         stringstream s;
         s << boost::log::extract<log_level>("Severity", rec);
+
+        log_level read_lvl;
+        s >> read_lvl;
+        REQUIRE(read_lvl == lvl);
+
         _level = s.str();
         _message = message;
     }
@@ -30,6 +36,7 @@ struct logging_test_context
     logging_test_context(log_level lvl = log_level::trace)
     {
         set_level(lvl);
+        REQUIRE(get_level() == lvl);
         clear_error_logged_flag();
 
         colorize(_color, lvl);
@@ -45,6 +52,7 @@ struct logging_test_context
     ~logging_test_context()
     {
         set_level(log_level::none);
+        REQUIRE(get_level() == log_level::none);
         on_message(nullptr);
         clear_error_logged_flag();
 
