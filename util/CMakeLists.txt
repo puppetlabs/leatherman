@@ -12,3 +12,5 @@ else()
 endif()
 
 add_leatherman_library(src/strings.cc src/time.cc ${PLATFORM_SRCS})
+
+add_leatherman_test(tests/strings-test.cc)

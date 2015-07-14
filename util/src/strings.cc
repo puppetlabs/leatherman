@@ -6,7 +6,7 @@
 namespace leatherman { namespace util {
 
     std::string plural(int num_of_things) {
-        return num_of_things > 1 ? "s" : "";
+        return num_of_things == 1 ? "" : "s";
     }
 
     template<>
