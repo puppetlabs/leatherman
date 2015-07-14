@@ -81,7 +81,7 @@ endmacro()
 # Create the cppcheck custom target with all the directories specified
 # in previous calls to `add_cppcheck_dirs`
 macro(enable_cppcheck)
-    add_custom_target(cppcheck COMMAND cppcheck --enable=warning,performance --error-exitcode=2 --quiet ${CPPCHECK_DIRS})
+    add_custom_target(cppcheck COMMAND cppcheck --enable=warning,performance --error-exitcode=2 --quiet --inline-suppr ${CPPCHECK_DIRS})
 endmacro()
 
 # We set this here so that enable_cpplint() can find it

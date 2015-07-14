@@ -43,4 +43,11 @@ namespace leatherman { namespace util {
         /** @return Returns universally unique identifier string. */
         std::string get_UUID();
 
+        /**
+         * Reads each line from the given string.
+         * @param s The string to read.
+         * @param callback The callback function that is passed each line in the string.
+         */
+        void each_line(std::string const& s, std::function<bool(std::string&)> callback);
+
 }}  // namespace leatherman::util
