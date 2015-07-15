@@ -1,7 +1,13 @@
 include_directories(${LEATHERMAN_CATCH_INCLUDE} ${LEATHERMAN_INCLUDE_DIRS})
 add_executable(leatherman_test main.cc ${LEATHERMAN_TEST_SRCS})
 
-target_link_libraries(leatherman_test ${LEATHERMAN_LIBRARIES})
+set(LEATHERMAN_TEST_LIBS ${LEATHERMAN_LIBRARIES})
+list(REMOVE_ITEM LEATHERMAN_TEST_LIBS ${LEATHERMAN_INT_CURL_LIBS})
+list(APPEND LEATHERMAN_TEST_LIBS ${LEATHERMAN_TEST_CURL_LIB})
+
+# We link libmock_curl instead of real libcurl in tests
+target_link_libraries(leatherman_test ${LEATHERMAN_TEST_LIBS})
+
 if (COVERALLS)
     target_link_libraries(leatherman_test gcov)
 endif()
