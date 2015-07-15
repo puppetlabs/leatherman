@@ -15,6 +15,7 @@
 #include <boost/log/sinks/basic_sink_backend.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/algorithm/string.hpp>
 
 #pragma GCC diagnostic pop
 
@@ -156,6 +157,7 @@ namespace leatherman { namespace logging {
     {
         string value;
         if (in >> value) {
+            boost::algorithm::to_lower(value);
             if (value == "none") {
                 level = log_level::none;
                 return in;
@@ -185,7 +187,7 @@ namespace leatherman { namespace logging {
                 return in;
             }
         }
-        throw runtime_error("invalid log level: expected none, trace, debug, info, warn, error, or fatal.");
+        throw runtime_error((boost::format("invalid log level '%1%': expected none, trace, debug, info, warn, error, or fatal.") % level).str());
     }
 
     ostream& operator<<(ostream& strm, log_level level)
