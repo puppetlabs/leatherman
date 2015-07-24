@@ -22,6 +22,7 @@ defoption(LEATHERMAN_DEFAULT_ENABLE "Should Leatherman libraries all be built by
 defoption(LEATHERMAN_DEBUG "Enable verbose logging messages from leatherman macros" FALSE)
 defoption(LEATHERMAN_ENABLE_TESTING "Build the leatherman test binary" ${LEATHERMAN_DEFAULT_ENABLE})
 defoption(LEATHERMAN_INSTALL "Install the leatherman libraries and headers" ${LEATHERMAN_DEFAULT_ENABLE})
+defoption(LEATHERMAN_SHARED "Create shared libraries instead of static" FALSE)
 
 set(BUILDING_LEATHERMAN TRUE)
 
