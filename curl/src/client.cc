@@ -420,4 +420,9 @@ namespace leatherman { namespace curl {
         LOG_TRACE("%1%%2%", header.str(), str);
         return 0;
     }
+
+    curl_handle const& client::get_handle()
+    {
+        return _handle;
+    }
 }}  // leatherman::curl

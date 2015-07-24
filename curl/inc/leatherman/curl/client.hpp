@@ -212,6 +212,14 @@ namespace leatherman { namespace curl {
         static int debug(CURL* handle, curl_infotype type, char* data, size_t size, void* ptr);
 
         curl_handle _handle;
+
+    protected:
+        /**
+         * Returns a reference to a cURL handle resource used in the request.
+         * This is primarily exposed for testing.
+         * @return Returns a const reference to the cURL handle resource.
+         */
+        curl_handle const& get_handle();
     };
 
 }}  // namespace leatherman::curl
