@@ -42,7 +42,8 @@ function travis_make()
         fi
 
         if [ $1 == "debug" ]; then
-            coveralls --gcov gcov-4.8 --gcov-options '\-lp' -r .. >/dev/null
+            # Ignore coveralls results, keep service success uncoupled
+            coveralls --gcov gcov-4.8 --gcov-options '\-lp' -r .. >/dev/null || true
         fi
     fi
 }
