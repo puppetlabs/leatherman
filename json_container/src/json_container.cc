@@ -168,6 +168,36 @@ namespace leatherman { namespace json_container {
         }
     }
 
+    size_t JsonContainer::size() const {
+        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+        return jval->Size();
+    }
+
+    size_t JsonContainer::size(const JsonContainerKey& key) const {
+        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+
+        if (!hasKey(*jval, key.data())) {
+            throw data_key_error { "unknown key: " + key };
+        }
+
+        jval = getValueInJson(*jval, key.data());
+
+        return jval->Size();
+    }
+
+    size_t JsonContainer::size(std::vector<JsonContainerKey> keys) const {
+        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+
+        for (const auto& key : keys) {
+            if (!hasKey(*jval, key.data())) {
+                throw data_key_error { "unknown key: " + key };
+            }
+            jval = getValueInJson(*jval, key.data());
+        }
+
+        return jval->Size();
+    }
+
     bool JsonContainer::includes(const JsonContainerKey& key) const {
         rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
 

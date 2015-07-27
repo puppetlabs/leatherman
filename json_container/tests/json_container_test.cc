@@ -201,6 +201,68 @@ TEST_CASE("JsonContainer::empty", "[data]") {
     }
 }
 
+TEST_CASE("JsonContainer::size", "[data]") {
+    SECTION("works correctly on the root (no key argument)") {
+        SECTION("empty object") {
+            JsonContainer data {};
+            REQUIRE(data.size() == 0);
+        }
+
+        SECTION("the root is an empty array") {
+            JsonContainer data {  "[]" };
+            REQUIRE(data.size() == 0);
+        }
+
+        SECTION("non-empty singleton object") {
+            JsonContainer data {};
+            data.set<int>("spam", 1);
+            REQUIRE(data.size() == 1);
+        }
+
+        SECTION("non-empty multi element object") {
+            JsonContainer bigger_data { JSON };
+            REQUIRE(bigger_data.size() == 8);
+        }
+
+        SECTION("non-empty array") {
+            JsonContainer data {  "[1, 2, 3]" };
+            REQUIRE(data.size() == 3);
+        }
+    }
+
+    JsonContainer data { JSON };
+
+    SECTION("works correctly on an object entry") {
+        SECTION("entry is a scalar") {
+            REQUIRE(data.size("goo") == 0);
+        }
+
+        SECTION("entry is an object") {
+            REQUIRE(data.size("foo") == 1);
+        }
+
+        SECTION("entry is an array") {
+            REQUIRE(data.size("vec") == 2);
+        }
+    }
+
+    SECTION("works correctly on a nested entry") {
+        data.set<JsonContainer>({ "foo", "spam" }, JsonContainer { JSON });
+
+        SECTION("entry is a scalar") {
+            REQUIRE(data.size({ "foo", "spam", "goo" }) == 0);
+        }
+
+        SECTION("entry is an object") {
+            REQUIRE(data.size({ "foo", "spam", "nested" }) == 1);
+        }
+
+        SECTION("entry is an array") {
+            REQUIRE(data.size({ "foo", "spam", "vec" }) == 2);
+        }
+    }
+}
+
 TEST_CASE("JsonContainer::includes", "[data]") {
     SECTION("does not throw for an empty JsonContainer instance") {
         JsonContainer data {};

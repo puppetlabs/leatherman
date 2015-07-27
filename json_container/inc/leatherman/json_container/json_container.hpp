@@ -112,6 +112,20 @@ namespace leatherman { namespace json_container {
         /// JSON object, false otherwise.
         bool empty() const;
 
+        /// Returns the number of entries of the root element in case
+        /// is an object or array; returns 0 in case of a scalar
+        size_t size() const;
+
+        /// Returns the number of entries of the specified element;
+        /// returns 0 in case it's scalar
+        /// Throw a data_key_error in case the specified key is unknown.
+        size_t size(const JsonContainerKey& key) const;
+
+        /// Returns the number of entries of the specified element;
+        /// returns 0 in case it's scalar
+        /// Throw a data_key_error in case of unknown keys.
+        size_t size(std::vector<JsonContainerKey> keys) const;
+
         bool includes(const JsonContainerKey& key) const;
         // NOTE(ale): we don't use const for the arg below for gcc issues
         bool includes(std::vector<JsonContainerKey> keys) const;
