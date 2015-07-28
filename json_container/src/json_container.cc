@@ -168,6 +168,36 @@ namespace leatherman { namespace json_container {
         }
     }
 
+    size_t JsonContainer::size() const {
+        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+        return getSize(*jval);
+    }
+
+    size_t JsonContainer::size(const JsonContainerKey& key) const {
+        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+
+        if (!hasKey(*jval, key.data())) {
+            throw data_key_error { "unknown key: " + key };
+        }
+
+        jval = getValueInJson(*jval, key.data());
+
+        return getSize(*jval);
+    }
+
+    size_t JsonContainer::size(std::vector<JsonContainerKey> keys) const {
+        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+
+        for (const auto& key : keys) {
+            if (!hasKey(*jval, key.data())) {
+                throw data_key_error { "unknown key: " + key };
+            }
+            jval = getValueInJson(*jval, key.data());
+        }
+
+        return getSize(*jval);
+    }
+
     bool JsonContainer::includes(const JsonContainerKey& key) const {
         rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
 
@@ -222,6 +252,17 @@ namespace leatherman { namespace json_container {
     }
 
     // Private functions
+
+    size_t JsonContainer::getSize(const rapidjson::Value& jval) const {
+        switch (getValueType(jval)) {
+            case DataType::Array:
+                return jval.Size();
+            case DataType::Object:
+                return jval.MemberCount();
+            default:
+                return 0;
+        }
+    }
 
     DataType JsonContainer::getValueType(const rapidjson::Value& jval) const {
         switch (jval.GetType()) {
