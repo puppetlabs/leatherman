@@ -437,7 +437,7 @@ namespace leatherman { namespace ruby {
             if (library.load(ruby_lib_location)) {
                 return library;
             }
-            LOG_WARNING((boost::format("preferred ruby library \"%1%\" could not be loaded.") % ruby_lib_location).str());
+            LOG_WARNING("preferred ruby library \"%1%\" could not be loaded.", ruby_lib_location);
         }
 
         // Next try an environment variable.
@@ -447,7 +447,7 @@ namespace leatherman { namespace ruby {
             if (library.load(value)) {
                 return library;
             } else {
-                LOG_WARNING((boost::format("ruby library \"%1%\" could not be loaded.") % value).str());
+                LOG_WARNING("ruby library \"%1%\" could not be loaded.", value);
             }
         }
 
@@ -469,7 +469,8 @@ namespace leatherman { namespace ruby {
                                                                   "break file if File.exist? file;"
                                                                   "false end)" });
         if (!success) {
-            LOG_WARNING("ruby failed to run", output, none);
+            LOG_WARNING("ruby failed to run: %1%", output);
+            return library;
         }
 
         boost::system::error_code ec;
