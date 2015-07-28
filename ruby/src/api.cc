@@ -120,13 +120,13 @@ namespace leatherman { namespace ruby {
         }
     }
 
-    api* api::instance()
+    api& api::instance()
     {
-        static unique_ptr<api> instance = create();
-        return instance.get();
+        static api instance { move(create()) };
+        return instance;
     }
 
-    unique_ptr<api> api::create()
+    lth_lib::dynamic_library api::create()
     {
         lth_lib::dynamic_library library = find_library();
         if (!library.loaded()) {
@@ -136,11 +136,7 @@ namespace leatherman { namespace ruby {
         } else {
             LOG_INFO("ruby was already loaded.");
         }
-        try {
-            return unique_ptr<api>(new api(move(library)));
-        } catch (lth_lib::missing_import_exception& ex) {
-            throw ex;
-        }
+        return library;
     }
 
     void api::initialize()
@@ -441,8 +437,7 @@ namespace leatherman { namespace ruby {
             if (library.load(ruby_lib_location)) {
                 return library;
             }
-            throw library_not_loaded_exception(
-                    (boost::format("preferred ruby library \"%1%\" could not be loaded.") % ruby_lib_location).str());
+            LOG_WARNING((boost::format("preferred ruby library \"%1%\" could not be loaded.") % ruby_lib_location).str());
         }
 
         // Next try an environment variable.
@@ -452,7 +447,7 @@ namespace leatherman { namespace ruby {
             if (library.load(value)) {
                 return library;
             } else {
-                throw library_not_loaded_exception((boost::format("ruby library \"%1%\" could not be loaded.") % value).str());
+                LOG_WARNING((boost::format("ruby library \"%1%\" could not be loaded.") % value).str());
             }
         }
 
@@ -474,7 +469,7 @@ namespace leatherman { namespace ruby {
                                                                   "break file if File.exist? file;"
                                                                   "false end)" });
         if (!success) {
-            throw execution_failure_exception("ruby failed to run", output, none);
+            LOG_WARNING("ruby failed to run", output, none);
         }
 
         boost::system::error_code ec;

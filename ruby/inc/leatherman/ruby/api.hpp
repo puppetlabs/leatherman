@@ -98,9 +98,10 @@ namespace leatherman {  namespace ruby {
 
         /**
          * Gets the Ruby API instance.
-         * @return Returns the Ruby API instance or nullptr if the Ruby API is unavailable.
+         * Throws a runtime_error if the API instance can't be created.
+         * @return Returns the Ruby API instance.
          */
-        static api* instance();
+        static api& instance();
 
         /**
          * Called to initialize the API.
@@ -639,7 +640,7 @@ namespace leatherman {  namespace ruby {
         void* (* const ruby_options)(int, char**);
         int (* const ruby_cleanup)(volatile int);
 
-        static std::unique_ptr<api> create();
+        static leatherman::dynamic_library::dynamic_library create();
         static leatherman::dynamic_library::dynamic_library find_library();
         static leatherman::dynamic_library::dynamic_library find_loaded_library();
         static VALUE callback_thunk(VALUE parameter);
