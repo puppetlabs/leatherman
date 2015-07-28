@@ -216,6 +216,8 @@ namespace leatherman { namespace json_container {
     private:
         std::unique_ptr<rapidjson::Document> document_root_;
 
+        size_t getSize(const rapidjson::Value& jval) const;
+
         DataType getValueType(const rapidjson::Value& jval) const;
         bool hasKey(const rapidjson::Value& jval, const char* key) const;
         bool isObject(const rapidjson::Value& jval) const;
