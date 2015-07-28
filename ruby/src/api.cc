@@ -120,13 +120,13 @@ namespace leatherman { namespace ruby {
         }
     }
 
-    api* api::instance()
+    api& api::instance()
     {
-        static unique_ptr<api> instance = create();
-        return instance.get();
+        static api instance { move(create()) };
+        return instance;
     }
 
-    unique_ptr<api> api::create()
+    lth_lib::dynamic_library api::create()
     {
         lth_lib::dynamic_library library = find_library();
         if (!library.loaded()) {
@@ -136,11 +136,7 @@ namespace leatherman { namespace ruby {
         } else {
             LOG_INFO("ruby was already loaded.");
         }
-        try {
-            return unique_ptr<api>(new api(move(library)));
-        } catch (lth_lib::missing_import_exception& ex) {
-            throw ex;
-        }
+        return library;
     }
 
     void api::initialize()
