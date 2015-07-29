@@ -393,6 +393,10 @@ namespace leatherman {  namespace ruby {
          * See MRI documentation.
          */
         VALUE* const rb_eRuntimeError;
+        /**
+         * See MRI documentation.
+         */
+        VALUE* const rb_eLoadError;
 
         /**
          * Gets the load path being used by Ruby.
