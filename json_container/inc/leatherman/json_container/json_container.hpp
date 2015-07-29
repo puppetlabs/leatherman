@@ -159,13 +159,21 @@ namespace leatherman { namespace json_container {
         /// Throw a data_key_error in case of unknown keys.
         DataType type(std::vector<JsonContainerKey> keys) const;
 
+        /// Return the value of the root entry.
+        /// Throw a data_type_error in case the type of the root entry
+        /// does not match the specified one.
         template <typename T>
         T get() const {
             return getValue<T>(*reinterpret_cast<rapidjson::Value*>(document_root_.get()));
         }
 
-        /// Throw an assertion error in case the type T doesn't match the
-        /// one of the specified value.
+        /// Return the value of the specified entry, in case exists.
+        /// In case the key is unknown, return a default value for the
+        /// given type: 0 for int, 0.0 for double, false for bool,
+        /// "" for string, empty JsonContainer for object, or an empty
+        /// vector of the specified type.
+        /// Throw a data_type_error in case the type T doesn't match
+        /// the specified one.
         template <typename T>
         T get(const JsonContainerKey& key) const {
             rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
@@ -177,8 +185,11 @@ namespace leatherman { namespace json_container {
             return getValue<T>();
         }
 
-        /// Throw an assertion error in case the type T doesn't match the
-        /// one of the specified value.
+        /// Return the value of the specified nested entry, in case
+        /// exists. Otherwise, return a default value for the
+        /// given type (see above overload).
+        /// Throw a data_type_error in case the type T doesn't match
+        /// the specified one.
         template <typename T>
         T get(std::vector<JsonContainerKey> keys) const {
             rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());

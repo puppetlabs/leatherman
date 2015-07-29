@@ -340,6 +340,11 @@ namespace leatherman { namespace json_container {
         if (value.IsNull()) {
             return 0;
         }
+
+        if (!value.IsInt()) {
+            throw data_type_error { "not an integer" };
+        }
+
         return value.GetInt();
     }
 
@@ -353,6 +358,11 @@ namespace leatherman { namespace json_container {
         if (value.IsNull()) {
             return false;
         }
+
+        if (!value.IsBool()) {
+            throw data_type_error { "not a boolean" };
+        }
+
         return value.GetBool();
     }
 
@@ -366,6 +376,11 @@ namespace leatherman { namespace json_container {
         if (value.IsNull()) {
             return "";
         }
+
+        if (!value.IsString()) {
+            throw data_type_error { "not a string" };
+        }
+
         return std::string(value.GetString());
     }
 
@@ -379,6 +394,11 @@ namespace leatherman { namespace json_container {
         if (value.IsNull()) {
             return 0.0;
         }
+
+        if (!value.IsDouble()) {
+            throw data_type_error { "not a double" };
+        }
+
         return value.GetDouble();
     }
 
@@ -394,9 +414,12 @@ namespace leatherman { namespace json_container {
             JsonContainer container {};
             return container;
         }
-        // rvalue return
-        JsonContainer containter { value };
-        return containter;
+
+        // HERE(ale): we don't do any type check
+
+        // rvalue return (implicitly)
+        JsonContainer container { value };
+        return container;
     }
 
     template<>
@@ -420,9 +443,17 @@ namespace leatherman { namespace json_container {
             return tmp;
         }
 
+        if (!value.IsArray()) {
+            throw data_type_error { "not an array" };
+        }
+
         for (rapidjson::Value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
+            if (!itr->IsString()) {
+                throw data_type_error { "not a string" };
+            }
+
             tmp.push_back(itr->GetString());
         }
 
@@ -443,9 +474,17 @@ namespace leatherman { namespace json_container {
             return tmp;
         }
 
+        if (!value.IsArray()) {
+            throw data_type_error { "not an array" };
+        }
+
         for (rapidjson::Value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
+            if (!itr->IsBool()) {
+                throw data_type_error { "not a boolean" };
+            }
+
             tmp.push_back(itr->GetBool());
         }
 
@@ -466,9 +505,17 @@ namespace leatherman { namespace json_container {
             return tmp;
         }
 
+        if (!value.IsArray()) {
+            throw data_type_error { "not an array" };
+        }
+
         for (rapidjson::Value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
+            if (!itr->IsInt()) {
+                throw data_type_error { "not an integer" };
+            }
+
             tmp.push_back(itr->GetInt());
         }
 
@@ -489,9 +536,17 @@ namespace leatherman { namespace json_container {
             return tmp;
         }
 
+        if (!value.IsArray()) {
+            throw data_type_error { "not an array" };
+        }
+
         for (rapidjson::Value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
+            if (!itr->IsDouble()) {
+                throw data_type_error { "not a double" };
+            }
+
             tmp.push_back(itr->GetDouble());
         }
 
@@ -512,9 +567,17 @@ namespace leatherman { namespace json_container {
             return tmp;
         }
 
+        if (!value.IsArray()) {
+            throw data_type_error { "not an array" };
+        }
+
         for (rapidjson::Value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
+            if (!itr->IsObject()) {
+                throw data_type_error { "not an object" };
+            }
+
             JsonContainer* tmp_this = const_cast<JsonContainer*>(this);
             const rapidjson::Value tmpvalue(*itr, tmp_this->document_root_->GetAllocator());
             JsonContainer tmp_data { tmpvalue };
