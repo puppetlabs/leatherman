@@ -25,7 +25,29 @@ TEST_CASE("JsonContainer::JsonContainer - passing JSON string", "[data]") {
         }
 
         SECTION("array") {
-            json_value = "[1, 2, 3]";
+            SECTION("of numbers") {
+                json_value = "[1, 2, 3]";
+            }
+
+            SECTION("of booleans") {
+                json_value = "[true, true]";
+            }
+
+            SECTION("of strings") {
+                json_value = "[\"spam\", \"eggs\", \"foo\"]";
+            }
+
+            SECTION("of objects") {
+                json_value = "[" + JSON + ",\n" + JSON + "]";
+            }
+
+            SECTION("of arrays") {
+                json_value = "[[1, 2, 3], [\"spam\", \"eggs\", \"foo\"]]";
+            }
+
+            SECTION("of values of different types") {
+                json_value = "[1, \"spam\",\n" + JSON + "]";
+            }
         }
 
         SECTION("string") {
