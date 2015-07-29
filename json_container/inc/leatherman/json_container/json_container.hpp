@@ -225,26 +225,6 @@ namespace leatherman { namespace json_container {
                                          const char* key) const;
         void createKeyInJson(const char* key, rapidjson::Value& jval);
 
-        template <typename T>
-        T get_(const rapidjson::Value& jval, const char * first_key) const {
-            if (hasKey(jval, first_key)) {
-                return getValue<T>(*getValueInJson(jval, first_key));
-            }
-
-            return getValue<T>();
-        }
-
-        template <typename T, typename ... Args>
-        T get_(const rapidjson::Value& jval,
-               const char * first_key,
-               Args ... nested_keys_and_val) const {
-            if (hasKey(jval, first_key)) {
-                return get_<T>(*getValueInJson(jval, first_key),
-                               nested_keys_and_val...);
-            }
-
-            return getValue<T>();
-        }
         template<typename T>
         T getValue(const rapidjson::Value& value) const;
 
