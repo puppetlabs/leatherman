@@ -16,8 +16,6 @@ static const std::string JSON = "{\"foo\" : {\"bar\" : 2},"
 
 namespace leatherman { namespace json_container {
 
-auto ctor = [](std::string& json_txt) { JsonContainer d { json_txt }; };  // NOLINT
-
 TEST_CASE("JsonContainer::JsonContainer - passing JSON string", "[data]") {
     std::string json_value {};
 
@@ -54,7 +52,7 @@ TEST_CASE("JsonContainer::JsonContainer - passing JSON string", "[data]") {
             json_value = "null";
         }
 
-        REQUIRE_NOTHROW(ctor(json_value));
+        REQUIRE_NOTHROW(JsonContainer { json_value });
     }
 
     SECTION("it should throw a data_parse_error in case of invalid JSON") {
@@ -70,7 +68,7 @@ TEST_CASE("JsonContainer::JsonContainer - passing JSON string", "[data]") {
             json_value = "1, 2, 3";
         }
 
-        REQUIRE_THROWS_AS(ctor(json_value), data_parse_error);
+        REQUIRE_THROWS_AS(JsonContainer { json_value }, data_parse_error);
     }
 }
 
