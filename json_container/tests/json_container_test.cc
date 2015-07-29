@@ -233,6 +233,38 @@ TEST_CASE("JsonContainer::get", "[data]") {
             }
         }
     }
+
+    SECTION("it can always return a JsonContainer instance of an entry") {
+        SECTION("scalars") {
+            SECTION("boolean") {
+                REQUIRE(data.get<JsonContainer>("bool").get<bool>() == true);
+            }
+
+            SECTION("integer") {
+                REQUIRE(data.get<JsonContainer>("goo").get<int>() == 1);
+            }
+
+            SECTION("double") {
+                REQUIRE(data.get<JsonContainer>("real").get<double>() == 3.1415);
+            }
+
+            SECTION("string") {
+                REQUIRE(data.get<JsonContainer>("string").get<std::string>()
+                        == "a string");
+            }
+        }
+
+        SECTION("object") {
+            REQUIRE(data.get<JsonContainer>("nested").get<std::string>("foo")
+                    == "bar");
+        }
+
+        SECTION("array") {
+            std::vector<int> expected_array {1, 2};
+            REQUIRE(data.get<JsonContainer>("vec").get<std::vector<int>>()
+                    == expected_array);
+        }
+    }
 }
 
 TEST_CASE("JsonContainer::toPrettyString", "[data]") {
