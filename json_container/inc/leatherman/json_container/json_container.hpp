@@ -39,11 +39,19 @@ namespace leatherman { namespace json_container {
     };
 
     // Types
+
     enum DataType { Object, Array, String, Int, Bool, Double, Null };
 
+    struct JsonContainerKey : public std::string {
+        JsonContainerKey(const std::string& value) : std::string(value) {}
+        JsonContainerKey(const char* value) : std::string(value) {}
+        JsonContainerKey(std::initializer_list<char> il) = delete;
+    };
+
     // Usage:
-    // NOTE SUPPORTED SCALARS
-    // int, float, double, bool, std::string, nullptr
+    //
+    // SUPPORTED SCALARS:
+    //    int, float, double, bool, std::string, nullptr
     //
     // To set a key to a scalar value in object x
     //    x.set<int>("foo", 1);
@@ -80,11 +88,6 @@ namespace leatherman { namespace json_container {
     //    x.includes("foo");
     //    x.includes({ "foo", "bar", "baz" });
 
-    struct JsonContainerKey : public std::string {
-        JsonContainerKey(const std::string& value) : std::string(value) {}
-        JsonContainerKey(const char* value) : std::string(value) {}
-        JsonContainerKey(std::initializer_list<char> il) = delete;
-    };
 
     class JsonContainer {
     public:
@@ -202,7 +205,7 @@ namespace leatherman { namespace json_container {
                 const char* key_data = key.data();
                 if (!isObject(*jval)) {
                     throw data_key_error { "invalid key supplied; cannot "
-                        "navigate the provided path" };
+                                           "navigate the provided path" };
                 }
                 if (!hasKey(*jval, key_data)) {
                     createKeyInJson(key_data, *jval);
@@ -225,8 +228,10 @@ namespace leatherman { namespace json_container {
         // since we have forward declarations for rapidjson; otherwise
         // we would have an implicit template instantiation error
         bool isObject(const rapidjson::Value& jval) const;
+
         rapidjson::Value* getValueInJson(const rapidjson::Value& jval,
                                          const char* key) const;
+
         void createKeyInJson(const char* key, rapidjson::Value& jval);
 
         template<typename T>

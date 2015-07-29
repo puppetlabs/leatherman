@@ -11,7 +11,9 @@ namespace leatherman { namespace json_container {
     const size_t DEFAULT_LEFT_PADDING { 4 };
     const size_t LEFT_PADDING_INCREMENT { 2 };
 
+    //
     // free functions
+    //
 
     std::string valueToString(const rapidjson::Value& jval) {
         rapidjson::StringBuffer buffer;
@@ -20,7 +22,9 @@ namespace leatherman { namespace json_container {
         return buffer.GetString();
     }
 
+    //
     // public interface
+    //
 
     JsonContainer::JsonContainer() : document_root_ { new rapidjson::Document() } {
         document_root_->SetObject();
@@ -168,6 +172,8 @@ namespace leatherman { namespace json_container {
         }
     }
 
+    // size
+
     size_t JsonContainer::size() const {
         rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
         return getSize(*jval);
@@ -198,6 +204,8 @@ namespace leatherman { namespace json_container {
         return getSize(*jval);
     }
 
+    // includes
+
     bool JsonContainer::includes(const JsonContainerKey& key) const {
         rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
 
@@ -220,6 +228,8 @@ namespace leatherman { namespace json_container {
 
         return true;
     }
+
+    // type
 
     DataType JsonContainer::type() const {
         rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
@@ -251,7 +261,11 @@ namespace leatherman { namespace json_container {
         return getValueType(*jval);
     }
 
+    //
     // Private functions
+    //
+
+    // Internal size getter
 
     size_t JsonContainer::getSize(const rapidjson::Value& jval) const {
         switch (getValueType(jval)) {
@@ -263,6 +277,8 @@ namespace leatherman { namespace json_container {
                 return 0;
         }
     }
+
+    // Internal type methods
 
     DataType JsonContainer::getValueType(const rapidjson::Value& jval) const {
         switch (jval.GetType()) {
@@ -290,6 +306,8 @@ namespace leatherman { namespace json_container {
         }
     }
 
+    // Internal key manipulation methods
+
     bool JsonContainer::hasKey(const rapidjson::Value& jval, const char* key) const {
         return (jval.IsObject() && jval.HasMember(key));
     }
@@ -310,7 +328,8 @@ namespace leatherman { namespace json_container {
                        document_root_->GetAllocator());
     }
 
-    // getValue specialisations
+    // getValue specialisations for entries of different types
+
     template<>
     int JsonContainer::getValue<>() const {
         return 0;
@@ -506,6 +525,7 @@ namespace leatherman { namespace json_container {
     }
 
     // setValue specialisations
+
     template<>
     void JsonContainer::setValue<>(rapidjson::Value& jval, bool new_value) {
         jval.SetBool(new_value);
