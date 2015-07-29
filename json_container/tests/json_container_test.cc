@@ -163,6 +163,76 @@ TEST_CASE("JsonContainer::get", "[data]") {
             REQUIRE(number == 42);
         }
     }
+
+    JsonContainer data { JSON };
+
+    SECTION("it throws a data_type_error in case of mismatch") {
+        SECTION("root entry") {
+            SECTION("not a boolean") {
+                REQUIRE_THROWS_AS(data.get<bool>("string"), data_type_error);
+            }
+
+            SECTION("not an integer") {
+                REQUIRE_THROWS_AS(data.get<int>("real"), data_type_error);
+            }
+
+            SECTION("not a double") {
+                REQUIRE_THROWS_AS(data.get<double>("goo"), data_type_error);
+            }
+
+            SECTION("not a string") {
+                REQUIRE_THROWS_AS(data.get<std::string>("real"), data_type_error);
+            }
+
+            SECTION("array mismatches") {
+                SECTION("not an array") {
+                    REQUIRE_THROWS_AS(data.get<std::vector<int>>("goo"),
+                                      data_type_error);
+                }
+
+                SECTION("mismatch type on array entry") {
+                    REQUIRE_THROWS_AS(data.get<double>("goo"), data_type_error);
+                }
+            }
+        }
+
+        SECTION("nested entry") {
+            data.set<JsonContainer>({ "foo", "spam" }, JsonContainer { JSON });
+
+            SECTION("not a boolean") {
+                REQUIRE_THROWS_AS(data.get<bool>({ "foo", "spam", "string" }),
+                                  data_type_error);
+            }
+
+            SECTION("not an integer") {
+                REQUIRE_THROWS_AS(data.get<int>({ "foo", "spam", "real" }),
+                                  data_type_error);
+            }
+
+            SECTION("not a double") {
+                REQUIRE_THROWS_AS(data.get<double>({ "foo", "spam", "goo" }),
+                                  data_type_error);
+            }
+
+            SECTION("not a string") {
+                REQUIRE_THROWS_AS(data.get<std::string>({ "foo", "spam", "real" }),
+                                  data_type_error);
+            }
+
+            SECTION("array mismatches") {
+                SECTION("not an array") {
+                    REQUIRE_THROWS_AS(
+                        data.get<std::vector<int>>({ "foo", "spam", "goo" }),
+                        data_type_error);
+                }
+
+                SECTION("mismatch type on array entry") {
+                    REQUIRE_THROWS_AS(data.get<double>({ "foo", "spam", "goo" }),
+                                      data_type_error);
+                }
+            }
+        }
+    }
 }
 
 TEST_CASE("JsonContainer::toPrettyString", "[data]") {
