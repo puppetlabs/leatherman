@@ -220,6 +220,10 @@ namespace leatherman { namespace json_container {
 
         DataType getValueType(const rapidjson::Value& jval) const;
         bool hasKey(const rapidjson::Value& jval, const char* key) const;
+
+        // NOTE(ale): we cant' use rapidjson::Value::IsObject directly
+        // since we have forward declarations for rapidjson; otherwise
+        // we would have an implicit template instantiation error
         bool isObject(const rapidjson::Value& jval) const;
         rapidjson::Value* getValueInJson(const rapidjson::Value& jval,
                                          const char* key) const;
