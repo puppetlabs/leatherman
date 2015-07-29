@@ -26,16 +26,34 @@ namespace rapidjson {
 namespace leatherman { namespace json_container {
     // Errors
 
-    /// Error thrown when trying to parse an invalid JSON string.
-    class data_parse_error : public std::runtime_error  {
+    /// Parent error class.
+    class data_error : public std::runtime_error  {
     public:
-        explicit data_parse_error(std::string const& msg) : std::runtime_error(msg) {}
+        explicit data_error(std::string const& msg) : std::runtime_error(msg) {}
+    };
+
+    /// Error thrown when trying to parse an invalid JSON string.
+    class data_parse_error : public data_error  {
+    public:
+        explicit data_parse_error(std::string const& msg) : data_error(msg) {}
     };
 
     /// Error due to an operation involving a key.
-    class data_key_error : public std::runtime_error  {
+    class data_key_error : public data_error  {
     public:
-        explicit data_key_error(std::string const& msg) : std::runtime_error(msg) {}
+        explicit data_key_error(std::string const& msg) : data_error(msg) {}
+    };
+
+    /// Error due to an operation involving an array index.
+    class data_index_error : public data_error  {
+    public:
+        explicit data_index_error(std::string const& msg) : data_error(msg) {}
+    };
+
+    /// Error due to wrongly specified type.
+    class data_type_error : public data_error  {
+    public:
+        explicit data_type_error(std::string const& msg) : data_error(msg) {}
     };
 
     // Types
