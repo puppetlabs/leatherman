@@ -16,8 +16,6 @@ static const std::string JSON = "{\"foo\" : {\"bar\" : 2},"
 
 namespace leatherman { namespace json_container {
 
-auto ctor = [](std::string& json_txt) { JsonContainer d { json_txt }; };  // NOLINT
-
 TEST_CASE("JsonContainer::JsonContainer - passing JSON string", "[data]") {
     std::string json_value {};
 
@@ -27,7 +25,29 @@ TEST_CASE("JsonContainer::JsonContainer - passing JSON string", "[data]") {
         }
 
         SECTION("array") {
-            json_value = "[1, 2, 3]";
+            SECTION("of numbers") {
+                json_value = "[1, 2, 3]";
+            }
+
+            SECTION("of booleans") {
+                json_value = "[true, true]";
+            }
+
+            SECTION("of strings") {
+                json_value = "[\"spam\", \"eggs\", \"foo\"]";
+            }
+
+            SECTION("of objects") {
+                json_value = "[" + JSON + ",\n" + JSON + "]";
+            }
+
+            SECTION("of arrays") {
+                json_value = "[[1, 2, 3], [\"spam\", \"eggs\", \"foo\"]]";
+            }
+
+            SECTION("of values of different types") {
+                json_value = "[1, \"spam\",\n" + JSON + "]";
+            }
         }
 
         SECTION("string") {
@@ -54,7 +74,7 @@ TEST_CASE("JsonContainer::JsonContainer - passing JSON string", "[data]") {
             json_value = "null";
         }
 
-        REQUIRE_NOTHROW(ctor(json_value));
+        REQUIRE_NOTHROW(JsonContainer { json_value });
     }
 
     SECTION("it should throw a data_parse_error in case of invalid JSON") {
@@ -70,7 +90,7 @@ TEST_CASE("JsonContainer::JsonContainer - passing JSON string", "[data]") {
             json_value = "1, 2, 3";
         }
 
-        REQUIRE_THROWS_AS(ctor(json_value), data_parse_error);
+        REQUIRE_THROWS_AS(JsonContainer { json_value }, data_parse_error);
     }
 }
 
@@ -141,6 +161,108 @@ TEST_CASE("JsonContainer::get", "[data]") {
             auto number = data_number.get<int>();
 
             REQUIRE(number == 42);
+        }
+    }
+
+    JsonContainer data { JSON };
+
+    SECTION("it throws a data_type_error in case of mismatch") {
+        SECTION("root entry") {
+            SECTION("not a boolean") {
+                REQUIRE_THROWS_AS(data.get<bool>("string"), data_type_error);
+            }
+
+            SECTION("not an integer") {
+                REQUIRE_THROWS_AS(data.get<int>("real"), data_type_error);
+            }
+
+            SECTION("not a double") {
+                REQUIRE_THROWS_AS(data.get<double>("goo"), data_type_error);
+            }
+
+            SECTION("not a string") {
+                REQUIRE_THROWS_AS(data.get<std::string>("real"), data_type_error);
+            }
+
+            SECTION("array mismatches") {
+                SECTION("not an array") {
+                    REQUIRE_THROWS_AS(data.get<std::vector<int>>("goo"),
+                                      data_type_error);
+                }
+
+                SECTION("mismatch type on array entry") {
+                    REQUIRE_THROWS_AS(data.get<double>("goo"), data_type_error);
+                }
+            }
+        }
+
+        SECTION("nested entry") {
+            data.set<JsonContainer>({ "foo", "spam" }, JsonContainer { JSON });
+
+            SECTION("not a boolean") {
+                REQUIRE_THROWS_AS(data.get<bool>({ "foo", "spam", "string" }),
+                                  data_type_error);
+            }
+
+            SECTION("not an integer") {
+                REQUIRE_THROWS_AS(data.get<int>({ "foo", "spam", "real" }),
+                                  data_type_error);
+            }
+
+            SECTION("not a double") {
+                REQUIRE_THROWS_AS(data.get<double>({ "foo", "spam", "goo" }),
+                                  data_type_error);
+            }
+
+            SECTION("not a string") {
+                REQUIRE_THROWS_AS(data.get<std::string>({ "foo", "spam", "real" }),
+                                  data_type_error);
+            }
+
+            SECTION("array mismatches") {
+                SECTION("not an array") {
+                    REQUIRE_THROWS_AS(
+                        data.get<std::vector<int>>({ "foo", "spam", "goo" }),
+                        data_type_error);
+                }
+
+                SECTION("mismatch type on array entry") {
+                    REQUIRE_THROWS_AS(data.get<double>({ "foo", "spam", "goo" }),
+                                      data_type_error);
+                }
+            }
+        }
+    }
+
+    SECTION("it can always return a JsonContainer instance of an entry") {
+        SECTION("scalars") {
+            SECTION("boolean") {
+                REQUIRE(data.get<JsonContainer>("bool").get<bool>() == true);
+            }
+
+            SECTION("integer") {
+                REQUIRE(data.get<JsonContainer>("goo").get<int>() == 1);
+            }
+
+            SECTION("double") {
+                REQUIRE(data.get<JsonContainer>("real").get<double>() == 3.1415);
+            }
+
+            SECTION("string") {
+                REQUIRE(data.get<JsonContainer>("string").get<std::string>()
+                        == "a string");
+            }
+        }
+
+        SECTION("object") {
+            REQUIRE(data.get<JsonContainer>("nested").get<std::string>("foo")
+                    == "bar");
+        }
+
+        SECTION("array") {
+            std::vector<int> expected_array {1, 2};
+            REQUIRE(data.get<JsonContainer>("vec").get<std::vector<int>>()
+                    == expected_array);
         }
     }
 }

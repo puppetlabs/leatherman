@@ -26,24 +26,50 @@ namespace rapidjson {
 namespace leatherman { namespace json_container {
     // Errors
 
-    /// Error thrown when trying to parse an invalid JSON string.
-    class data_parse_error : public std::runtime_error  {
+    /// Parent error class.
+    class data_error : public std::runtime_error  {
     public:
-        explicit data_parse_error(std::string const& msg) : std::runtime_error(msg) {}
+        explicit data_error(std::string const& msg) : std::runtime_error(msg) {}
+    };
+
+    /// Error thrown when trying to parse an invalid JSON string.
+    class data_parse_error : public data_error  {
+    public:
+        explicit data_parse_error(std::string const& msg) : data_error(msg) {}
     };
 
     /// Error due to an operation involving a key.
-    class data_key_error : public std::runtime_error  {
+    class data_key_error : public data_error  {
     public:
-        explicit data_key_error(std::string const& msg) : std::runtime_error(msg) {}
+        explicit data_key_error(std::string const& msg) : data_error(msg) {}
+    };
+
+    /// Error due to an operation involving an array index.
+    class data_index_error : public data_error  {
+    public:
+        explicit data_index_error(std::string const& msg) : data_error(msg) {}
+    };
+
+    /// Error due to wrongly specified type.
+    class data_type_error : public data_error  {
+    public:
+        explicit data_type_error(std::string const& msg) : data_error(msg) {}
     };
 
     // Types
+
     enum DataType { Object, Array, String, Int, Bool, Double, Null };
 
+    struct JsonContainerKey : public std::string {
+        JsonContainerKey(const std::string& value) : std::string(value) {}
+        JsonContainerKey(const char* value) : std::string(value) {}
+        JsonContainerKey(std::initializer_list<char> il) = delete;
+    };
+
     // Usage:
-    // NOTE SUPPORTED SCALARS
-    // int, float, double, bool, std::string, nullptr
+    //
+    // SUPPORTED SCALARS:
+    //    int, float, double, bool, std::string, nullptr
     //
     // To set a key to a scalar value in object x
     //    x.set<int>("foo", 1);
@@ -80,11 +106,6 @@ namespace leatherman { namespace json_container {
     //    x.includes("foo");
     //    x.includes({ "foo", "bar", "baz" });
 
-    struct JsonContainerKey : public std::string {
-        JsonContainerKey(const std::string& value) : std::string(value) {}
-        JsonContainerKey(const char* value) : std::string(value) {}
-        JsonContainerKey(std::initializer_list<char> il) = delete;
-    };
 
     class JsonContainer {
     public:
@@ -138,13 +159,21 @@ namespace leatherman { namespace json_container {
         /// Throw a data_key_error in case of unknown keys.
         DataType type(std::vector<JsonContainerKey> keys) const;
 
+        /// Return the value of the root entry.
+        /// Throw a data_type_error in case the type of the root entry
+        /// does not match the specified one.
         template <typename T>
         T get() const {
             return getValue<T>(*reinterpret_cast<rapidjson::Value*>(document_root_.get()));
         }
 
-        /// Throw an assertion error in case the type T doesn't match the
-        /// one of the specified value.
+        /// Return the value of the specified entry, in case exists.
+        /// In case the key is unknown, return a default value for the
+        /// given type: 0 for int, 0.0 for double, false for bool,
+        /// "" for string, empty JsonContainer for object, or an empty
+        /// vector of the specified type.
+        /// Throw a data_type_error in case the type T doesn't match
+        /// the specified one.
         template <typename T>
         T get(const JsonContainerKey& key) const {
             rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
@@ -156,8 +185,11 @@ namespace leatherman { namespace json_container {
             return getValue<T>();
         }
 
-        /// Throw an assertion error in case the type T doesn't match the
-        /// one of the specified value.
+        /// Return the value of the specified nested entry, in case
+        /// exists. Otherwise, return a default value for the
+        /// given type (see above overload).
+        /// Throw a data_type_error in case the type T doesn't match
+        /// the specified one.
         template <typename T>
         T get(std::vector<JsonContainerKey> keys) const {
             rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
@@ -202,7 +234,7 @@ namespace leatherman { namespace json_container {
                 const char* key_data = key.data();
                 if (!isObject(*jval)) {
                     throw data_key_error { "invalid key supplied; cannot "
-                        "navigate the provided path" };
+                                           "navigate the provided path" };
                 }
                 if (!hasKey(*jval, key_data)) {
                     createKeyInJson(key_data, *jval);
@@ -220,31 +252,17 @@ namespace leatherman { namespace json_container {
 
         DataType getValueType(const rapidjson::Value& jval) const;
         bool hasKey(const rapidjson::Value& jval, const char* key) const;
+
+        // NOTE(ale): we cant' use rapidjson::Value::IsObject directly
+        // since we have forward declarations for rapidjson; otherwise
+        // we would have an implicit template instantiation error
         bool isObject(const rapidjson::Value& jval) const;
+
         rapidjson::Value* getValueInJson(const rapidjson::Value& jval,
                                          const char* key) const;
+
         void createKeyInJson(const char* key, rapidjson::Value& jval);
 
-        template <typename T>
-        T get_(const rapidjson::Value& jval, const char * first_key) const {
-            if (hasKey(jval, first_key)) {
-                return getValue<T>(*getValueInJson(jval, first_key));
-            }
-
-            return getValue<T>();
-        }
-
-        template <typename T, typename ... Args>
-        T get_(const rapidjson::Value& jval,
-               const char * first_key,
-               Args ... nested_keys_and_val) const {
-            if (hasKey(jval, first_key)) {
-                return get_<T>(*getValueInJson(jval, first_key),
-                               nested_keys_and_val...);
-            }
-
-            return getValue<T>();
-        }
         template<typename T>
         T getValue(const rapidjson::Value& value) const;
 

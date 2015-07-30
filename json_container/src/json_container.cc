@@ -11,7 +11,9 @@ namespace leatherman { namespace json_container {
     const size_t DEFAULT_LEFT_PADDING { 4 };
     const size_t LEFT_PADDING_INCREMENT { 2 };
 
+    //
     // free functions
+    //
 
     std::string valueToString(const rapidjson::Value& jval) {
         rapidjson::StringBuffer buffer;
@@ -20,7 +22,9 @@ namespace leatherman { namespace json_container {
         return buffer.GetString();
     }
 
+    //
     // public interface
+    //
 
     JsonContainer::JsonContainer() : document_root_ { new rapidjson::Document() } {
         document_root_->SetObject();
@@ -168,6 +172,8 @@ namespace leatherman { namespace json_container {
         }
     }
 
+    // size
+
     size_t JsonContainer::size() const {
         rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
         return getSize(*jval);
@@ -198,6 +204,8 @@ namespace leatherman { namespace json_container {
         return getSize(*jval);
     }
 
+    // includes
+
     bool JsonContainer::includes(const JsonContainerKey& key) const {
         rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
 
@@ -220,6 +228,8 @@ namespace leatherman { namespace json_container {
 
         return true;
     }
+
+    // type
 
     DataType JsonContainer::type() const {
         rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
@@ -251,7 +261,11 @@ namespace leatherman { namespace json_container {
         return getValueType(*jval);
     }
 
+    //
     // Private functions
+    //
+
+    // Internal size getter
 
     size_t JsonContainer::getSize(const rapidjson::Value& jval) const {
         switch (getValueType(jval)) {
@@ -263,6 +277,8 @@ namespace leatherman { namespace json_container {
                 return 0;
         }
     }
+
+    // Internal type methods
 
     DataType JsonContainer::getValueType(const rapidjson::Value& jval) const {
         switch (jval.GetType()) {
@@ -290,6 +306,8 @@ namespace leatherman { namespace json_container {
         }
     }
 
+    // Internal key manipulation methods
+
     bool JsonContainer::hasKey(const rapidjson::Value& jval, const char* key) const {
         return (jval.IsObject() && jval.HasMember(key));
     }
@@ -310,7 +328,8 @@ namespace leatherman { namespace json_container {
                        document_root_->GetAllocator());
     }
 
-    // getValue specialisations
+    // getValue specialisations for entries of different types
+
     template<>
     int JsonContainer::getValue<>() const {
         return 0;
@@ -321,6 +340,11 @@ namespace leatherman { namespace json_container {
         if (value.IsNull()) {
             return 0;
         }
+
+        if (!value.IsInt()) {
+            throw data_type_error { "not an integer" };
+        }
+
         return value.GetInt();
     }
 
@@ -334,6 +358,11 @@ namespace leatherman { namespace json_container {
         if (value.IsNull()) {
             return false;
         }
+
+        if (!value.IsBool()) {
+            throw data_type_error { "not a boolean" };
+        }
+
         return value.GetBool();
     }
 
@@ -347,6 +376,11 @@ namespace leatherman { namespace json_container {
         if (value.IsNull()) {
             return "";
         }
+
+        if (!value.IsString()) {
+            throw data_type_error { "not a string" };
+        }
+
         return std::string(value.GetString());
     }
 
@@ -360,6 +394,11 @@ namespace leatherman { namespace json_container {
         if (value.IsNull()) {
             return 0.0;
         }
+
+        if (!value.IsDouble()) {
+            throw data_type_error { "not a double" };
+        }
+
         return value.GetDouble();
     }
 
@@ -375,9 +414,12 @@ namespace leatherman { namespace json_container {
             JsonContainer container {};
             return container;
         }
-        // rvalue return
-        JsonContainer containter { value };
-        return containter;
+
+        // HERE(ale): we don't do any type check
+
+        // rvalue return (implicitly)
+        JsonContainer container { value };
+        return container;
     }
 
     template<>
@@ -401,9 +443,17 @@ namespace leatherman { namespace json_container {
             return tmp;
         }
 
+        if (!value.IsArray()) {
+            throw data_type_error { "not an array" };
+        }
+
         for (rapidjson::Value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
+            if (!itr->IsString()) {
+                throw data_type_error { "not a string" };
+            }
+
             tmp.push_back(itr->GetString());
         }
 
@@ -424,9 +474,17 @@ namespace leatherman { namespace json_container {
             return tmp;
         }
 
+        if (!value.IsArray()) {
+            throw data_type_error { "not an array" };
+        }
+
         for (rapidjson::Value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
+            if (!itr->IsBool()) {
+                throw data_type_error { "not a boolean" };
+            }
+
             tmp.push_back(itr->GetBool());
         }
 
@@ -447,9 +505,17 @@ namespace leatherman { namespace json_container {
             return tmp;
         }
 
+        if (!value.IsArray()) {
+            throw data_type_error { "not an array" };
+        }
+
         for (rapidjson::Value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
+            if (!itr->IsInt()) {
+                throw data_type_error { "not an integer" };
+            }
+
             tmp.push_back(itr->GetInt());
         }
 
@@ -470,9 +536,17 @@ namespace leatherman { namespace json_container {
             return tmp;
         }
 
+        if (!value.IsArray()) {
+            throw data_type_error { "not an array" };
+        }
+
         for (rapidjson::Value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
+            if (!itr->IsDouble()) {
+                throw data_type_error { "not a double" };
+            }
+
             tmp.push_back(itr->GetDouble());
         }
 
@@ -493,9 +567,17 @@ namespace leatherman { namespace json_container {
             return tmp;
         }
 
+        if (!value.IsArray()) {
+            throw data_type_error { "not an array" };
+        }
+
         for (rapidjson::Value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
+            if (!itr->IsObject()) {
+                throw data_type_error { "not an object" };
+            }
+
             JsonContainer* tmp_this = const_cast<JsonContainer*>(this);
             const rapidjson::Value tmpvalue(*itr, tmp_this->document_root_->GetAllocator());
             JsonContainer tmp_data { tmpvalue };
@@ -506,6 +588,7 @@ namespace leatherman { namespace json_container {
     }
 
     // setValue specialisations
+
     template<>
     void JsonContainer::setValue<>(rapidjson::Value& jval, bool new_value) {
         jval.SetBool(new_value);
