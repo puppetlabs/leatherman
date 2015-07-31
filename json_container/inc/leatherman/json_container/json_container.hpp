@@ -217,7 +217,7 @@ namespace leatherman { namespace json_container {
         /// object, so that is not possible to set the entry.
         template <typename T>
         void set(const JsonContainerKey& key, T value) {
-            rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+            auto jval = getValueInJson();
             const char* key_data = key.data();
 
             if (!isObject(*jval)) {
@@ -236,7 +236,7 @@ namespace leatherman { namespace json_container {
         /// iterate the remaining keys.
         template <typename T>
         void set(std::vector<JsonContainerKey> keys, T value) {
-            rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+            auto jval = getValueInJson();
 
             for (const auto& key : keys) {
                 const char* key_data = key.data();
