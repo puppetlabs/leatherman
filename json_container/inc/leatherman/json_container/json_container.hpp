@@ -170,45 +170,29 @@ namespace leatherman { namespace json_container {
         /// does not match the specified one.
         template <typename T>
         T get() const {
-            return getValue<T>(*reinterpret_cast<rapidjson::Value*>(document_root_.get()));
+            return getValue<T>(*getValueInJson());
         }
 
-        /// Return the value of the specified entry, in case exists.
-        /// In case the key is unknown, return a default value for the
-        /// given type: 0 for int, 0.0 for double, false for bool,
-        /// "" for string, empty JsonContainer for object, or an empty
-        /// vector of the specified type.
+        /// Return the value of the specified entry of the root object.
+        /// Throw a data_key_error in case the entry does not exist.
         /// Throw a data_type_error in case the type T doesn't match
         /// the specified one.
         template <typename T>
         T get(const JsonContainerKey& key) const {
-            rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
-
-            if (hasKey(*jval, key.data())) {
-                return getValue<T>(*getValueInJson(*jval, key.data()));
-            }
-
-            return getValue<T>();
+            return getValue<T>(*getValueInJson({ key }));
         }
 
-        /// Return the value of the specified nested entry, in case
-        /// exists. Otherwise, return a default value for the
-        /// given type (see above overload).
+        /// Return the value of the specified nested entry.
+        /// Throw a data_key_error in case the entry does not exist.
         /// Throw a data_type_error in case the type T doesn't match
         /// the specified one.
         template <typename T>
         T get(std::vector<JsonContainerKey> keys) const {
-            rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+            return getValue<T>(*getValueInJson(keys));
+        }
 
-            for (const auto& key : keys) {
-                if (!hasKey(*jval, key.data())) {
-                    return getValue<T>();
-                }
 
-                jval = getValueInJson(*jval, key.data());
-            }
 
-            return getValue<T>(*jval);
         }
 
         /// Throw a data_key_error in case the root is not a valid JSON
@@ -298,9 +282,6 @@ namespace leatherman { namespace json_container {
 
         template<typename T>
         T getValue(const rapidjson::Value& value) const;
-
-        template<typename T>
-        T getValue() const;
 
         template<typename T>
         void setValue(rapidjson::Value& jval, T new_value);

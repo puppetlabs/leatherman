@@ -232,31 +232,20 @@ namespace leatherman { namespace json_container {
     // type
 
     DataType JsonContainer::type() const {
-        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+        auto jval = getValueInJson();
         return getValueType(*jval);
     }
 
     DataType JsonContainer::type(const JsonContainerKey& key) const {
-        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
-
-        if (!hasKey(*jval, key.data())) {
-            throw data_key_error { "unknown key: " + key };
-        }
-
-        jval = getValueInJson(*jval, key.data());
-
+        auto jval = getValueInJson({ key });
         return getValueType(*jval);
     }
 
     DataType JsonContainer::type(std::vector<JsonContainerKey> keys) const {
-        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+        auto jval = getValueInJson(keys);
+        return getValueType(*jval);
+    }
 
-        for (const auto& key : keys) {
-            if (!hasKey(*jval, key.data())) {
-                throw data_key_error { "unknown key: " + key };
-            }
-            jval = getValueInJson(*jval, key.data());
-        }
 
         return getValueType(*jval);
     }
@@ -362,12 +351,7 @@ namespace leatherman { namespace json_container {
                        document_root_->GetAllocator());
     }
 
-    // getValue specialisations for entries of different types
-
-    template<>
-    int JsonContainer::getValue<>() const {
-        return 0;
-    }
+    // getValue specialisations
 
     template<>
     int JsonContainer::getValue<>(const rapidjson::Value& value) const {
@@ -380,11 +364,6 @@ namespace leatherman { namespace json_container {
         }
 
         return value.GetInt();
-    }
-
-    template<>
-    bool JsonContainer::getValue<>() const {
-        return false;
     }
 
     template<>
@@ -401,11 +380,6 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    std::string JsonContainer::getValue() const {
-        return "";
-    }
-
-    template<>
     std::string JsonContainer::getValue<>(const rapidjson::Value& value) const {
         if (value.IsNull()) {
             return "";
@@ -419,11 +393,6 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    double JsonContainer::getValue<>() const {
-        return 0.0;
-    }
-
-    template<>
     double JsonContainer::getValue<>(const rapidjson::Value& value) const {
         if (value.IsNull()) {
             return 0.0;
@@ -434,12 +403,6 @@ namespace leatherman { namespace json_container {
         }
 
         return value.GetDouble();
-    }
-
-    template<>
-    JsonContainer JsonContainer::getValue<>() const {
-        JsonContainer container {};
-        return container;
     }
 
     template<>
@@ -464,12 +427,6 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    std::vector<std::string> JsonContainer::getValue<>() const {
-        std::vector<std::string> tmp {};
-        return tmp;
-    }
-
-    template<>
     std::vector<std::string> JsonContainer::getValue<>(const rapidjson::Value& value) const {
         std::vector<std::string> tmp {};
 
@@ -491,12 +448,6 @@ namespace leatherman { namespace json_container {
             tmp.push_back(itr->GetString());
         }
 
-        return tmp;
-    }
-
-    template<>
-    std::vector<bool> JsonContainer::getValue<>() const {
-        std::vector<bool> tmp {};
         return tmp;
     }
 
@@ -526,12 +477,6 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    std::vector<int> JsonContainer::getValue<>() const {
-        std::vector<int> tmp {};
-        return tmp;
-    }
-
-    template<>
     std::vector<int> JsonContainer::getValue<>(const rapidjson::Value& value) const {
         std::vector<int> tmp {};
 
@@ -557,12 +502,6 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    std::vector<double> JsonContainer::getValue<>() const {
-        std::vector<double> tmp {};
-        return tmp;
-    }
-
-    template<>
     std::vector<double> JsonContainer::getValue<>(const rapidjson::Value& value) const {
         std::vector<double> tmp {};
 
@@ -584,12 +523,6 @@ namespace leatherman { namespace json_container {
             tmp.push_back(itr->GetDouble());
         }
 
-        return tmp;
-    }
-
-    template<>
-    std::vector<JsonContainer> JsonContainer::getValue<>() const {
-        std::vector<JsonContainer> tmp {};
         return tmp;
     }
 
