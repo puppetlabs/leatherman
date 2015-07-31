@@ -94,7 +94,7 @@ TEST_CASE("JsonContainer::JsonContainer - passing JSON string", "[data]") {
     }
 }
 
-TEST_CASE("JsonContainer::get", "[data]") {
+TEST_CASE("JsonContainer::get for object entries", "[data]") {
     JsonContainer msg { JSON };
 
     SECTION("it can get a root value") {
@@ -134,15 +134,8 @@ TEST_CASE("JsonContainer::get", "[data]") {
         REQUIRE(msg.get<bool>("null") == false);
     }
 
-    SECTION("it returns a null like value when indexing something that "
-            "doesn't exist") {
-        REQUIRE(msg.get<std::string>("invalid") == "");
-        REQUIRE(msg.get<int>({ "goo", "1" }) == 0);
-        REQUIRE(msg.get<bool>({ "foo", "baz" }) == false);
-    }
-
-    SECTION("it can get the root") {
-        SECTION("array") {
+    SECTION("it can get the root entry") {
+        SECTION("array of numbers") {
             JsonContainer data_array { "[1, 2, 3]" };
             auto array = data_array.get<std::vector<int>>();
             std::vector<int> expected_array { 1, 2, 3 };
@@ -165,6 +158,17 @@ TEST_CASE("JsonContainer::get", "[data]") {
     }
 
     JsonContainer data { JSON };
+
+    SECTION("it throws a data_key_error in case of unknown object entry") {
+        SECTION("unknown root object entry") {
+            REQUIRE_THROWS_AS(data.get<int>("unknown"), data_key_error);
+        }
+
+        SECTION("unknown nested object entry") {
+            REQUIRE_THROWS_AS(data.get<int>({ "nested", "unknown" }),
+                              data_key_error);
+        }
+    }
 
     SECTION("it throws a data_type_error in case of mismatch") {
         SECTION("root entry") {
