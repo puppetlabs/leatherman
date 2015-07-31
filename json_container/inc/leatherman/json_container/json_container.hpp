@@ -268,8 +268,31 @@ namespace leatherman { namespace json_container {
         // we would have an implicit template instantiation error
         bool isObject(const rapidjson::Value& jval) const;
 
+        // Root object entry accessor
+        // Throws a data_type_error in case the specified value is not
+        // an object.
+        // Throws a data_key_error or if the key is unknown.
         rapidjson::Value* getValueInJson(const rapidjson::Value& jval,
                                          const char* key) const;
+
+        // Root array entry accessor
+        // Throws a data_type_error in case the specified value is not
+        // an array.
+        // Throws a data_index_error in case the arraye index is out
+        // of bounds.
+        rapidjson::Value* getValueInJson(const rapidjson::Value& jval,
+                                         const size_t& idx) const;
+
+        // Generic entry accessor
+        // In case any key is specified, throws a data_type_error if
+        // the specified entry is not an object; throws a
+        // data_key_error or if the key is unknown.
+        // In case an array element is specified, throws a
+        // data_index_error if the index is out of bounds.
+        rapidjson::Value* getValueInJson(
+            std::vector<JsonContainerKey> keys = std::vector<JsonContainerKey> {},
+            const bool is_array = false,
+            const size_t idx = 0) const;
 
         void createKeyInJson(const char* key, rapidjson::Value& jval);
 

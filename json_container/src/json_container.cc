@@ -314,7 +314,45 @@ namespace leatherman { namespace json_container {
 
     rapidjson::Value* JsonContainer::getValueInJson(const rapidjson::Value& jval,
                                                     const char* key) const {
+        if (!jval.IsObject()) {
+            throw data_type_error { "not an object" };
+        }
+
+        if (!jval.HasMember(key)) {
+            std::string err_msg { "unknown object entry with key: " };
+            throw data_key_error { err_msg + key };
+        }
+
         return const_cast<rapidjson::Value*>(&jval[key]);
+    }
+
+    rapidjson::Value* JsonContainer::getValueInJson(const rapidjson::Value& jval,
+                                                    const size_t& idx) const {
+        if (getValueType(jval) != DataType::Array) {
+            throw data_type_error { "not an array" };
+        }
+
+        if (idx >= jval.Size()) {
+            throw data_index_error { "array index out of bounds" };
+        }
+
+        return const_cast<rapidjson::Value*>(&jval[idx]);
+    }
+
+    rapidjson::Value* JsonContainer::getValueInJson(std::vector<JsonContainerKey> keys,
+                                                    const bool is_array,
+                                                    const size_t idx) const {
+        auto jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+
+        for (const auto& key : keys) {
+            jval = getValueInJson(*jval, key.data());
+        }
+
+        if (is_array) {
+            jval = getValueInJson(*jval, idx);
+        }
+
+        return jval;
     }
 
     void JsonContainer::createKeyInJson(const char* key,
