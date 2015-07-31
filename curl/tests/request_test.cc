@@ -75,6 +75,15 @@ namespace leatherman { namespace curl {
             REQUIRE(body == "Hello, I am a request body!");
         }
 
+        SECTION("Content-Length should be set based on size of the body") {
+          string msg = "This is the request body";
+          test_request.body(msg, "test");
+          auto content_length = test_request.header("Content-Length");
+
+          REQUIRE(content_length);
+          REQUIRE(*content_length == to_string(msg.size()));
+        }
+
         SECTION("Overall request timeout should be configurable and retrievable") {
             test_request.timeout(100);
             REQUIRE(test_request.timeout() == 100);
