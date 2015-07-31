@@ -711,4 +711,81 @@ TEST_CASE("JsonContainer::type", "[data]") {
     }
 }
 
+TEST_CASE("JsonContainer::type for arrays entries", "[data]") {
+    JsonContainer data { "[false, -42, 3.14, \"spam\", {\"foo\" : [3, true]}, "
+                         "[1, 2, 3, 4] ]" };
+
+    SECTION("root entry") {
+        SECTION("array") {
+            JsonContainer not_an_aray { JSON };
+            REQUIRE_THROWS_AS(not_an_aray.type(1), data_type_error);
+        }
+
+        SECTION("array with values of different types") {
+            JsonContainer data_array { "[1, \"spam\", false]" };
+            REQUIRE(data_array.type() == DataType::Array);
+        }
+
+        SECTION("boolean") {
+            REQUIRE(data.type(0) == DataType::Bool);
+        }
+
+        SECTION("integer") {
+            REQUIRE(data.type(1) == DataType::Int);
+        }
+
+        SECTION("double") {
+            REQUIRE(data.type(2) == DataType::Double);
+        }
+
+        SECTION("string") {
+            REQUIRE(data.type(3) == DataType::String);
+        }
+
+        SECTION("object") {
+            REQUIRE(data.type(4) == DataType::Object);
+        }
+
+        SECTION("array") {
+            REQUIRE(data.type(5) == DataType::Array);
+        }
+    }
+
+    SECTION("object entry") {
+        JsonContainer o { JSON };
+        o.set<JsonContainer>("multi type array", data);
+
+        SECTION("container") {
+            REQUIRE(o.type("multi type array") == DataType::Array);
+        }
+
+        SECTION("double") {
+            REQUIRE(o.type("multi type array", 2) == DataType::Double);
+        }
+
+        SECTION("string") {
+            REQUIRE(o.type("multi type array", 3) == DataType::String);
+        }
+    }
+
+    SECTION("nested entry") {
+        JsonContainer o { JSON };
+        o.set<JsonContainer>({ "nested", "multi type array" }, data);
+
+        SECTION("container") {
+            REQUIRE(o.type({ "nested", "multi type array" }) == DataType::Array);
+        }
+
+        SECTION("double") {
+            REQUIRE(o.type({ "nested", "multi type array" }, 2)
+                    == DataType::Double);
+        }
+
+        SECTION("string") {
+            REQUIRE(o.type({ "nested", "multi type array" }, 3)
+                    == DataType::String);
+        }
+    }
+}
+
 }}  // namespace leatherman::json_container
