@@ -518,15 +518,22 @@ TEST_CASE("JsonContainer::set", "[data]") {
     SECTION("it allows resetting a JsonContainer value") {
         JsonContainer d {};
         d.set<int>("i", 1);
+
         msg.set<JsonContainer>("d_c entry", d);
         auto i_entry = msg.get<JsonContainer>("d_c entry");
+
+        // Expecting msg = { "d_c entry" : {"i" : 1} }
         REQUIRE(msg.includes("d_c entry"));
         REQUIRE(i_entry.get<int>("i") == 1);
 
         JsonContainer d_other {};
-        d_other.set<bool>("b", false);
+        d_other.set<bool>("b", true);
+
+        msg.set<JsonContainer>("d_c entry", d_other);
         auto b_entry = msg.get<JsonContainer>("d_c entry");
-        REQUIRE_FALSE(b_entry.get<bool>("b"));
+
+        // Expecting msg = { "d_c entry" : {"b" : true} }
+        REQUIRE(b_entry.get<bool>("b"));
     }
 
     SECTION("it can set a key to a vector") {
@@ -576,12 +583,19 @@ TEST_CASE("JsonContainer::keys", "[data]") {
     SECTION("It returns a vector of keys") {
         JsonContainer data { "{ \"a\" : 1, "
                               " \"b\" : 2}"};
-        REQUIRE(data.keys().size() == 2);
+        std::vector<std::string> expected_keys { "a", "b" };
+
+        REQUIRE(data.keys() == expected_keys);
     }
 
     SECTION("It returns an empty vector when the JsonContainer is empty") {
         JsonContainer data {};
         REQUIRE(data.keys().size() == 0);
+    }
+
+    SECTION("It returns an empty vector when the JsonContainer is an array") {
+        JsonContainer data_array { "[1, 2, 3]" };
+        REQUIRE(data_array.keys().size() == 0);
     }
 }
 
@@ -599,7 +613,7 @@ TEST_CASE("JsonContainer::type", "[data]") {
             REQUIRE(data.type() == DataType::Object);
         }
 
-        SECTION("number") {
+        SECTION("integer") {
             JsonContainer data_number { "42" };
             REQUIRE(data_number.type() == DataType::Int);
         }
@@ -645,8 +659,15 @@ TEST_CASE("JsonContainer::type", "[data]") {
         }
 
         SECTION("it can distinguish a Double value") {
-            data.set<double>("d_entry", 2.71828);
-            REQUIRE(data.type("d_entry") == DataType::Double);
+            SECTION("defined by set") {
+                data.set<double>("d_entry", 2.71828);
+                REQUIRE(data.type("d_entry") == DataType::Double);
+            }
+
+            SECTION("defined by JSON string given to the ctor") {
+                JsonContainer data_number { "2.71828" };
+                REQUIRE(data_number.type() == DataType::Double);
+            }
         }
 
         SECTION("it can distinguish a null value") {
