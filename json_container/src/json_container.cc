@@ -232,7 +232,19 @@ namespace leatherman { namespace json_container {
         return getValueType(*jval);
     }
 
+    DataType JsonContainer::type(const size_t idx) const {
+        auto jval = getValueInJson(std::vector<JsonContainerKey> {}, true, idx);
+        return getValueType(*jval);
+    }
 
+    DataType JsonContainer::type(const JsonContainerKey& key, const size_t idx) const {
+        auto jval = getValueInJson({ key }, true, idx);
+        return getValueType(*jval);
+    }
+
+    DataType JsonContainer::type(std::vector<JsonContainerKey> keys,
+                                 const size_t idx) const {
+        auto jval = getValueInJson(keys, true, idx);
         return getValueType(*jval);
     }
 

@@ -169,6 +169,20 @@ namespace leatherman { namespace json_container {
         /// Throw a data_key_error in case of unknown keys.
         DataType type(std::vector<JsonContainerKey> keys) const;
 
+        /// Throw a data_type_error in case the root entry is not an array.
+        /// Throw a data_index_error in case the index is out of bounds.
+        DataType type(const size_t idx) const;
+
+        /// Throw a data_key_error in case the specified key is unknown.
+        /// Throw a data_type_error in case the specified entry is not an array.
+        /// Throw a data_index_error in case the index is out of bound.
+        DataType type(const JsonContainerKey& key, const size_t idx) const;
+
+        /// Throw a data_key_error in case of unknown keys.
+        /// Throw a data_type_error in case the specified entry is not an array.
+        /// Throw a data_index_error in case the index is out of bound.
+        DataType type(std::vector<JsonContainerKey> keys, const size_t idx) const;
+
         /// Return the value of the root entry.
         /// Throw a data_type_error in case the type of the root entry
         /// does not match the specified one.
