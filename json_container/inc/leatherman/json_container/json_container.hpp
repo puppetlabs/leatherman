@@ -89,6 +89,9 @@ namespace leatherman { namespace json_container {
     // To get a vector from a key in object x
     //    x.get<std::vector<float>>("foo");
     //
+    // To get the int entry with index i from the array a in object x
+    //    x.get<int>("a", 1);
+    //
     // To get a result object (json object) from object x
     //    x.get<Data>("foo");
     //
@@ -209,8 +212,38 @@ namespace leatherman { namespace json_container {
             return getValue<T>(*getValueInJson(keys));
         }
 
+        /// Return the indexed value of root array.
+        /// Throw a data_index_error in case the index is out of bound.
+        /// Throw a data_type_error in case the type T doesn't match
+        /// the one of the specified value or if the root entry is not
+        /// an array.
+        template <typename T>
+        T get(const size_t idx) const {
+            return getValue<T>(*getValueInJson(std::vector<JsonContainerKey> {},
+                                               true, idx));
+        }
 
+        /// Return the indexed value of the specified array entry.
+        /// Throw a data_key_error in case the array entry is unknown.
+        /// Throw a data_index_error in case the index is out of bound.
+        /// Throw a data_type_error in case the type T doesn't match
+        /// the one of the specified entry or in case the specified
+        /// entry is not an array.
+        template <typename T>
+        T get(const JsonContainerKey& key, const size_t idx) const {
+            return getValue<T>(*getValueInJson({ key }, true, idx));
+        }
 
+        /// Return the indexed value of the specified nested array
+        /// entry.
+        /// Throw a data_key_error in case the array entry is unknown.
+        /// Throw a data_index_error in case the index is out of bound.
+        /// Throw a data_type_error in case the type T doesn't match
+        /// the one of the specified entry or in case the specified
+        /// entry is not an array.
+        template <typename T>
+        T get(std::vector<JsonContainerKey> keys, const size_t idx) const {
+            return getValue<T>(*getValueInJson(keys, true, idx));
         }
 
         /// Throw a data_key_error in case the root is not a valid JSON
