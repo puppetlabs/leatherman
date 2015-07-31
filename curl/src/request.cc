@@ -82,6 +82,7 @@ namespace leatherman { namespace curl {
     {
         _body = move(body);
         add_header("Content-Type", move(content_type));
+        add_header("Content-Length", to_string(_body.size()));
     }
 
     string const& request::body() const
