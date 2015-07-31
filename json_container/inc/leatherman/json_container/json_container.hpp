@@ -129,6 +129,9 @@ namespace leatherman { namespace json_container {
         // NOTE(ale): we don't use const for the keys arg of such
         // signatures due to gcc issues
 
+        /// Throw a data_key_error in case the specified key is unknown.
+        std::string toString(std::vector<JsonContainerKey> keys) const;
+
         std::string toPrettyString(size_t left_padding) const;
         std::string toPrettyString() const;
 

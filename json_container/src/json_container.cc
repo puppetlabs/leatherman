@@ -88,13 +88,12 @@ namespace leatherman { namespace json_container {
     }
 
     std::string JsonContainer::toString(const JsonContainerKey& key) const {
-        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+        auto jval = getValueInJson({ key });
+        return valueToString(*jval);
+    }
 
-        if (!hasKey(*jval, key.data())) {
-            throw data_key_error { "unknown key: " + key };
-        }
-
-        jval = getValueInJson(*jval, key.data());
+    std::string JsonContainer::toString(std::vector<JsonContainerKey> keys) const {
+        auto jval = getValueInJson(keys);
         return valueToString(*jval);
     }
 
