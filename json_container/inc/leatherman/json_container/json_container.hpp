@@ -21,7 +21,7 @@ namespace rapidjson {
     using Document = GenericDocument<UTF8<char>,
                                      MemoryPoolAllocator<CrtAllocator>,
                                      CrtAllocator>;
- }  // namespace rapidjson
+}  // namespace rapidjson
 
 namespace leatherman { namespace json_container {
     // Errors
@@ -106,7 +106,6 @@ namespace leatherman { namespace json_container {
     //    x.includes("foo");
     //    x.includes({ "foo", "bar", "baz" });
 
-
     class JsonContainer {
     public:
         JsonContainer();
@@ -115,6 +114,7 @@ namespace leatherman { namespace json_container {
         JsonContainer(const JsonContainer& data);
         JsonContainer(const JsonContainer&& data);
         JsonContainer& operator=(JsonContainer other);
+
         ~JsonContainer();
 
         std::vector<std::string> keys() const;
@@ -123,32 +123,38 @@ namespace leatherman { namespace json_container {
 
         std::string toString() const;
 
-        // Throws a data_key_error in case the specified key is unknown.
+        /// Throw a data_key_error in case the specified key is unknown.
         std::string toString(const JsonContainerKey& key) const;
+
+        // NOTE(ale): we don't use const for the keys arg of such
+        // signatures due to gcc issues
 
         std::string toPrettyString(size_t left_padding) const;
         std::string toPrettyString() const;
 
-        /// Returns true if the root is an empty JSON array or an empty
+        /// Return true if the root is an empty JSON array or an empty
         /// JSON object, false otherwise.
         bool empty() const;
 
-        /// Returns the number of entries of the root element in case
+        /// Return the number of entries of the root element in case
         /// is an object or array; returns 0 in case of a scalar
         size_t size() const;
 
-        /// Returns the number of entries of the specified element;
+        /// Return the number of entries of the specified element;
         /// returns 0 in case it's scalar
         /// Throw a data_key_error in case the specified key is unknown.
         size_t size(const JsonContainerKey& key) const;
 
-        /// Returns the number of entries of the specified element;
-        /// returns 0 in case it's scalar
+        /// Return the number of entries of the specified element;
+        /// return 0 in case it's scalar
         /// Throw a data_key_error in case of unknown keys.
         size_t size(std::vector<JsonContainerKey> keys) const;
 
+
+        /// Whether the specified entry exists.
         bool includes(const JsonContainerKey& key) const;
-        // NOTE(ale): we don't use const for the arg below for gcc issues
+
+        /// Whether the specified entry exists.
         bool includes(std::vector<JsonContainerKey> keys) const;
 
         DataType type() const;
@@ -232,13 +238,16 @@ namespace leatherman { namespace json_container {
 
             for (const auto& key : keys) {
                 const char* key_data = key.data();
+
                 if (!isObject(*jval)) {
                     throw data_key_error { "invalid key supplied; cannot "
                                            "navigate the provided path" };
                 }
+
                 if (!hasKey(*jval, key_data)) {
                     createKeyInJson(key_data, *jval);
                 }
+
                 jval = getValueInJson(*jval, key_data);
             }
 
@@ -251,6 +260,7 @@ namespace leatherman { namespace json_container {
         size_t getSize(const rapidjson::Value& jval) const;
 
         DataType getValueType(const rapidjson::Value& jval) const;
+
         bool hasKey(const rapidjson::Value& jval, const char* key) const;
 
         // NOTE(ale): we cant' use rapidjson::Value::IsObject directly
@@ -306,4 +316,4 @@ namespace leatherman { namespace json_container {
     template<>
     void JsonContainer::setValue<>(rapidjson::Value& jval, JsonContainer new_value);
 
- }}  // namespace leatherman::json_container
+}}  // namespace leatherman::json_container

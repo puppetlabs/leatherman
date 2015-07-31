@@ -265,8 +265,6 @@ namespace leatherman { namespace json_container {
     // Private functions
     //
 
-    // Internal size getter
-
     size_t JsonContainer::getSize(const rapidjson::Value& jval) const {
         switch (getValueType(jval)) {
             case DataType::Array:
@@ -277,8 +275,6 @@ namespace leatherman { namespace json_container {
                 return 0;
         }
     }
-
-    // Internal type methods
 
     DataType JsonContainer::getValueType(const rapidjson::Value& jval) const {
         switch (jval.GetType()) {
@@ -306,7 +302,7 @@ namespace leatherman { namespace json_container {
         }
     }
 
-    // Internal key manipulation methods
+    // Internal key / index manipulation methods
 
     bool JsonContainer::hasKey(const rapidjson::Value& jval, const char* key) const {
         return (jval.IsObject() && jval.HasMember(key));
