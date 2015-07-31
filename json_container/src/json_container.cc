@@ -61,26 +61,13 @@ namespace leatherman { namespace json_container {
     // either have an empty destructor or use a shared_ptr instead.
     JsonContainer::~JsonContainer() {}
 
+    // representation
+
     rapidjson::Document JsonContainer::getRaw() const {
         rapidjson::Document tmp;
         auto& a_t = document_root_->GetAllocator();
         tmp.CopyFrom(*document_root_, a_t);
         return tmp;
-    }
-
-    std::vector<std::string> JsonContainer::keys() const {
-        std::vector<std::string> k;
-        rapidjson::Value* v = reinterpret_cast<rapidjson::Value*>(document_root_.get());
-
-        if (v->IsObject()) {
-            for (rapidjson::Value::ConstMemberIterator itr = v->MemberBegin();
-                 itr != v->MemberEnd(); ++itr) {
-                k.push_back(itr->name.GetString());
-            }
-        }
-
-        // Return an empty vector if the document type isn't an object
-        return k;
     }
 
     std::string JsonContainer::toString() const {
@@ -158,6 +145,8 @@ namespace leatherman { namespace json_container {
         return toPrettyString(DEFAULT_LEFT_PADDING);
     }
 
+    // capacity
+
     bool JsonContainer::empty() const {
         rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
         auto data_type = getValueType(*jval);
@@ -170,8 +159,6 @@ namespace leatherman { namespace json_container {
             return false;
         }
     }
-
-    // size
 
     size_t JsonContainer::size() const {
         rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());

@@ -117,8 +117,6 @@ namespace leatherman { namespace json_container {
 
         ~JsonContainer();
 
-        std::vector<std::string> keys() const;
-
         rapidjson::Document getRaw() const;
 
         std::string toString() const;
@@ -153,6 +151,9 @@ namespace leatherman { namespace json_container {
         /// Throw a data_key_error in case of unknown keys.
         size_t size(std::vector<JsonContainerKey> keys) const;
 
+        /// In case the root entry is an object, returns its keys,
+        /// otherwise an empty vector.
+        std::vector<std::string> keys() const;
 
         /// Whether the specified entry exists.
         bool includes(const JsonContainerKey& key) const;
