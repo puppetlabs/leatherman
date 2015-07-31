@@ -269,6 +269,102 @@ TEST_CASE("JsonContainer::get for object entries", "[data]") {
                     == expected_array);
         }
     }
+
+    SECTION("it can access array entries") {
+        SECTION("it throws a data_type_error in case of type mismatch") {
+            SECTION("root entry") {
+                JsonContainer a { "[1, 2, 3]" };
+                REQUIRE_THROWS_AS(a.get<std::string>(1), data_type_error);
+            }
+
+            SECTION("object entry") {
+                REQUIRE_THROWS_AS(data.get<std::string>("vec", 1),
+                                  data_type_error);
+            }
+        }
+
+        SECTION("it throws a data_index_error in case of index out of bounds") {
+            SECTION("root entry") {
+                JsonContainer a { "[1, 2, 3]" };
+                REQUIRE_THROWS_AS(a.get<int>(10), data_index_error);
+            }
+
+            SECTION("object entry") {
+                REQUIRE_THROWS_AS(data.get<int>("vec", 10), data_index_error);
+            }
+        }
+
+        SECTION("it can get a value") {
+            SECTION("boolean") {
+                JsonContainer b { "[false, false, true, false]" };
+                REQUIRE_FALSE(b.get<bool>(3));
+            }
+
+            SECTION("integer") {
+                JsonContainer i { "[1, 2, 3]" };
+                REQUIRE(i.get<int>(1) == 2);
+            }
+
+            SECTION("double") {
+                JsonContainer d { "[3.14, 2.718]" };
+                REQUIRE(d.get<double>(1) == 2.718);
+            }
+
+            SECTION("string") {
+                JsonContainer s { "[\"one\", \"two\"]" };
+                REQUIRE(s.get<std::string>(1) == "two");
+            }
+
+            SECTION("object") {
+                JsonContainer o { "[ {\"spam\":\"eggs\"}, {\"foo\":\"bar\"} ]" };
+                auto retrieved_o = o.get<JsonContainer>(0);
+
+                REQUIRE(retrieved_o.size() == 1);
+                REQUIRE(retrieved_o.get<std::string>("spam") == "eggs");
+            }
+
+            SECTION("array") {
+                JsonContainer a { "[ [1, 2], [false, true], [\"ab\", \"cd\"] ]" };
+                std::vector<bool> e_a { false, true };
+
+                REQUIRE(a.get<std::vector<bool>>(1) == e_a);
+            }
+        }
+
+        SECTION("array with values of different types") {
+            JsonContainer a { "[ 1, \"foo\", true, [2.718, 3.14], 42, 42.0, "
+                              "{\"spam\":\"eggs\"} ]" };
+
+            SECTION("boolean") {
+                REQUIRE(a.get<bool>(2));
+            }
+
+            SECTION("integer") {
+                REQUIRE(a.get<int>(0) == 1);
+            }
+
+            SECTION("double") {
+                REQUIRE(a.get<double>(5) == 42.0);
+            }
+
+            SECTION("string") {
+                REQUIRE(a.get<std::string>(1) == "foo");
+            }
+
+            SECTION("object") {
+                auto retrieved_o = a.get<JsonContainer>(6);
+
+                REQUIRE(retrieved_o.size() == 1);
+                REQUIRE(retrieved_o.get<std::string>("spam") == "eggs");
+            }
+
+            SECTION("array") {
+                std::vector<double> expected_array { 2.718, 3.14 };
+
+                REQUIRE(a.get<std::vector<double>>(3) == expected_array);
+            }
+        }
+    }
 }
 
 TEST_CASE("JsonContainer::toString", "[data]") {
