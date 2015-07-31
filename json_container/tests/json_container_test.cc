@@ -271,6 +271,41 @@ TEST_CASE("JsonContainer::get for object entries", "[data]") {
     }
 }
 
+TEST_CASE("JsonContainer::toString", "[data]") {
+    SECTION("root entry") {
+        SECTION("object") {
+            JsonContainer o {};
+            o.set<std::string>("spam", "eggs");
+            REQUIRE(o.toString() == "{\"spam\":\"eggs\"}");
+        }
+
+        SECTION("array") {
+            JsonContainer a { "[1, 2, 3]" };
+            REQUIRE(a.toString() == "[1,2,3]");
+        }
+
+        SECTION("multi type array") {
+            JsonContainer mt_a { "[1, false, \"s\"]" };
+            REQUIRE(mt_a.toString() == "[1,false,\"s\"]");
+        }
+
+        SECTION("scalar") {
+            JsonContainer s { "42" };
+            REQUIRE(s.toString() == "42");
+        }
+    }
+
+    JsonContainer data { JSON };
+
+    SECTION("root object entry") {
+        REQUIRE(data.toString("goo") == "1");
+    }
+
+    SECTION("nested object entry") {
+        REQUIRE(data.toString({ "nested", "foo" }) == "\"bar\"");
+    }
+}
+
 TEST_CASE("JsonContainer::toPrettyString", "[data]") {
     SECTION("does not throw when the root is") {
         SECTION("a string") {
