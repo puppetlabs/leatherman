@@ -61,6 +61,8 @@ namespace leatherman { namespace json_container {
     // either have an empty destructor or use a shared_ptr instead.
     JsonContainer::~JsonContainer() {}
 
+    // representation
+
     rapidjson::Document JsonContainer::getRaw() const {
         rapidjson::Document tmp;
         auto& a_t = document_root_->GetAllocator();
@@ -68,33 +70,17 @@ namespace leatherman { namespace json_container {
         return tmp;
     }
 
-    std::vector<std::string> JsonContainer::keys() const {
-        std::vector<std::string> k;
-        rapidjson::Value* v = reinterpret_cast<rapidjson::Value*>(document_root_.get());
-
-        if (v->IsObject()) {
-            for (rapidjson::Value::ConstMemberIterator itr = v->MemberBegin();
-                 itr != v->MemberEnd(); ++itr) {
-                k.push_back(itr->name.GetString());
-            }
-        }
-
-        // Return an empty vector if the document type isn't an object
-        return k;
-    }
-
     std::string JsonContainer::toString() const {
         return valueToString(*document_root_);
     }
 
     std::string JsonContainer::toString(const JsonContainerKey& key) const {
-        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+        auto jval = getValueInJson({ key });
+        return valueToString(*jval);
+    }
 
-        if (!hasKey(*jval, key.data())) {
-            throw data_key_error { "unknown key: " + key };
-        }
-
-        jval = getValueInJson(*jval, key.data());
+    std::string JsonContainer::toString(std::vector<JsonContainerKey> keys) const {
+        auto jval = getValueInJson(keys);
         return valueToString(*jval);
     }
 
@@ -159,8 +145,10 @@ namespace leatherman { namespace json_container {
         return toPrettyString(DEFAULT_LEFT_PADDING);
     }
 
+    // capacity
+
     bool JsonContainer::empty() const {
-        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+        auto jval = getValueInJson();
         auto data_type = getValueType(*jval);
 
         if (data_type == DataType::Object) {
@@ -172,42 +160,42 @@ namespace leatherman { namespace json_container {
         }
     }
 
-    // size
-
     size_t JsonContainer::size() const {
-        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+        auto jval = getValueInJson();
         return getSize(*jval);
     }
 
     size_t JsonContainer::size(const JsonContainerKey& key) const {
-        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
-
-        if (!hasKey(*jval, key.data())) {
-            throw data_key_error { "unknown key: " + key };
-        }
-
-        jval = getValueInJson(*jval, key.data());
-
+        auto jval = getValueInJson({ key });
         return getSize(*jval);
     }
 
     size_t JsonContainer::size(std::vector<JsonContainerKey> keys) const {
-        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+        auto jval = getValueInJson(keys);
+        return getSize(*jval);
+    }
 
-        for (const auto& key : keys) {
-            if (!hasKey(*jval, key.data())) {
-                throw data_key_error { "unknown key: " + key };
+    // keys
+
+    std::vector<std::string> JsonContainer::keys() const {
+        std::vector<std::string> k;
+        auto jval = getValueInJson();
+
+        if (jval->IsObject()) {
+            for (rapidjson::Value::ConstMemberIterator itr = jval->MemberBegin();
+                 itr != jval->MemberEnd(); ++itr) {
+                k.push_back(itr->name.GetString());
             }
-            jval = getValueInJson(*jval, key.data());
         }
 
-        return getSize(*jval);
+        // Return an empty vector if the document type isn't an object
+        return k;
     }
 
     // includes
 
     bool JsonContainer::includes(const JsonContainerKey& key) const {
-        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+        auto jval = getValueInJson();
 
         if (hasKey(*jval, key.data())) {
             return true;
@@ -217,7 +205,7 @@ namespace leatherman { namespace json_container {
     }
 
     bool JsonContainer::includes(std::vector<JsonContainerKey> keys) const {
-        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+        auto jval = getValueInJson();
 
         for (const auto& key : keys) {
             if (!hasKey(*jval, key.data())) {
@@ -232,40 +220,39 @@ namespace leatherman { namespace json_container {
     // type
 
     DataType JsonContainer::type() const {
-        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+        auto jval = getValueInJson();
         return getValueType(*jval);
     }
 
     DataType JsonContainer::type(const JsonContainerKey& key) const {
-        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
-
-        if (!hasKey(*jval, key.data())) {
-            throw data_key_error { "unknown key: " + key };
-        }
-
-        jval = getValueInJson(*jval, key.data());
-
+        auto jval = getValueInJson({ key });
         return getValueType(*jval);
     }
 
     DataType JsonContainer::type(std::vector<JsonContainerKey> keys) const {
-        rapidjson::Value* jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+        auto jval = getValueInJson(keys);
+        return getValueType(*jval);
+    }
 
-        for (const auto& key : keys) {
-            if (!hasKey(*jval, key.data())) {
-                throw data_key_error { "unknown key: " + key };
-            }
-            jval = getValueInJson(*jval, key.data());
-        }
+    DataType JsonContainer::type(const size_t idx) const {
+        auto jval = getValueInJson(std::vector<JsonContainerKey> {}, true, idx);
+        return getValueType(*jval);
+    }
 
+    DataType JsonContainer::type(const JsonContainerKey& key, const size_t idx) const {
+        auto jval = getValueInJson({ key }, true, idx);
+        return getValueType(*jval);
+    }
+
+    DataType JsonContainer::type(std::vector<JsonContainerKey> keys,
+                                 const size_t idx) const {
+        auto jval = getValueInJson(keys, true, idx);
         return getValueType(*jval);
     }
 
     //
     // Private functions
     //
-
-    // Internal size getter
 
     size_t JsonContainer::getSize(const rapidjson::Value& jval) const {
         switch (getValueType(jval)) {
@@ -277,8 +264,6 @@ namespace leatherman { namespace json_container {
                 return 0;
         }
     }
-
-    // Internal type methods
 
     DataType JsonContainer::getValueType(const rapidjson::Value& jval) const {
         switch (jval.GetType()) {
@@ -306,7 +291,7 @@ namespace leatherman { namespace json_container {
         }
     }
 
-    // Internal key manipulation methods
+    // Internal key / index manipulation methods
 
     bool JsonContainer::hasKey(const rapidjson::Value& jval, const char* key) const {
         return (jval.IsObject() && jval.HasMember(key));
@@ -318,7 +303,45 @@ namespace leatherman { namespace json_container {
 
     rapidjson::Value* JsonContainer::getValueInJson(const rapidjson::Value& jval,
                                                     const char* key) const {
+        if (!jval.IsObject()) {
+            throw data_type_error { "not an object" };
+        }
+
+        if (!jval.HasMember(key)) {
+            std::string err_msg { "unknown object entry with key: " };
+            throw data_key_error { err_msg + key };
+        }
+
         return const_cast<rapidjson::Value*>(&jval[key]);
+    }
+
+    rapidjson::Value* JsonContainer::getValueInJson(const rapidjson::Value& jval,
+                                                    const size_t& idx) const {
+        if (getValueType(jval) != DataType::Array) {
+            throw data_type_error { "not an array" };
+        }
+
+        if (idx >= jval.Size()) {
+            throw data_index_error { "array index out of bounds" };
+        }
+
+        return const_cast<rapidjson::Value*>(&jval[idx]);
+    }
+
+    rapidjson::Value* JsonContainer::getValueInJson(std::vector<JsonContainerKey> keys,
+                                                    const bool is_array,
+                                                    const size_t idx) const {
+        auto jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+
+        for (const auto& key : keys) {
+            jval = getValueInJson(*jval, key.data());
+        }
+
+        if (is_array) {
+            jval = getValueInJson(*jval, idx);
+        }
+
+        return jval;
     }
 
     void JsonContainer::createKeyInJson(const char* key,
@@ -328,12 +351,7 @@ namespace leatherman { namespace json_container {
                        document_root_->GetAllocator());
     }
 
-    // getValue specialisations for entries of different types
-
-    template<>
-    int JsonContainer::getValue<>() const {
-        return 0;
-    }
+    // getValue specialisations
 
     template<>
     int JsonContainer::getValue<>(const rapidjson::Value& value) const {
@@ -346,11 +364,6 @@ namespace leatherman { namespace json_container {
         }
 
         return value.GetInt();
-    }
-
-    template<>
-    bool JsonContainer::getValue<>() const {
-        return false;
     }
 
     template<>
@@ -367,11 +380,6 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    std::string JsonContainer::getValue() const {
-        return "";
-    }
-
-    template<>
     std::string JsonContainer::getValue<>(const rapidjson::Value& value) const {
         if (value.IsNull()) {
             return "";
@@ -385,11 +393,6 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    double JsonContainer::getValue<>() const {
-        return 0.0;
-    }
-
-    template<>
     double JsonContainer::getValue<>(const rapidjson::Value& value) const {
         if (value.IsNull()) {
             return 0.0;
@@ -400,12 +403,6 @@ namespace leatherman { namespace json_container {
         }
 
         return value.GetDouble();
-    }
-
-    template<>
-    JsonContainer JsonContainer::getValue<>() const {
-        JsonContainer container {};
-        return container;
     }
 
     template<>
@@ -430,12 +427,6 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    std::vector<std::string> JsonContainer::getValue<>() const {
-        std::vector<std::string> tmp {};
-        return tmp;
-    }
-
-    template<>
     std::vector<std::string> JsonContainer::getValue<>(const rapidjson::Value& value) const {
         std::vector<std::string> tmp {};
 
@@ -457,12 +448,6 @@ namespace leatherman { namespace json_container {
             tmp.push_back(itr->GetString());
         }
 
-        return tmp;
-    }
-
-    template<>
-    std::vector<bool> JsonContainer::getValue<>() const {
-        std::vector<bool> tmp {};
         return tmp;
     }
 
@@ -492,12 +477,6 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    std::vector<int> JsonContainer::getValue<>() const {
-        std::vector<int> tmp {};
-        return tmp;
-    }
-
-    template<>
     std::vector<int> JsonContainer::getValue<>(const rapidjson::Value& value) const {
         std::vector<int> tmp {};
 
@@ -523,12 +502,6 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    std::vector<double> JsonContainer::getValue<>() const {
-        std::vector<double> tmp {};
-        return tmp;
-    }
-
-    template<>
     std::vector<double> JsonContainer::getValue<>(const rapidjson::Value& value) const {
         std::vector<double> tmp {};
 
@@ -550,12 +523,6 @@ namespace leatherman { namespace json_container {
             tmp.push_back(itr->GetDouble());
         }
 
-        return tmp;
-    }
-
-    template<>
-    std::vector<JsonContainer> JsonContainer::getValue<>() const {
-        std::vector<JsonContainer> tmp {};
         return tmp;
     }
 

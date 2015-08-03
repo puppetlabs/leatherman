@@ -94,7 +94,7 @@ TEST_CASE("JsonContainer::JsonContainer - passing JSON string", "[data]") {
     }
 }
 
-TEST_CASE("JsonContainer::get", "[data]") {
+TEST_CASE("JsonContainer::get for object entries", "[data]") {
     JsonContainer msg { JSON };
 
     SECTION("it can get a root value") {
@@ -134,15 +134,8 @@ TEST_CASE("JsonContainer::get", "[data]") {
         REQUIRE(msg.get<bool>("null") == false);
     }
 
-    SECTION("it returns a null like value when indexing something that "
-            "doesn't exist") {
-        REQUIRE(msg.get<std::string>("invalid") == "");
-        REQUIRE(msg.get<int>({ "goo", "1" }) == 0);
-        REQUIRE(msg.get<bool>({ "foo", "baz" }) == false);
-    }
-
-    SECTION("it can get the root") {
-        SECTION("array") {
+    SECTION("it can get the root entry") {
+        SECTION("array of numbers") {
             JsonContainer data_array { "[1, 2, 3]" };
             auto array = data_array.get<std::vector<int>>();
             std::vector<int> expected_array { 1, 2, 3 };
@@ -165,6 +158,17 @@ TEST_CASE("JsonContainer::get", "[data]") {
     }
 
     JsonContainer data { JSON };
+
+    SECTION("it throws a data_key_error in case of unknown object entry") {
+        SECTION("unknown root object entry") {
+            REQUIRE_THROWS_AS(data.get<int>("unknown"), data_key_error);
+        }
+
+        SECTION("unknown nested object entry") {
+            REQUIRE_THROWS_AS(data.get<int>({ "nested", "unknown" }),
+                              data_key_error);
+        }
+    }
 
     SECTION("it throws a data_type_error in case of mismatch") {
         SECTION("root entry") {
@@ -264,6 +268,137 @@ TEST_CASE("JsonContainer::get", "[data]") {
             REQUIRE(data.get<JsonContainer>("vec").get<std::vector<int>>()
                     == expected_array);
         }
+    }
+
+    SECTION("it can access array entries") {
+        SECTION("it throws a data_type_error in case of type mismatch") {
+            SECTION("root entry") {
+                JsonContainer a { "[1, 2, 3]" };
+                REQUIRE_THROWS_AS(a.get<std::string>(1), data_type_error);
+            }
+
+            SECTION("object entry") {
+                REQUIRE_THROWS_AS(data.get<std::string>("vec", 1),
+                                  data_type_error);
+            }
+        }
+
+        SECTION("it throws a data_index_error in case of index out of bounds") {
+            SECTION("root entry") {
+                JsonContainer a { "[1, 2, 3]" };
+                REQUIRE_THROWS_AS(a.get<int>(10), data_index_error);
+            }
+
+            SECTION("object entry") {
+                REQUIRE_THROWS_AS(data.get<int>("vec", 10), data_index_error);
+            }
+        }
+
+        SECTION("it can get a value") {
+            SECTION("boolean") {
+                JsonContainer b { "[false, false, true, false]" };
+                REQUIRE_FALSE(b.get<bool>(3));
+            }
+
+            SECTION("integer") {
+                JsonContainer i { "[1, 2, 3]" };
+                REQUIRE(i.get<int>(1) == 2);
+            }
+
+            SECTION("double") {
+                JsonContainer d { "[3.14, 2.718]" };
+                REQUIRE(d.get<double>(1) == 2.718);
+            }
+
+            SECTION("string") {
+                JsonContainer s { "[\"one\", \"two\"]" };
+                REQUIRE(s.get<std::string>(1) == "two");
+            }
+
+            SECTION("object") {
+                JsonContainer o { "[ {\"spam\":\"eggs\"}, {\"foo\":\"bar\"} ]" };
+                auto retrieved_o = o.get<JsonContainer>(0);
+
+                REQUIRE(retrieved_o.size() == 1);
+                REQUIRE(retrieved_o.get<std::string>("spam") == "eggs");
+            }
+
+            SECTION("array") {
+                JsonContainer a { "[ [1, 2], [false, true], [\"ab\", \"cd\"] ]" };
+                std::vector<bool> e_a { false, true };
+
+                REQUIRE(a.get<std::vector<bool>>(1) == e_a);
+            }
+        }
+
+        SECTION("array with values of different types") {
+            JsonContainer a { "[ 1, \"foo\", true, [2.718, 3.14], 42, 42.0, "
+                              "{\"spam\":\"eggs\"} ]" };
+
+            SECTION("boolean") {
+                REQUIRE(a.get<bool>(2));
+            }
+
+            SECTION("integer") {
+                REQUIRE(a.get<int>(0) == 1);
+            }
+
+            SECTION("double") {
+                REQUIRE(a.get<double>(5) == 42.0);
+            }
+
+            SECTION("string") {
+                REQUIRE(a.get<std::string>(1) == "foo");
+            }
+
+            SECTION("object") {
+                auto retrieved_o = a.get<JsonContainer>(6);
+
+                REQUIRE(retrieved_o.size() == 1);
+                REQUIRE(retrieved_o.get<std::string>("spam") == "eggs");
+            }
+
+            SECTION("array") {
+                std::vector<double> expected_array { 2.718, 3.14 };
+
+                REQUIRE(a.get<std::vector<double>>(3) == expected_array);
+            }
+        }
+    }
+}
+
+TEST_CASE("JsonContainer::toString", "[data]") {
+    SECTION("root entry") {
+        SECTION("object") {
+            JsonContainer o {};
+            o.set<std::string>("spam", "eggs");
+            REQUIRE(o.toString() == "{\"spam\":\"eggs\"}");
+        }
+
+        SECTION("array") {
+            JsonContainer a { "[1, 2, 3]" };
+            REQUIRE(a.toString() == "[1,2,3]");
+        }
+
+        SECTION("multi type array") {
+            JsonContainer mt_a { "[1, false, \"s\"]" };
+            REQUIRE(mt_a.toString() == "[1,false,\"s\"]");
+        }
+
+        SECTION("scalar") {
+            JsonContainer s { "42" };
+            REQUIRE(s.toString() == "42");
+        }
+    }
+
+    JsonContainer data { JSON };
+
+    SECTION("root object entry") {
+        REQUIRE(data.toString("goo") == "1");
+    }
+
+    SECTION("nested object entry") {
+        REQUIRE(data.toString({ "nested", "foo" }) == "\"bar\"");
     }
 }
 
@@ -479,15 +614,22 @@ TEST_CASE("JsonContainer::set", "[data]") {
     SECTION("it allows resetting a JsonContainer value") {
         JsonContainer d {};
         d.set<int>("i", 1);
+
         msg.set<JsonContainer>("d_c entry", d);
         auto i_entry = msg.get<JsonContainer>("d_c entry");
+
+        // Expecting msg = { "d_c entry" : {"i" : 1} }
         REQUIRE(msg.includes("d_c entry"));
         REQUIRE(i_entry.get<int>("i") == 1);
 
         JsonContainer d_other {};
-        d_other.set<bool>("b", false);
+        d_other.set<bool>("b", true);
+
+        msg.set<JsonContainer>("d_c entry", d_other);
         auto b_entry = msg.get<JsonContainer>("d_c entry");
-        REQUIRE_FALSE(b_entry.get<bool>("b"));
+
+        // Expecting msg = { "d_c entry" : {"b" : true} }
+        REQUIRE(b_entry.get<bool>("b"));
     }
 
     SECTION("it can set a key to a vector") {
@@ -537,12 +679,19 @@ TEST_CASE("JsonContainer::keys", "[data]") {
     SECTION("It returns a vector of keys") {
         JsonContainer data { "{ \"a\" : 1, "
                               " \"b\" : 2}"};
-        REQUIRE(data.keys().size() == 2);
+        std::vector<std::string> expected_keys { "a", "b" };
+
+        REQUIRE(data.keys() == expected_keys);
     }
 
     SECTION("It returns an empty vector when the JsonContainer is empty") {
         JsonContainer data {};
         REQUIRE(data.keys().size() == 0);
+    }
+
+    SECTION("It returns an empty vector when the JsonContainer is an array") {
+        JsonContainer data_array { "[1, 2, 3]" };
+        REQUIRE(data_array.keys().size() == 0);
     }
 }
 
@@ -560,7 +709,7 @@ TEST_CASE("JsonContainer::type", "[data]") {
             REQUIRE(data.type() == DataType::Object);
         }
 
-        SECTION("number") {
+        SECTION("integer") {
             JsonContainer data_number { "42" };
             REQUIRE(data_number.type() == DataType::Int);
         }
@@ -606,8 +755,15 @@ TEST_CASE("JsonContainer::type", "[data]") {
         }
 
         SECTION("it can distinguish a Double value") {
-            data.set<double>("d_entry", 2.71828);
-            REQUIRE(data.type("d_entry") == DataType::Double);
+            SECTION("defined by set") {
+                data.set<double>("d_entry", 2.71828);
+                REQUIRE(data.type("d_entry") == DataType::Double);
+            }
+
+            SECTION("defined by JSON string given to the ctor") {
+                JsonContainer data_number { "2.71828" };
+                REQUIRE(data_number.type() == DataType::Double);
+            }
         }
 
         SECTION("it can distinguish a null value") {
@@ -668,6 +824,83 @@ TEST_CASE("JsonContainer::type", "[data]") {
             data.set<JsonContainer>({ "stuff", "more_stuff" }, data_with_null);
             auto data_type = data.type({ "stuff", "more_stuff", "the_null" });
             REQUIRE(data_type == DataType::Null);
+        }
+    }
+}
+
+TEST_CASE("JsonContainer::type for arrays entries", "[data]") {
+    JsonContainer data { "[false, -42, 3.14, \"spam\", {\"foo\" : [3, true]}, "
+                         "[1, 2, 3, 4] ]" };
+
+    SECTION("root entry") {
+        SECTION("array") {
+            JsonContainer not_an_aray { JSON };
+            REQUIRE_THROWS_AS(not_an_aray.type(1), data_type_error);
+        }
+
+        SECTION("array with values of different types") {
+            JsonContainer data_array { "[1, \"spam\", false]" };
+            REQUIRE(data_array.type() == DataType::Array);
+        }
+
+        SECTION("boolean") {
+            REQUIRE(data.type(0) == DataType::Bool);
+        }
+
+        SECTION("integer") {
+            REQUIRE(data.type(1) == DataType::Int);
+        }
+
+        SECTION("double") {
+            REQUIRE(data.type(2) == DataType::Double);
+        }
+
+        SECTION("string") {
+            REQUIRE(data.type(3) == DataType::String);
+        }
+
+        SECTION("object") {
+            REQUIRE(data.type(4) == DataType::Object);
+        }
+
+        SECTION("array") {
+            REQUIRE(data.type(5) == DataType::Array);
+        }
+    }
+
+    SECTION("object entry") {
+        JsonContainer o { JSON };
+        o.set<JsonContainer>("multi type array", data);
+
+        SECTION("container") {
+            REQUIRE(o.type("multi type array") == DataType::Array);
+        }
+
+        SECTION("double") {
+            REQUIRE(o.type("multi type array", 2) == DataType::Double);
+        }
+
+        SECTION("string") {
+            REQUIRE(o.type("multi type array", 3) == DataType::String);
+        }
+    }
+
+    SECTION("nested entry") {
+        JsonContainer o { JSON };
+        o.set<JsonContainer>({ "nested", "multi type array" }, data);
+
+        SECTION("container") {
+            REQUIRE(o.type({ "nested", "multi type array" }) == DataType::Array);
+        }
+
+        SECTION("double") {
+            REQUIRE(o.type({ "nested", "multi type array" }, 2)
+                    == DataType::Double);
+        }
+
+        SECTION("string") {
+            REQUIRE(o.type({ "nested", "multi type array" }, 3)
+                    == DataType::String);
         }
     }
 }
