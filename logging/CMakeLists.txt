@@ -7,6 +7,10 @@ add_leatherman_includes("${Boost_INCLUDE_DIRS}")
 leatherman_dependency(nowide)
 leatherman_dependency(locale)
 
+if (CMAKE_SYSTEM_NAME MATCHES "Linux" OR CMAKE_SYSTEM_NAME MATCHES "SunOS")
+    add_leatherman_deps(rt)
+endif()
+
 if (BUILDING_LEATHERMAN)
     leatherman_logging_namespace("leatherman.logging")
     leatherman_logging_line_numbers()
