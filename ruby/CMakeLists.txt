@@ -1,5 +1,3 @@
-find_package(Ruby 1.9 REQUIRED)
-
 leatherman_dependency(dynamic_library)
 leatherman_dependency(util)
 leatherman_dependency(execution)
