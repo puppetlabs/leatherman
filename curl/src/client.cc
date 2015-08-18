@@ -321,7 +321,7 @@ namespace leatherman { namespace curl {
         if (!_client_protocols) {
             // If not set, allow all protocols
             _client_protocols = CURLPROTO_ALL;
-            LOG_WARNING("No client protocol was set. Allowing all protocols.", _client_protocols);
+            LOG_WARNING("No client protocol was set. Allowing all protocols.");
         }
 
         auto result = curl_easy_setopt(_handle, CURLOPT_PROTOCOLS, _client_protocols);
