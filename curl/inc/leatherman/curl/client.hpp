@@ -201,7 +201,7 @@ namespace leatherman { namespace curl {
         std::string _ca_cert;
         std::string _client_cert;
         std::string _client_key;
-        long _client_protocols;
+        long _client_protocols = CURLPROTO_ALL;
 
         response perform(http_method method, request const& req);
         void set_method(context& ctx, http_method method);

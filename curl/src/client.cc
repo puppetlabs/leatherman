@@ -318,12 +318,6 @@ namespace leatherman { namespace curl {
     }
 
     void client::set_client_protocols(context& ctx) {
-        if (!_client_protocols) {
-            // If not set, allow all protocols
-            _client_protocols = CURLPROTO_ALL;
-            LOG_WARNING("No client protocol was set. Allowing all protocols.");
-        }
-
         auto result = curl_easy_setopt(_handle, CURLOPT_PROTOCOLS, _client_protocols);
         if (result != CURLE_OK) {
             throw http_request_exception(ctx.req, curl_easy_strerror(result));
