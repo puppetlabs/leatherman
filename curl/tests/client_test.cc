@@ -239,6 +239,13 @@ namespace leatherman { namespace curl {
             auto test_impl = static_cast<curl_impl* const>(handle);
             REQUIRE(test_impl->protocols == CURLPROTO_HTTP);
         }
+
+        SECTION("cURL defaults to all protocols if no protocols are specified") {
+            auto resp = test_client.get(test_request);
+            CURL* const& handle = test_client.get_handle();
+            auto test_impl = static_cast<curl_impl* const>(handle);
+            REQUIRE(test_impl->protocols == CURLPROTO_ALL);
+        }
     }
 
     TEST_CASE("curl::client errors") {
