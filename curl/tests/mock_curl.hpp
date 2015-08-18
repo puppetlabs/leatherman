@@ -33,6 +33,7 @@ struct curl_impl
         ca_bundle_error,
         ssl_cert_error,
         ssl_key_error,
+        protocol_error,
     };
 
     error_mode test_failure_mode = error_mode::success;
@@ -50,6 +51,7 @@ struct curl_impl
     void* read_data; // Where to read the request body from
 
     std::string request_url, cookie, cacert, client_cert, client_key;
+    long protocols;
     http_method method = http_method::get;
 
     curl_slist* header; // List of custom request headers to be passed to the server
