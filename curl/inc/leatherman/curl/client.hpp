@@ -164,6 +164,13 @@ namespace leatherman { namespace curl {
          */
         void set_client_cert(std::string const& client_cert, std::string const& client_key);
 
+        /**
+         * Set and limit what protocols curl will support
+         * @param client_protocols bitmask of CURLPROTO_*
+         *        (see more: http://curl.haxx.se/libcurl/c/CURLOPT_PROTOCOLS.html)
+         */
+        void set_supported_protocols(long client_protocols);
+
      private:
         client(client const&) = delete;
         client& operator=(client const&) = delete;
@@ -194,6 +201,7 @@ namespace leatherman { namespace curl {
         std::string _ca_cert;
         std::string _client_cert;
         std::string _client_key;
+        long _client_protocols = CURLPROTO_ALL;
 
         response perform(http_method method, request const& req);
         void set_method(context& ctx, http_method method);
@@ -205,6 +213,7 @@ namespace leatherman { namespace curl {
         void set_write_callbacks(context& ctx);
         void set_client_info(context &ctx);
         void set_ca_info(context& ctx);
+        void set_client_protocols(context& ctx);
 
         static size_t read_body(char* buffer, size_t size, size_t count, void* ptr);
         static size_t write_header(char* buffer, size_t size, size_t count, void* ptr);

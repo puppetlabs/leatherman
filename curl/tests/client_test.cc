@@ -231,6 +231,21 @@ namespace leatherman { namespace curl {
             auto test_impl = static_cast<curl_impl* const>(handle);
             REQUIRE(test_impl->client_key == "key");
         }
+
+        SECTION("cURL should make an HTTP request with the specified HTTP protocol") {
+            test_client.set_supported_protocols(CURLPROTO_HTTP);
+            auto resp = test_client.get(test_request);
+            CURL* const& handle = test_client.get_handle();
+            auto test_impl = static_cast<curl_impl* const>(handle);
+            REQUIRE(test_impl->protocols == CURLPROTO_HTTP);
+        }
+
+        SECTION("cURL defaults to all protocols if no protocols are specified") {
+            auto resp = test_client.get(test_request);
+            CURL* const& handle = test_client.get_handle();
+            auto test_impl = static_cast<curl_impl* const>(handle);
+            REQUIRE(test_impl->protocols == CURLPROTO_ALL);
+        }
     }
 
     TEST_CASE("curl::client errors") {
@@ -335,6 +350,12 @@ namespace leatherman { namespace curl {
         SECTION("client fails to set SSL key info") {
             test_client.set_client_cert("cert", "key");
             test_impl->test_failure_mode = curl_impl::error_mode::ssl_key_error;
+            REQUIRE_THROWS_AS(test_client.get(test_request), http_request_exception);
+        }
+
+        SECTION("client fails to make http call with https protocol only enabled") {
+            test_client.set_supported_protocols(CURLPROTO_HTTPS);
+            test_impl->test_failure_mode = curl_impl::error_mode::protocol_error;
             REQUIRE_THROWS_AS(test_client.get(test_request), http_request_exception);
         }
     }

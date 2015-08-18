@@ -154,6 +154,7 @@ namespace leatherman { namespace curl {
         set_write_callbacks(ctx);
         set_ca_info(ctx);
         set_client_info(ctx);
+        set_client_protocols(ctx);
 
         // Perform the request
         result = curl_easy_perform(_handle);
@@ -177,6 +178,10 @@ namespace leatherman { namespace curl {
     {
         _client_cert = client_cert;
         _client_key = client_key;
+    }
+
+    void client::set_supported_protocols(long client_protocols) {
+        _client_protocols = client_protocols;
     }
 
     void client::set_method(context& ctx, http_method method)
@@ -309,6 +314,13 @@ namespace leatherman { namespace curl {
             if (result != CURLE_OK) {
                 throw http_request_exception(ctx.req, curl_easy_strerror(result));
             }
+        }
+    }
+
+    void client::set_client_protocols(context& ctx) {
+        auto result = curl_easy_setopt(_handle, CURLOPT_PROTOCOLS, _client_protocols);
+        if (result != CURLE_OK) {
+            throw http_request_exception(ctx.req, curl_easy_strerror(result));
         }
     }
 
