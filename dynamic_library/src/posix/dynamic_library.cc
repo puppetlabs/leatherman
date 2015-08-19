@@ -41,26 +41,12 @@ namespace leatherman { namespace dynamic_library {
 
         auto load_mode = (global ? RTLD_GLOBAL : RTLD_LOCAL) | RTLD_LAZY;
 
-        // Don't actually perform a load to determine if it is already loaded
-#if !defined(RTLD_NOLOAD)
-        // HACK HACK HACK HACK HACK
-
-        // On AIX, RTLD_NOLOAD doesn't exist. This gets things to compile
-        // there, but is WRONG and will most likely BREAK at runtime.
-        // FACT-891 needs to be resolved.
         _handle = dlopen(name.c_str(), load_mode);
-#else
-        _handle = dlopen(name.c_str(), RTLD_NOLOAD | load_mode);
-#endif
         if (!_handle) {
-            // Load now
-            _handle = dlopen(name.c_str(), load_mode);
-            if (!_handle) {
-                LOG_DEBUG("library %1% not found %2% (%3%).", name.c_str(), strerror(errno), errno);
-                return false;
-            }
-            _first_load = true;
+            LOG_DEBUG("library %1% not found %2% (%3%).", name.c_str(), strerror(errno), errno);
+            return false;
         }
+        _first_load = true;
         _name = name;
         return true;
     }

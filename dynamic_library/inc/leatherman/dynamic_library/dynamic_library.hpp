@@ -74,6 +74,8 @@ namespace leatherman { namespace dynamic_library {
         /**
          * Loads the given dynamic library.
          * The current library will be closed before the given library is loaded.
+         * If you rely on the value of first_load(), you should try to call find_by_symbol
+         * before calling this function.
          * @param name The name of the library to load.
          * @return Returns true if the library loaded or false if it did not.
          */
