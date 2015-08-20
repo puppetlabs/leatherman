@@ -154,7 +154,7 @@ namespace leatherman { namespace execution {
     }
 
     // Source: http://blogs.msdn.com/b/twistylittlepassagesallalike/archive/2011/04/23/everyone-quotes-arguments-the-wrong-way.aspx
-    static string ArgvToCommandLine(vector<string> const& arguments)
+    static string ArgvToCommandLine(vector<string> const& arguments, bool preserve = false)
     {
         // Unless we're told otherwise, don't quote unless we actually need to do so - hopefully avoid problems if
         // programs won't parse quotes properly.
@@ -162,7 +162,7 @@ namespace leatherman { namespace execution {
         for (auto const& arg : arguments) {
             if (arg.empty()) {
                 continue;
-            } else if (arg.find_first_of(" \t\n\v\"") == arg.npos) {
+            } else if (preserve || arg.find_first_of(" \t\n\v\"") == arg.npos) {
                 commandline += arg;
             } else {
                 commandline += '"';
@@ -468,7 +468,7 @@ namespace leatherman { namespace execution {
 
         // Execute the command with arguments. Prefix arguments with the executable, or quoted arguments won't work.
         auto commandLine = arguments ?
-            boost::nowide::widen(ArgvToCommandLine({ executable }) + " " + ArgvToCommandLine(*arguments)) : L"";
+            boost::nowide::widen(ArgvToCommandLine({ executable }) + " " + ArgvToCommandLine(*arguments, options[execution_options::preserve_arguments])) : L"";
 
         STARTUPINFO startupInfo = {};
         startupInfo.cb = sizeof(startupInfo);
