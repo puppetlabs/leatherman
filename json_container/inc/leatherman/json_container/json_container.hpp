@@ -246,6 +246,26 @@ namespace leatherman { namespace json_container {
             return getValue<T>(*getValueInJson(keys, true, idx));
         }
 
+        /// Return the value of the specified entry of the root object,
+        /// or default_value if the entry doesn't exist.
+        /// Throw a data_type_error in case the type T doesn't match
+        /// the specified one.
+        template <typename T>
+        T getWithDefault(const JsonContainerKey& key, const T default_value) {
+            auto jval = getValueInJson();
+            auto key_data = key.data();
+
+            if (!isObject(*jval)) {
+                throw data_type_error { "not an object" };
+            }
+
+            if (!hasKey(*jval, key_data)) {
+                return default_value;
+            }
+
+            return getValue<T>(*getValueInJson(*jval, key_data));
+        }
+
         /// Throw a data_key_error in case the root is not a valid JSON
         /// object, so that is not possible to set the entry.
         template <typename T>

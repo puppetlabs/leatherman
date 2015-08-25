@@ -157,6 +157,21 @@ TEST_CASE("JsonContainer::get for object entries", "[data]") {
         }
     }
 
+    SECTION("it can provide a default value if the key is not found") {
+      REQUIRE(msg.getWithDefault<int>("dne", 42) == 42);
+      REQUIRE(msg.getWithDefault<double>("dne", 42.0) == 42.0);
+      REQUIRE(msg.getWithDefault<bool>("dne", true) == true);
+      REQUIRE(msg.getWithDefault<std::string>("dne", "foo") == "foo");
+      std::vector<int> ints{1, 2, 3};
+      std::vector<double> doubles{1.0, 2.0, 3.0};
+      std::vector<bool> bools{false, true, false};
+      std::vector<std::string> strings{"foo", "bar", "baz"};
+      REQUIRE(msg.getWithDefault<std::vector<int>>("dne", ints) == ints);
+      REQUIRE(msg.getWithDefault<std::vector<double>>("dne", doubles) == doubles);
+      REQUIRE(msg.getWithDefault<std::vector<bool>>("dne", bools) == bools);
+      REQUIRE(msg.getWithDefault<std::vector<std::string>>("dne", strings) == strings);
+    }
+
     JsonContainer data { JSON };
 
     SECTION("it throws a data_key_error in case of unknown object entry") {
