@@ -200,7 +200,7 @@ namespace leatherman { namespace json_container {
         /// the specified one.
         template <typename T>
         T get(const JsonContainerKey& key) const {
-            return getValue<T>(*getValueInJson({ key }));
+            return getValue<T>(*getValueInJson(std::vector<JsonContainerKey> { key }));
         }
 
         /// Return the value of the specified nested entry.
@@ -231,7 +231,8 @@ namespace leatherman { namespace json_container {
         /// entry is not an array.
         template <typename T>
         T get(const JsonContainerKey& key, const size_t idx) const {
-            return getValue<T>(*getValueInJson({ key }, true, idx));
+            return getValue<T>(*getValueInJson(std::vector<JsonContainerKey> { key },
+                                               true, idx));
         }
 
         /// Return the indexed value of the specified nested array
