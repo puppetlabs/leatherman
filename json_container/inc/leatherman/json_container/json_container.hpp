@@ -251,7 +251,7 @@ namespace leatherman { namespace json_container {
         /// Throw a data_type_error in case the type T doesn't match
         /// the specified one or if the root entry is not an object.
         template <typename T>
-        T getWithDefault(const JsonContainerKey& key, const T default_value) {
+        T getWithDefault(const JsonContainerKey& key, const T default_value) const {
             auto jval = getValueInJson();
             auto key_data = key.data();
 
