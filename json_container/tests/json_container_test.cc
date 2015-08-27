@@ -95,43 +95,43 @@ TEST_CASE("JsonContainer::JsonContainer - passing JSON string", "[data]") {
 }
 
 TEST_CASE("JsonContainer::get for object entries", "[data]") {
-    JsonContainer msg { JSON };
+    JsonContainer data { JSON };
 
     SECTION("it can get a root value") {
-        REQUIRE(msg.get<int>("goo") == 1);
+        REQUIRE(data.get<int>("goo") == 1);
     }
 
     SECTION("it can get a nested value") {
-        REQUIRE(msg.get<int>({"foo", "bar"}) == 2);
+        REQUIRE(data.get<int>({"foo", "bar"}) == 2);
     }
 
     SECTION("it can get a bool value") {
-        REQUIRE(msg.get<bool>("bool") == true);
+        REQUIRE(data.get<bool>("bool") == true);
     }
 
     SECTION("it can get a string value") {
-        REQUIRE(msg.get<std::string>("string") == "a string");
+        REQUIRE(data.get<std::string>("string") == "a string");
     }
 
     SECTION("it can get a double value") {
-        REQUIRE(msg.get<double>("real") == 3.1415);
+        REQUIRE(data.get<double>("real") == 3.1415);
     }
 
     SECTION("it can get a vector") {
         std::vector<int> tmp { 1, 2 };
-        std::vector<int> result { msg.get<std::vector<int>>("vec") };
+        std::vector<int> result { data.get<std::vector<int>>("vec") };
         REQUIRE(tmp[0] == result[0]);
         REQUIRE(tmp[1] == result[1]);
     }
 
     SECTION("it can get the root object") {
-      REQUIRE(msg.get<JsonContainer>().get<int>("goo") == 1);
+      REQUIRE(data.get<JsonContainer>().get<int>("goo") == 1);
     }
 
     SECTION("it should behave correctly given a null value") {
-        REQUIRE(msg.get<std::string>("null") == "");
-        REQUIRE(msg.get<int>("null") == 0);
-        REQUIRE(msg.get<bool>("null") == false);
+        REQUIRE(data.get<std::string>("null") == "");
+        REQUIRE(data.get<int>("null") == 0);
+        REQUIRE(data.get<bool>("null") == false);
     }
 
     SECTION("it can get the root entry") {
@@ -144,7 +144,7 @@ TEST_CASE("JsonContainer::get for object entries", "[data]") {
         }
 
         SECTION("object") {
-            auto object = msg.get<JsonContainer>();
+            auto object = data.get<JsonContainer>();
 
             REQUIRE(object.get<int>("goo") == 1);
         }
@@ -156,23 +156,6 @@ TEST_CASE("JsonContainer::get for object entries", "[data]") {
             REQUIRE(number == 42);
         }
     }
-
-    SECTION("it can provide a default value if the key is not found") {
-      REQUIRE(msg.getWithDefault<int>("dne", 42) == 42);
-      REQUIRE(msg.getWithDefault<double>("dne", 42.0) == 42.0);
-      REQUIRE(msg.getWithDefault<bool>("dne", true) == true);
-      REQUIRE(msg.getWithDefault<std::string>("dne", "foo") == "foo");
-      std::vector<int> ints{1, 2, 3};
-      std::vector<double> doubles{1.0, 2.0, 3.0};
-      std::vector<bool> bools{false, true, false};
-      std::vector<std::string> strings{"foo", "bar", "baz"};
-      REQUIRE(msg.getWithDefault<std::vector<int>>("dne", ints) == ints);
-      REQUIRE(msg.getWithDefault<std::vector<double>>("dne", doubles) == doubles);
-      REQUIRE(msg.getWithDefault<std::vector<bool>>("dne", bools) == bools);
-      REQUIRE(msg.getWithDefault<std::vector<std::string>>("dne", strings) == strings);
-    }
-
-    JsonContainer data { JSON };
 
     SECTION("it throws a data_key_error in case of unknown object entry") {
         SECTION("unknown root object entry") {
@@ -379,6 +362,60 @@ TEST_CASE("JsonContainer::get for object entries", "[data]") {
                 REQUIRE(a.get<std::vector<double>>(3) == expected_array);
             }
         }
+    }
+}
+
+TEST_CASE("JsonContainer::getWithDefault", "[data]") {
+    JsonContainer data { JSON };
+    JsonContainer data_a { "[1, 2, 3]" };
+    std::vector<int> ints { 1, 2, 3 };
+    std::vector<double> doubles { 1.0, 2.0, 3.0 };
+    std::vector<bool> bools { false, true, false };
+    std::vector<std::string> strings { "foo", "bar", "baz" };
+
+    SECTION("it can provide a default value if a root entry key is not found") {
+        REQUIRE(data.getWithDefault<int>("dne", 42) == 42);
+        REQUIRE(data.getWithDefault<double>("dne", 42.0) == 42.0);
+        REQUIRE(data.getWithDefault<bool>("dne", true) == true);
+        REQUIRE(data.getWithDefault<std::string>("dne", "foo") == "foo");
+        REQUIRE(data.getWithDefault<std::vector<int>>("dne", ints) == ints);
+        REQUIRE(data.getWithDefault<std::vector<double>>("dne", doubles) == doubles);
+        REQUIRE(data.getWithDefault<std::vector<bool>>("dne", bools) == bools);
+        REQUIRE(data.getWithDefault<std::vector<std::string>>("dne", strings) == strings);
+    }
+
+    SECTION("throw a data_type_error if the root entry is not an object") {
+        REQUIRE_THROWS_AS(data_a.getWithDefault<int>("foo", 42), data_type_error);
+    }
+
+    SECTION("it can provide a default value if a nested key is not found") {
+        JsonContainer lv_2 {};
+        lv_2.set<JsonContainer>("entry_3", data);
+        JsonContainer lv_1 {};
+        lv_1.set<JsonContainer>("entry_2", lv_2);
+        std::vector<JsonContainerKey> missing_entry { "entry_2", "entry_3", "dne" };
+
+        REQUIRE(lv_1.getWithDefault<int>(missing_entry, 42) == 42);
+        REQUIRE(lv_1.getWithDefault<double>(missing_entry, 42.0) == 42.0);
+        REQUIRE(lv_1.getWithDefault<bool>(missing_entry, true) == true);
+        REQUIRE(lv_1.getWithDefault<std::string>(missing_entry, "foo")
+                == "foo");
+        REQUIRE(lv_1.getWithDefault<std::vector<int>>(missing_entry, ints)
+                == ints);
+        REQUIRE(lv_1.getWithDefault<std::vector<double>>(missing_entry, doubles)
+                == doubles);
+        REQUIRE(lv_1.getWithDefault<std::vector<bool>>(missing_entry, bools)
+                == bools);
+        REQUIRE(lv_1.getWithDefault<std::vector<std::string>>(missing_entry, strings)
+                == strings);
+    }
+
+    SECTION("throw a data_type_error if the parent of a nested entry is not an object") {
+        JsonContainer more_data_a {};
+        more_data_a.set<std::vector<int>>("ints_entry", ints);
+
+        REQUIRE_THROWS_AS(more_data_a.getWithDefault<int>({ "ints_entry", "foo" }, 42),
+                          data_type_error);
     }
 }
 

@@ -127,8 +127,8 @@ namespace leatherman { namespace json_container {
         /// Throw a data_key_error in case the specified key is unknown.
         std::string toString(const JsonContainerKey& key) const;
 
-        // NOTE(ale): we don't use const for the keys arg of such
-        // signatures due to gcc issues
+        // TODO(ale): we don't use const for the keys arg on a number
+        // of signatures due to gcc issues; fix this
 
         /// Throw a data_key_error in case the specified key is unknown.
         std::string toString(std::vector<JsonContainerKey> keys) const;
@@ -200,7 +200,7 @@ namespace leatherman { namespace json_container {
         /// the specified one.
         template <typename T>
         T get(const JsonContainerKey& key) const {
-            return getValue<T>(*getValueInJson({ key }));
+            return getValue<T>(*getValueInJson(std::vector<JsonContainerKey> { key }));
         }
 
         /// Return the value of the specified nested entry.
@@ -231,7 +231,8 @@ namespace leatherman { namespace json_container {
         /// entry is not an array.
         template <typename T>
         T get(const JsonContainerKey& key, const size_t idx) const {
-            return getValue<T>(*getValueInJson({ key }, true, idx));
+            return getValue<T>(*getValueInJson(std::vector<JsonContainerKey> { key },
+                                               true, idx));
         }
 
         /// Return the indexed value of the specified nested array
@@ -249,9 +250,9 @@ namespace leatherman { namespace json_container {
         /// Return the value of the specified entry of the root object,
         /// or default_value if the entry doesn't exist.
         /// Throw a data_type_error in case the type T doesn't match
-        /// the specified one.
+        /// the specified one or if the root entry is not an object.
         template <typename T>
-        T getWithDefault(const JsonContainerKey& key, const T default_value) {
+        T getWithDefault(const JsonContainerKey& key, const T default_value) const {
             auto jval = getValueInJson();
             auto key_data = key.data();
 
@@ -266,12 +267,35 @@ namespace leatherman { namespace json_container {
             return getValue<T>(*getValueInJson(*jval, key_data));
         }
 
+        /// Return the value of the specified nested entry or
+        /// default_value if the entry doesn't exist but its parent is
+        /// an object.
+        /// Throw a data_type_error in case the type T doesn't match
+        /// the specified one or in case the parent of the specified
+        /// entry is not an object.
+        template <typename T>
+        T getWithDefault(std::vector<JsonContainerKey> keys, const T& default_value) const {
+            auto key_data = keys.back().data();
+            keys.pop_back();
+            auto jval_obj = getValueInJson(keys);
+
+            if (!isObject(*jval_obj)) {
+                throw data_type_error { "not an object" };
+            }
+
+            if (!hasKey(*jval_obj, key_data)) {
+                return default_value;
+            }
+
+            return getValue<T>(*getValueInJson(*jval_obj, key_data));
+        }
+
         /// Throw a data_key_error in case the root is not a valid JSON
         /// object, so that is not possible to set the entry.
         template <typename T>
         void set(const JsonContainerKey& key, T value) {
             auto jval = getValueInJson();
-            const char* key_data = key.data();
+            auto key_data = key.data();
 
             if (!isObject(*jval)) {
                 throw data_key_error { "root is not a valid JSON object" };
