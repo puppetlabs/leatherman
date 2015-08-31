@@ -20,10 +20,10 @@
 /**
  * Defines the logging namespace.
  */
-#ifndef LEATHERMAN_LOGGING_NAMESPACE
-#error "LEATHERMAN_LOGGING_NAMESPACE must be set. This is typically done via CMake."
-#else
+#ifdef LEATHERMAN_LOGGING_NAMESPACE
 #define LOG_NAMESPACE LEATHERMAN_LOGGING_NAMESPACE
+#else
+#define LOG_NAMESPACE ""
 #endif
 
 
@@ -37,12 +37,20 @@
 #ifdef LEATHERMAN_LOGGING_LINE_NUMBERS
 #define LOG_MESSAGE(level, line_num, format, ...) \
     if (leatherman::logging::is_enabled(level)) { \
-        leatherman::logging::log(LOG_NAMESPACE, level, line_num, format, ##__VA_ARGS__); \
+        if (leatherman::logging::override_namespace.empty()) { \
+            leatherman::logging::log(LOG_NAMESPACE, level, line_num, format, ##__VA_ARGS__); \
+        } else { \
+            leatherman::logging::log(leatherman::logging::override_namespace, level, 0, format, ##__VA_ARGS__); \
+        } \
     }
 #else
 #define LOG_MESSAGE(level, line_num, format, ...) \
     if (leatherman::logging::is_enabled(level)) { \
-        leatherman::logging::log(LOG_NAMESPACE, level, 0, format, ##__VA_ARGS__); \
+        if (leatherman::logging::override_namespace.empty()) { \
+            leatherman::logging::log(LOG_NAMESPACE, level, 0, format, ##__VA_ARGS__); \
+        } else { \
+            leatherman::logging::log(leatherman::logging::override_namespace, level, 0, format, ##__VA_ARGS__); \
+        } \
     }
 #endif
 /**
@@ -127,6 +135,13 @@ namespace leatherman { namespace logging {
         error,
         fatal
     };
+
+    /**
+     * The override namespace. If not empty, the LOG_* macros will use the override namespace rather
+     * than the LEATHERMAN_LOGGING_NAMESPACE for log messages. Setting this will also cause line numbers
+     * to be ignored.
+     */
+    extern std::string override_namespace;
 
     /**
      * Reads a log level from an input stream.

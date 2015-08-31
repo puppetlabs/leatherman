@@ -32,6 +32,7 @@ namespace leatherman { namespace logging {
     static log_level g_level = log_level::none;
     static bool g_colorize = false;
     static bool g_error_logged = false;
+    string override_namespace;
 
     class color_writer : public sinks::basic_sink_backend<sinks::synchronized_feeding>
     {
