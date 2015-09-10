@@ -75,7 +75,7 @@ namespace leatherman { namespace logging {
         boost::shared_ptr<sink_t> sink(new sink_t(&dst));
         core->add_sink(sink);
 
-#if !defined(__sun) || !defined(__GNUC__)
+#if (!defined(__sun) && !defined(_AIX)) || !defined(__GNUC__)
         // Imbue the logging sink with the requested locale.
         // Locale in GCC is busted on Solaris, so skip it.
         dst.imbue(leatherman::locale::get_locale(locale));
