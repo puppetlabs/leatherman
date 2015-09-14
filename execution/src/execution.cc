@@ -136,7 +136,7 @@ namespace leatherman { namespace execution {
         return file + remainder;
     }
 
-    tuple<bool, string, string> execute(
+    tuple<bool, string, string, int> execute(
         string const& file,
         vector<string> const* arguments,
         map<string, string> const* environment,
@@ -157,7 +157,7 @@ namespace leatherman { namespace execution {
         }
     }
 
-    tuple<bool, string, string> execute(
+    tuple<bool, string, string, int> execute(
         string const& file,
         uint32_t timeout,
         option_set<execution_options> const& options)
@@ -168,7 +168,7 @@ namespace leatherman { namespace execution {
         return execute(file, nullptr, nullptr, nullptr, stderr_callback, actual_options, timeout);
     }
 
-    tuple<bool, string, string> execute(
+    tuple<bool, string, string, int> execute(
         string const& file,
         vector<string> const& arguments,
         uint32_t timeout,
@@ -180,7 +180,7 @@ namespace leatherman { namespace execution {
         return execute(file, &arguments, nullptr, nullptr, stderr_callback, actual_options, timeout);
     }
 
-    tuple<bool, string, string> execute(
+    tuple<bool, string, string, int> execute(
         string const& file,
         vector<string> const& arguments,
         map<string, string> const& environment,

@@ -127,17 +127,20 @@ SCENARIO("executing commands with execution::execute") {
     };
     bool success;
     string output, error;
+    int exit_code;
     GIVEN("a command that succeeds") {
         THEN("the output should be returned") {
-            tie(success, output, error) = execute("cat", { EXEC_TESTS_DIRECTORY "/fixtures/ls/file3.txt" });
+            tie(success, output, error, exit_code) = execute("cat", { EXEC_TESTS_DIRECTORY "/fixtures/ls/file3.txt" });
             REQUIRE(success);
             REQUIRE(output == "file3");
+            REQUIRE(exit_code == 0);
         }
         WHEN("requested to merge the environment") {
             setenv("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE", 1);
-            tie(success, output, error) = execute("env", {}, { {"TEST_VARIABLE1", "TEST_VALUE1" }, {"TEST_VARIABLE2", "TEST_VALUE2" } });
+            tie(success, output, error, exit_code) = execute("env", {}, { {"TEST_VARIABLE1", "TEST_VALUE1" }, {"TEST_VARIABLE2", "TEST_VALUE2" } });
             unsetenv("TEST_INHERITED_VARIABLE");
             REQUIRE(success);
+            REQUIRE(exit_code == 0);
             auto variables = get_variables(output);
             THEN("the child environment should contain the given variables") {
                 REQUIRE(variables.size() > 4);
@@ -155,9 +158,10 @@ SCENARIO("executing commands with execution::execute") {
         }
         WHEN("requested to override the environment") {
             setenv("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE", 1);
-            tie(success, output, error) = execute("env", {}, { {"TEST_VARIABLE1", "TEST_VALUE1" }, {"TEST_VARIABLE2", "TEST_VALUE2" }}, 0, { execution_options::trim_output });
+            tie(success, output, error, exit_code) = execute("env", {}, { {"TEST_VARIABLE1", "TEST_VALUE1" }, {"TEST_VARIABLE2", "TEST_VALUE2" }}, 0, { execution_options::trim_output });
             unsetenv("TEST_INHERITED_VARIABLE");
             REQUIRE(success);
+            REQUIRE(exit_code == 0);
             auto variables = get_variables(output);
             THEN("the child environment should only contain the given variables") {
                 REQUIRE(variables.size() == 4u);
@@ -174,8 +178,9 @@ SCENARIO("executing commands with execution::execute") {
             }
         }
         WHEN("requested to override LC_ALL or LANG") {
-            tie(success, output, error) = execute("env", {}, { {"LANG", "FOO" }, { "LC_ALL", "BAR" } });
+            tie(success, output, error, exit_code) = execute("env", {}, { {"LANG", "FOO" }, { "LC_ALL", "BAR" } });
             REQUIRE(success);
+            REQUIRE(exit_code == 0);
             auto variables = get_variables(output);
             THEN("the values should be passed to the child process") {
                 REQUIRE(variables.count("LC_ALL") == 1);
@@ -187,27 +192,30 @@ SCENARIO("executing commands with execution::execute") {
     }
     GIVEN("a command that fails") {
         WHEN("default options are used") {
-            tie(success, output, error) = execute("ls", { "does_not_exist" });
+            tie(success, output, error, exit_code) = execute("ls", { "does_not_exist" });
             THEN("no output is returned") {
                 REQUIRE_FALSE(success);
                 REQUIRE(output == "");
                 REQUIRE(error == "");
+                REQUIRE(exit_code > 0);
             }
         }
         WHEN("the redirect stderr option is used") {
-            tie(success, output, error) = execute("ls", { "does_not_exist" }, 0, { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_stdout });
+            tie(success, output, error, exit_code) = execute("ls", { "does_not_exist" }, 0, { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_stdout });
             THEN("error output is returned") {
                 REQUIRE_FALSE(success);
                 REQUIRE(boost::ends_with(output, "No such file or directory"));
                 REQUIRE(error == "");
+                REQUIRE(exit_code > 0);
             }
         }
         WHEN("not redirecting stderr to null") {
-            tie(success, output, error) = execute("ls", { "does_not_exist" }, 0, { execution_options::trim_output, execution_options::merge_environment });
+            tie(success, output, error, exit_code) = execute("ls", { "does_not_exist" }, 0, { execution_options::trim_output, execution_options::merge_environment });
             THEN("error output is returned") {
                 REQUIRE_FALSE(success);
                 REQUIRE(output == "");
                 REQUIRE(boost::ends_with(error, "No such file or directory"));
+                REQUIRE(exit_code > 0);
             }
         }
         WHEN("the 'throw on non-zero exit' option is used") {
@@ -223,12 +231,12 @@ SCENARIO("executing commands with execution::execute") {
     }
     GIVEN("a command that outputs leading/trailing whitespace") {
         THEN("whitespace should be trimmed by default") {
-            tie(success, output, error) = execute("cat", { EXEC_TESTS_DIRECTORY "/fixtures/ls/file1.txt" });
+            tie(success, output, error, exit_code) = execute("cat", { EXEC_TESTS_DIRECTORY "/fixtures/ls/file1.txt" });
             REQUIRE(success);
             REQUIRE(output == "this is a test of trimming");
         }
         WHEN("the 'trim whitespace' option is not used") {
-            tie(success, output, error) = execute("cat", { EXEC_TESTS_DIRECTORY "/fixtures/ls/file1.txt" }, 0, { execution_options::merge_environment });
+            tie(success, output, error, exit_code) = execute("cat", { EXEC_TESTS_DIRECTORY "/fixtures/ls/file1.txt" }, 0, { execution_options::merge_environment });
             THEN("whitespace should not be trimmed") {
                 REQUIRE(output == "   this is a test of trimming   ");
             }
@@ -254,7 +262,7 @@ SCENARIO("executing commands with execution::execute") {
     GIVEN("stderr is redirected to null") {
         WHEN("using a debug log level") {
             log_capture capture(log_level::debug);
-            tie(success, output, error) = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message");
+            tie(success, output, error, exit_code) = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message");
             REQUIRE(success);
             REQUIRE(output == "foo=bar");
             REQUIRE(error.empty());
@@ -266,7 +274,7 @@ SCENARIO("executing commands with execution::execute") {
         }
         WHEN("not using a debug log level") {
             log_capture capture(log_level::warning);
-            tie(success, output, error) = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message");
+            tie(success, output, error, exit_code) = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message");
             REQUIRE(success);
             REQUIRE(output == "foo=bar");
             REQUIRE(error.empty());

@@ -101,37 +101,42 @@ SCENARIO("executing commands with execution::execute") {
     };
     bool success = false;
     string output, error;
+    int exit_code;
     GIVEN("a command that succeeds") {
         THEN("the output should be returned") {
-            tie(success, output, error) = execute("cmd.exe", { "/c", "type", normalize(EXEC_TESTS_DIRECTORY "/fixtures/ls/file3.txt") });
+            tie(success, output, error, exit_code) = execute("cmd.exe", { "/c", "type", normalize(EXEC_TESTS_DIRECTORY "/fixtures/ls/file3.txt") });
             REQUIRE(success);
             REQUIRE(output == "file3");
             REQUIRE(error == "");
+            REQUIRE(exit_code == 0);
         }
     }
     GIVEN("a command that fails") {
         WHEN("default options are used") {
-            tie(success, output, error) = execute("cmd.exe", { "/c", "dir", "/B", "does_not_exist" });
+            tie(success, output, error, exit_code) = execute("cmd.exe", { "/c", "dir", "/B", "does_not_exist" });
             THEN("no output is returned") {
                 REQUIRE_FALSE(success);
                 REQUIRE(output == "");
                 REQUIRE(error == "");
+                REQUIRE(exit_code > 0);
             }
         }
         WHEN("the redirect stderr option is used") {
-            tie(success, output, error) = execute("cmd.exe", { "/c", "dir", "/B", "does_not_exist" }, 0, { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_stdout });
+            tie(success, output, error, exit_code) = execute("cmd.exe", { "/c", "dir", "/B", "does_not_exist" }, 0, { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_stdout });
             THEN("error output is returned on stdout") {
                 REQUIRE_FALSE(success);
                 REQUIRE(output == "File Not Found");
                 REQUIRE(error == "");
+                REQUIRE(exit_code > 0);
             }
         }
         WHEN("not redirecting stderr to null") {
-            tie(success, output, error) = execute("cmd.exe", { "/c", "dir", "/B", "does_not_exist" }, 0, { execution_options::trim_output, execution_options::merge_environment });
+            tie(success, output, error, exit_code) = execute("cmd.exe", { "/c", "dir", "/B", "does_not_exist" }, 0, { execution_options::trim_output, execution_options::merge_environment });
             THEN("error output is returned") {
                 REQUIRE_FALSE(success);
                 REQUIRE(output == "");
                 REQUIRE(error == "File Not Found");
+                REQUIRE(exit_code > 0);
             }
         }
         WHEN("the 'throw on non-zero exit' option is used") {
@@ -141,7 +146,7 @@ SCENARIO("executing commands with execution::execute") {
         }
         WHEN("requested to merge the environment") {
             SetEnvironmentVariableW(L"TEST_INHERITED_VARIABLE", L"TEST_INHERITED_VALUE");
-            tie(success, output, error) = execute("cmd.exe", { "/c", "set" }, { { "TEST_VARIABLE1", "TEST_VALUE1" }, { "TEST_VARIABLE2", "TEST_VALUE2" } });
+            tie(success, output, error, exit_code) = execute("cmd.exe", { "/c", "set" }, { { "TEST_VARIABLE1", "TEST_VALUE1" }, { "TEST_VARIABLE2", "TEST_VALUE2" } });
             SetEnvironmentVariableW(L"TEST_INHERITED_VARIABLE", nullptr);
             REQUIRE(success);
             REQUIRE(error == "");
@@ -162,7 +167,7 @@ SCENARIO("executing commands with execution::execute") {
         }
         WHEN("requested to override the environment") {
             SetEnvironmentVariableW(L"TEST_INHERITED_VARIABLE", L"TEST_INHERITED_VALUE");
-            tie(success, output, error) = execute("cmd.exe", { "/c", "set" }, { { "TEST_VARIABLE1", "TEST_VALUE1" }, { "TEST_VARIABLE2", "TEST_VALUE2" } }, 0, { execution_options::trim_output });
+            tie(success, output, error, exit_code) = execute("cmd.exe", { "/c", "set" }, { { "TEST_VARIABLE1", "TEST_VALUE1" }, { "TEST_VARIABLE2", "TEST_VALUE2" } }, 0, { execution_options::trim_output });
             SetEnvironmentVariableW(L"TEST_INHERITED_VARIABLE", nullptr);
             REQUIRE(success);
             REQUIRE(error == "");
@@ -181,7 +186,7 @@ SCENARIO("executing commands with execution::execute") {
             }
         }
         WHEN("requested to override LC_ALL or LANG") {
-            tie(success, output, error) = execute("cmd.exe", { "/c", "set" }, { { "LANG", "FOO" }, { "LC_ALL", "BAR" } });
+            tie(success, output, error, exit_code) = execute("cmd.exe", { "/c", "set" }, { { "LANG", "FOO" }, { "LC_ALL", "BAR" } });
             REQUIRE(success);
             REQUIRE(error == "");
             auto variables = get_variables(output);
@@ -195,13 +200,13 @@ SCENARIO("executing commands with execution::execute") {
     }
     GIVEN("a command that outputs leading/trailing whitespace") {
         THEN("whitespace should be trimmed by default") {
-            tie(success, output, error) = execute("cmd.exe", { "/c", "type", normalize(EXEC_TESTS_DIRECTORY "/fixtures/ls/file1.txt") });
+            tie(success, output, error, exit_code) = execute("cmd.exe", { "/c", "type", normalize(EXEC_TESTS_DIRECTORY "/fixtures/ls/file1.txt") });
             REQUIRE(success);
             REQUIRE(output == "this is a test of trimming");
             REQUIRE(error == "");
         }
         WHEN("the 'trim whitespace' option is not used") {
-            tie(success, output, error) = execute("cmd.exe", { "/c", "type", normalize(EXEC_TESTS_DIRECTORY "/fixtures/ls/file1.txt") }, 0, { execution_options::merge_environment });
+            tie(success, output, error, exit_code) = execute("cmd.exe", { "/c", "type", normalize(EXEC_TESTS_DIRECTORY "/fixtures/ls/file1.txt") }, 0, { execution_options::merge_environment });
             REQUIRE(success);
             THEN("whitespace should not be trimmed") {
                 REQUIRE(output == "   this is a test of trimming   ");
@@ -233,7 +238,7 @@ SCENARIO("executing commands with execution::execute") {
     GIVEN("stderr is redirected to null") {
         WHEN("using a debug log level") {
             log_capture capture(log_level::debug);
-            tie(success, output, error) = execute(EXEC_TESTS_DIRECTORY "/fixtures/windows/error_message.bat");
+            tie(success, output, error, exit_code) = execute(EXEC_TESTS_DIRECTORY "/fixtures/windows/error_message.bat");
             REQUIRE(success);
             REQUIRE(output == "foo=bar");
             REQUIRE(error.empty());
@@ -245,7 +250,7 @@ SCENARIO("executing commands with execution::execute") {
         }
         WHEN("not using a debug log level") {
             log_capture capture(log_level::warning);
-            tie(success, output, error) = execute(EXEC_TESTS_DIRECTORY "/fixtures/windows/error_message.bat");
+            tie(success, output, error, exit_code) = execute(EXEC_TESTS_DIRECTORY "/fixtures/windows/error_message.bat");
             REQUIRE(success);
             REQUIRE(output == "foo=bar");
             REQUIRE(error.empty());

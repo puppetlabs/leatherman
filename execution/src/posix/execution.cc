@@ -372,7 +372,7 @@ namespace leatherman { namespace execution {
         return -1;
     }
 
-    tuple<bool, string, string> execute(
+    tuple<bool, string, string, int> execute(
         string const& file,
         vector<string> const* arguments,
         map<string, string> const* environment,
@@ -389,7 +389,7 @@ namespace leatherman { namespace execution {
             if (options[execution_options::throw_on_nonzero_exit]) {
                 throw child_exit_exception("child process returned non-zero exit status.", 127, {}, {});
             }
-            return make_tuple(false, "", "");
+            return make_tuple(false, "", "", 127);
         }
 
         // Create the pipes for stdin/stdout redirection
@@ -530,7 +530,7 @@ namespace leatherman { namespace execution {
                 throw child_signal_exception((boost::format("child process was terminated by signal (%1%).") % status).str(), status, move(output), move(error));
             }
         }
-        return make_tuple(success, move(output), move(error));
+        return make_tuple(success, move(output), move(error), status);
     }
 
 }}  // namespace leatherman::execution

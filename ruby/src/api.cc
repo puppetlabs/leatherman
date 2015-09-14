@@ -472,8 +472,9 @@ namespace leatherman { namespace ruby {
 
         bool success;
         string output, none;
+        int exit_code;
 
-        tie(success, output, none) = execute(ruby, { "-e", "print(['libdir', 'archlibdir', 'sitearchlibdir', 'bindir'].find do |name|"
+        tie(success, output, none, exit_code) = execute(ruby, { "-e", "print(['libdir', 'archlibdir', 'sitearchlibdir', 'bindir'].find do |name|"
                                                                   "dir = RbConfig::CONFIG[name];"
                                                                   "next unless dir;"
                                                                   "file = File.join(dir, RbConfig::CONFIG['LIBRUBY_SO']);"
