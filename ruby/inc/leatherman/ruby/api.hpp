@@ -213,6 +213,10 @@ namespace leatherman {  namespace ruby {
         /**
          * See MRI documentation.
          */
+        SIGNED_VALUE (* const rb_num2long)(VALUE);
+        /**
+         * See MRI documentation.
+         */
         double (* const rb_num2dbl)(VALUE);
         /**
          * See MRI documentation.
@@ -379,6 +383,10 @@ namespace leatherman {  namespace ruby {
          * See MRI documentation.
          */
         VALUE* const rb_cFloat;
+        /**
+         * See MRI documentation.
+         */
+        VALUE* const rb_cBignum;
 
         /**
          * See MRI documentation.
