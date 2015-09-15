@@ -7,6 +7,7 @@
 #include <leatherman/util/regex.hpp>
 #include "../fixtures.hpp"
 #include "../log_capture.hpp"
+#include "../lth_cat.hpp"
 #include <stdlib.h>
 
 using namespace std;
@@ -105,6 +106,21 @@ SCENARIO("executing commands with execution::execute") {
             REQUIRE(exec.success);
             REQUIRE(exec.output == "file3");
             REQUIRE(exec.error == "");
+            REQUIRE(exec.exit_code == 0);
+        }
+        WHEN("expecting input") {
+            auto exec = execute("cmd.exe", { "/c", CMAKE_BIN_DIRECTORY "/lth_cat.exe" }, "hello");
+            REQUIRE(exec.success);
+            REQUIRE(exec.output == "hello");
+            REQUIRE(exec.error == "");
+            REQUIRE(exec.exit_code == 0);
+        }
+        WHEN("expecting input with lots of output") {
+            auto exec = execute("cmd.exe", { "/c", CMAKE_BIN_DIRECTORY "/lth_cat.exe", "prefix", "suffix", "overwhelm", "stderr" },
+                "hello\ngoodbye", 0, { execution_options::merge_environment });
+            REQUIRE(exec.success);
+            REQUIRE(exec.output == lth_cat::prefix+lth_cat::overwhelm+"hello\n"+lth_cat::overwhelm+"goodbye\n"+lth_cat::overwhelm+lth_cat::suffix);
+            REQUIRE(exec.error == "hello\ngoodbye\n");
             REQUIRE(exec.exit_code == 0);
         }
     }

@@ -139,6 +139,7 @@ namespace leatherman { namespace execution {
     result execute(
         string const& file,
         vector<string> const* arguments,
+        string const* input,
         map<string, string> const* environment,
         function<bool(string&)> const& stdout_callback,
         function<bool(string&)> const& stderr_callback,
@@ -165,7 +166,7 @@ namespace leatherman { namespace execution {
         auto actual_options = options;
         function<bool(string&)> stderr_callback;
         setup_execute(stderr_callback, actual_options);
-        return execute(file, nullptr, nullptr, nullptr, stderr_callback, actual_options, timeout);
+        return execute(file, nullptr, nullptr, nullptr, nullptr, stderr_callback, actual_options, timeout);
     }
 
     result execute(
@@ -177,7 +178,7 @@ namespace leatherman { namespace execution {
         auto actual_options = options;
         function<bool(string&)> stderr_callback;
         setup_execute(stderr_callback, actual_options);
-        return execute(file, &arguments, nullptr, nullptr, stderr_callback, actual_options, timeout);
+        return execute(file, &arguments, nullptr, nullptr, nullptr, stderr_callback, actual_options, timeout);
     }
 
     result execute(
@@ -190,7 +191,34 @@ namespace leatherman { namespace execution {
         auto actual_options = options;
         function<bool(string&)> stderr_callback;
         setup_execute(stderr_callback, actual_options);
-        return execute(file, &arguments, &environment, nullptr, stderr_callback, actual_options, timeout);
+        return execute(file, &arguments, nullptr, &environment, nullptr, stderr_callback, actual_options, timeout);
+    }
+
+    result execute(
+        string const& file,
+        vector<string> const& arguments,
+        string const& input,
+        uint32_t timeout,
+        option_set<execution_options> const& options)
+    {
+        auto actual_options = options;
+        function<bool(string&)> stderr_callback;
+        setup_execute(stderr_callback, actual_options);
+        return execute(file, &arguments, &input, nullptr, nullptr, stderr_callback, actual_options, timeout);
+    }
+
+    result execute(
+        string const& file,
+        vector<string> const& arguments,
+        string const& input,
+        map<string, string> const& environment,
+        uint32_t timeout,
+        option_set<execution_options> const& options)
+    {
+        auto actual_options = options;
+        function<bool(string&)> stderr_callback;
+        setup_execute(stderr_callback, actual_options);
+        return execute(file, &arguments, &input, &environment, nullptr, stderr_callback, actual_options, timeout);
     }
 
     static void setup_each_line(function<bool(string&)>& stdout_callback, function<bool(string&)>& stderr_callback, option_set<execution_options>& options)
@@ -225,7 +253,7 @@ namespace leatherman { namespace execution {
     {
         auto actual_options = options;
         setup_each_line(stdout_callback, stderr_callback, actual_options);
-        return execute(file, nullptr, nullptr, stdout_callback, stderr_callback, actual_options, timeout).success;
+        return execute(file, nullptr, nullptr, nullptr, stdout_callback, stderr_callback, actual_options, timeout).success;
     }
 
     bool each_line(
@@ -238,7 +266,7 @@ namespace leatherman { namespace execution {
     {
         auto actual_options = options;
         setup_each_line(stdout_callback, stderr_callback, actual_options);
-        return execute(file, &arguments, nullptr, stdout_callback, stderr_callback, actual_options, timeout).success;
+        return execute(file, &arguments, nullptr, nullptr, stdout_callback, stderr_callback, actual_options, timeout).success;
     }
 
     bool each_line(
@@ -252,7 +280,7 @@ namespace leatherman { namespace execution {
     {
         auto actual_options = options;
         setup_each_line(stdout_callback, stderr_callback, actual_options);
-        return execute(file, &arguments, &environment, stdout_callback, stderr_callback, actual_options, timeout).success;
+        return execute(file, &arguments, nullptr, &environment, stdout_callback, stderr_callback, actual_options, timeout).success;
     }
 
     static bool process_data(bool trim, string const& data, string& buffer, string const& logger, function<bool(string&)> const& callback)

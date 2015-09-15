@@ -227,11 +227,47 @@ namespace leatherman { namespace execution {
         function<bool(string const&)> const& callback;
     };
 
-    static void read_from_child(DWORD child, array<pipe, 2>& pipes, uint32_t timeout, HANDLE timer)
+    struct input_pipe
+    {
+        scoped_resource<HANDLE> handle;
+        string buffer;
+        bool pending;
+    };
+
+    static void rw_from_child(DWORD child, array<pipe, 2>& pipes, input_pipe input, uint32_t timeout, HANDLE timer)
     {
         vector<HANDLE> wait_handles;
         while (true)
         {
+            // First try to write input
+            if (input.handle != INVALID_HANDLE_VALUE && !input.pending) {
+                while (true) {
+                    DWORD count;
+                    if (!WriteFile(input.handle, input.buffer.c_str(), input.buffer.size(), &count, nullptr)) {
+                        // Treat broken pipes as closed pipes
+                        if (GetLastError() == ERROR_BROKEN_PIPE) {
+                            input.handle = scoped_resource<HANDLE>(INVALID_HANDLE_VALUE, CloseHandle);
+                            break;
+                        }
+                        // Check to see if it's a pending operation
+                        if (GetLastError() == ERROR_IO_PENDING) {
+                            input.pending = true;
+                            break;
+                        }
+                        LOG_ERROR("failed to write child stdin input: %1%.", system_error());
+                        throw execution_exception("failed to write child process input.");
+                    }
+
+                    if (count == 0) {
+                        input.handle = scoped_resource<HANDLE>(INVALID_HANDLE_VALUE, CloseHandle);
+                        break;
+                    }
+
+                    // Register written data
+                    input.buffer.erase(0, count);
+                }
+            }
+
             // Read from all pipes
             for (auto& pipe : pipes) {
                 // If the handle is closed or is pending, skip
@@ -287,6 +323,9 @@ namespace leatherman { namespace execution {
                     continue;
                 }
                 wait_handles.push_back(pipe.event);
+            }
+            if (input.handle != INVALID_HANDLE_VALUE && input.pending) {
+                wait_handles.push_back(input.handle);
             }
 
             // If no wait handles, then we're done processing
@@ -344,12 +383,18 @@ namespace leatherman { namespace execution {
                 }
                 break;
             }
+
+            if (input.handle != INVALID_HANDLE_VALUE && input.pending && input.handle == wait_handles[index]) {
+                // Mark input as not pending, loop will take care of updating the pipe.
+                input.pending = false;
+            }
         }
     }
 
     result execute(
         string const& file,
         vector<string> const* arguments,
+        string const* input,
         map<string, string> const* environment,
         function<bool(string&)> const& stdout_callback,
         function<bool(string&)> const& stderr_callback,
@@ -501,7 +546,9 @@ namespace leatherman { namespace execution {
         }
 
         // Release unused pipes, to avoid any races in process completion.
-        stdInWr.release();
+        if (!input) {
+            stdInWr.release();
+        }
         stdInRd.release();
         stdOutWr.release();
         stdErrWr.release();
@@ -564,7 +611,12 @@ namespace leatherman { namespace execution {
                 pipe("stderr", stdErrRd, process_stderr)
             } };
 
-            read_from_child(procInfo.dwProcessId, pipes, timeout, timer);
+            input_pipe inpipe = {scoped_resource<HANDLE>(INVALID_HANDLE_VALUE, CloseHandle), "", false};
+            if (input) {
+                inpipe = {move(stdInWr), *input, false};
+            }
+
+            rw_from_child(procInfo.dwProcessId, pipes, move(inpipe), timeout, timer);
         });
 
         stdOutRd.release();

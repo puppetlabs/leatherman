@@ -169,12 +169,14 @@ namespace leatherman { namespace execution {
         function<bool(string const&)> const& callback;
     };
 
-    static void read_from_child(pid_t child, array<pipe, 2>& pipes, uint32_t timeout)
+    static void rw_from_child(pid_t child, array<pipe, 2>& pipes, pair<scoped_descriptor, string> input, uint32_t timeout)
     {
         // Each pipe is a tuple of descriptor, buffer to use to read data, and a callback to call when data is read
-        fd_set set;
+        // The input pair is a descriptor and text to write to it
+        fd_set read_set, write_set;
         while (!command_timedout) {
-            FD_ZERO(&set);
+            FD_ZERO(&read_set);
+            FD_ZERO(&write_set);
 
             // Set up the descriptors and buffers to select upon
             int max = -1;
@@ -182,11 +184,17 @@ namespace leatherman { namespace execution {
                 if (pipe.descriptor == -1) {
                     continue;
                 }
-                FD_SET(pipe.descriptor, &set);
+                FD_SET(pipe.descriptor, &read_set);
                 if (pipe.descriptor > max) {
                     max = pipe.descriptor;
                 }
                 pipe.buffer.resize(4096);
+            }
+            if (input.first != -1) {
+                FD_SET(input.first, &write_set);
+                if (input.first > max) {
+                    max = input.first;
+                }
             }
             if (max == -1) {
                 // All pipes closed; we're done
@@ -196,7 +204,7 @@ namespace leatherman { namespace execution {
             // If using a timeout, timeout after 500ms to check whether or not the command itself timed out
             timeval read_timeout = {};
             read_timeout.tv_usec = 500000;
-            int result = select(max + 1, &set, nullptr, nullptr, timeout ? &read_timeout : nullptr);
+            int result = select(max + 1, &read_set, &write_set, nullptr, timeout ? &read_timeout : nullptr);
             if (result == -1) {
                 if (errno != EINTR) {
                     LOG_ERROR(format_error("select call failed"));
@@ -212,7 +220,7 @@ namespace leatherman { namespace execution {
             }
 
             for (auto& pipe : pipes) {
-                if (pipe.descriptor == -1 || !FD_ISSET(pipe.descriptor, &set)) {
+                if (pipe.descriptor == -1 || !FD_ISSET(pipe.descriptor, &read_set)) {
                     continue;
                 }
 
@@ -238,6 +246,28 @@ namespace leatherman { namespace execution {
                     // Callback signaled that we're done
                     return;
                 }
+            }
+
+            if (input.first != -1 && FD_ISSET(input.first, &write_set)) {
+                // Expecting data on input
+                auto count = write(input.first, input.second.c_str(), input.second.size());
+                if (count < 0) {
+                    if (errno != EINTR) {
+                        LOG_ERROR("stdin pipe write failed: %1%.", format_error());
+                        throw execution_exception("failed to write child input.");
+                    }
+                    // Interrupted by signal
+                    LOG_DEBUG("stdin pipe write was interrupted and will be retried.");
+                    continue;
+                }
+                if (count == 0) {
+                    // Pipe has closed
+                    input = {};
+                    continue;
+                }
+                // Register written data
+                input.second.erase(0, count);
+                continue;
             }
         }
 
@@ -375,6 +405,7 @@ namespace leatherman { namespace execution {
     result execute(
         string const& file,
         vector<string> const* arguments,
+        string const* input,
         map<string, string> const* environment,
         function<bool(string&)> const& stdout_callback,
         function<bool(string&)> const& stderr_callback,
@@ -434,8 +465,10 @@ namespace leatherman { namespace execution {
         pid_t child = create_child(stdin_read, stdout_write, child_stderr, executable.c_str(), args.data(), envp.data());
 
         // Close the unused descriptors
+        if (!input) {
+            stdin_write.release();
+        }
         stdin_read.release();
-        stdin_write.release();
         stdout_write.release();
         stderr_write.release();
 
@@ -503,7 +536,13 @@ namespace leatherman { namespace execution {
                 pipe("stdout", stdout_read, process_stdout),
                 pipe("stderr", stderr_read, process_stderr)
             }};
-            read_from_child(child, pipes, timeout);
+
+            pair<scoped_descriptor, string> inpipe;
+            if (input) {
+                inpipe = {move(stdin_write), *input};
+            }
+
+            rw_from_child(child, pipes, move(inpipe), timeout);
         });
 
         // Close the read pipes

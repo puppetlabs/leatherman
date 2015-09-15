@@ -9,6 +9,10 @@ namespace leatherman { namespace util { namespace posix {
     {
     }
 
+    scoped_descriptor::scoped_descriptor() : scoped_resource(-1, nullptr)
+    {
+    }
+
     void scoped_descriptor::close(int descriptor)
     {
         if (descriptor >= 0) {

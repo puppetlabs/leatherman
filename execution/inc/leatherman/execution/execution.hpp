@@ -273,6 +273,40 @@ namespace leatherman { namespace execution {
         lth_util::option_set<execution_options> const& options = { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_null });
 
     /**
+     * Executes the given program.
+     * @param file The name or path of the program to execute.
+     * @param arguments The arguments to pass to the program. On Windows they will be quoted as needed for spaces.
+     * @param input A string to place on stdin for the child process before reading output.
+     * @param timeout The timeout, in seconds. Defaults to no timeout.
+     * @param options The execution options.  Defaults to trimming output, merging the environment, and redirecting stderr to null.
+     * @return Returns a result struct.
+     */
+    result execute(
+        std::string const& file,
+        std::vector<std::string> const& arguments,
+        std::string const& input,
+        uint32_t timeout = 0,
+        lth_util::option_set<execution_options> const& options = { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_null });
+
+    /**
+     * Executes the given program.
+     * @param file The name or path of the program to execute.
+     * @param arguments The arguments to pass to the program. On Windows they will be quoted as needed for spaces.
+     * @param input A string to place on stdin for the child process before reading output.
+     * @param environment The environment variables to pass to the child process.
+     * @param timeout The timeout, in seconds. Defaults to no timeout.
+     * @param options The execution options.  Defaults to trimming output, merging the environment, and redirecting stderr to null.
+     * @return Returns a result struct.
+     */
+    result execute(
+        std::string const& file,
+        std::vector<std::string> const& arguments,
+        std::string const& input,
+        std::map<std::string, std::string> const& environment,
+        uint32_t timeout = 0,
+        lth_util::option_set<execution_options> const& options = { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_null });
+
+    /**
      * Executes the given program and returns each line of output.
      * @param file The name or path of the program to execute.
      * @param stdout_callback The callback that is called with each line of output on stdout.

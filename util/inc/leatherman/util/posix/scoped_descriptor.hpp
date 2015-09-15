@@ -20,6 +20,11 @@ namespace leatherman { namespace util { namespace posix {
          */
         explicit scoped_descriptor(int descriptor);
 
+        /**
+         * Constructs a closed scoped_descriptor.
+         */
+        scoped_descriptor();
+
      private:
         static void close(int descriptor);
     };

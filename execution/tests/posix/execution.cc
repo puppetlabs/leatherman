@@ -5,6 +5,7 @@
 #include <leatherman/util/strings.hpp>
 #include "../fixtures.hpp"
 #include "../log_capture.hpp"
+#include "../lth_cat.hpp"
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -185,6 +186,21 @@ SCENARIO("executing commands with execution::execute") {
                 REQUIRE(variables.count("LANG") == 1);
                 REQUIRE(variables["LANG"] == "FOO");
             }
+        }
+        WHEN("expecting input") {
+            auto exec = execute("cat", {}, "hello");
+            REQUIRE(exec.success);
+            REQUIRE(exec.output == "hello");
+            REQUIRE(exec.error == "");
+            REQUIRE(exec.exit_code == 0);
+        }
+        WHEN("expecting input with lots of output") {
+            auto exec = execute(CMAKE_BIN_DIRECTORY "/lth_cat", { "prefix", "suffix", "overwhelm", "stderr" },
+                "hello\ngoodbye", 0, { execution_options::merge_environment });
+            REQUIRE(exec.success);
+            REQUIRE(exec.output == lth_cat::prefix+lth_cat::overwhelm+"hello\n"+lth_cat::overwhelm+"goodbye\n"+lth_cat::overwhelm+lth_cat::suffix);
+            REQUIRE(exec.error == "hello\ngoodbye\n");
+            REQUIRE(exec.exit_code == 0);
         }
     }
     GIVEN("a command that fails") {
