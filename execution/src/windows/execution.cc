@@ -1,7 +1,7 @@
 #include <leatherman/execution/execution.hpp>
 #include <leatherman/util/environment.hpp>
 #include <leatherman/util/scope_exit.hpp>
-#include <leatherman/util/scoped_resource.hpp>
+#include <leatherman/util/windows/scoped_handle.hpp>
 #include <leatherman/util/scoped_env.hpp>
 #include <leatherman/windows/system_error.hpp>
 #include <leatherman/windows/windows.hpp>
@@ -18,6 +18,7 @@ using namespace std;
 using namespace leatherman::windows;
 using namespace leatherman::logging;
 using namespace leatherman::util;
+using namespace leatherman::util::windows;
 using namespace boost::filesystem;
 using namespace boost::algorithm;
 
@@ -101,7 +102,7 @@ namespace leatherman { namespace execution {
     }
 
     // Create a pipe, throwing if there's an error. Returns {read, write} handles.
-    static tuple<scoped_resource<HANDLE>, scoped_resource<HANDLE>> CreatePipeThrow(DWORD read_mode = 0, DWORD write_mode = 0)
+    static tuple<scoped_handle, scoped_handle> CreatePipeThrow(DWORD read_mode = 0, DWORD write_mode = 0)
     {
         static LONG counter = 0;
 
@@ -121,7 +122,7 @@ namespace leatherman { namespace execution {
             InterlockedIncrement(&counter)).str());
 
         // Create the read pipe
-        scoped_resource<HANDLE> read_handle(CreateNamedPipeW(
+        scoped_handle read_handle(CreateNamedPipeW(
             name.c_str(),
             PIPE_ACCESS_INBOUND | read_mode,
             PIPE_TYPE_BYTE | PIPE_WAIT,
@@ -129,7 +130,7 @@ namespace leatherman { namespace execution {
             4096,
             4096,
             0,
-            &attributes), CloseHandle);
+            &attributes));
 
         if (read_handle == INVALID_HANDLE_VALUE) {
             LOG_ERROR("failed to create read pipe: %1%.", system_error());
@@ -137,14 +138,14 @@ namespace leatherman { namespace execution {
         }
 
         // Open the write pipe
-        scoped_resource<HANDLE> write_handle(CreateFileW(
+        scoped_handle write_handle(CreateFileW(
             name.c_str(),
             GENERIC_WRITE,
             0,
             &attributes,
             OPEN_EXISTING,
             FILE_ATTRIBUTE_NORMAL | write_mode,
-            nullptr), CloseHandle);
+            nullptr));
 
         if (write_handle == INVALID_HANDLE_VALUE) {
             LOG_ERROR("failed to create write pipe: %1%.", system_error());
@@ -209,7 +210,7 @@ namespace leatherman { namespace execution {
             callback(cb)
         {
             if (handle != INVALID_HANDLE_VALUE) {
-                event = scoped_resource<HANDLE>(CreateEvent(nullptr, TRUE, FALSE, nullptr), CloseHandle);
+                event = scoped_handle(CreateEvent(nullptr, TRUE, FALSE, nullptr));
                 if (!event) {
                     LOG_ERROR("failed to create %1% read event: %2%.", name, system_error());
                     throw execution_exception("failed to create read event.");
@@ -221,7 +222,7 @@ namespace leatherman { namespace execution {
         const string name;
         HANDLE handle;
         OVERLAPPED overlapped;
-        scoped_resource<HANDLE> event;
+        scoped_handle event;
         bool pending;
         string buffer;
         function<bool(string const&)> const& callback;
@@ -229,7 +230,7 @@ namespace leatherman { namespace execution {
 
     struct input_pipe
     {
-        scoped_resource<HANDLE> handle;
+        scoped_handle handle;
         string buffer;
         bool pending;
     };
@@ -246,7 +247,7 @@ namespace leatherman { namespace execution {
                     if (!WriteFile(input.handle, input.buffer.c_str(), input.buffer.size(), &count, nullptr)) {
                         // Treat broken pipes as closed pipes
                         if (GetLastError() == ERROR_BROKEN_PIPE) {
-                            input.handle = scoped_resource<HANDLE>(INVALID_HANDLE_VALUE, CloseHandle);
+                            input.handle = {};
                             break;
                         }
                         // Check to see if it's a pending operation
@@ -259,7 +260,7 @@ namespace leatherman { namespace execution {
                     }
 
                     if (count == 0) {
-                        input.handle = scoped_resource<HANDLE>(INVALID_HANDLE_VALUE, CloseHandle);
+                        input.handle = {};
                         break;
                     }
 
@@ -479,26 +480,26 @@ namespace leatherman { namespace execution {
         // Execute the command, reading the results into a buffer until there's no more to read.
         // See http://msdn.microsoft.com/en-us/library/windows/desktop/ms682499(v=vs.85).aspx
         // for details on redirecting input/output.
-        scoped_resource<HANDLE> stdInRd, stdInWr;
+        scoped_handle stdInRd, stdInWr;
         tie(stdInRd, stdInWr) = CreatePipeThrow();
         if (!SetHandleInformation(stdInWr, HANDLE_FLAG_INHERIT, 0)) {
             throw execution_exception("pipe could not be modified");
         }
 
-        scoped_resource<HANDLE> stdOutRd, stdOutWr;
+        scoped_handle stdOutRd, stdOutWr;
         tie(stdOutRd, stdOutWr) = CreatePipeThrow(FILE_FLAG_OVERLAPPED, 0);
         if (!SetHandleInformation(stdOutRd, HANDLE_FLAG_INHERIT, 0)) {
             throw execution_exception("pipe could not be modified");
         }
 
-        scoped_resource<HANDLE> stdErrRd(INVALID_HANDLE_VALUE, nullptr), stdErrWr(INVALID_HANDLE_VALUE, nullptr);
+        scoped_handle stdErrRd, stdErrWr;
         if (!options[execution_options::redirect_stderr_to_stdout]) {
             // If redirecting to null, open the "NUL" device and inherit the handle
             if (options[execution_options::redirect_stderr_to_null]) {
                 SECURITY_ATTRIBUTES attributes = {};
                 attributes.nLength = sizeof(SECURITY_ATTRIBUTES);
                 attributes.bInheritHandle = TRUE;
-                stdErrWr = scoped_resource<HANDLE>(CreateFileW(L"nul", GENERIC_WRITE, FILE_SHARE_WRITE, &attributes, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr), CloseHandle);
+                stdErrWr = scoped_handle(CreateFileW(L"nul", GENERIC_WRITE, FILE_SHARE_WRITE, &attributes, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr));
                 if (stdErrWr == INVALID_HANDLE_VALUE) {
                     throw execution_exception("cannot open NUL device for redirecting stderr.");
                 }
@@ -553,14 +554,14 @@ namespace leatherman { namespace execution {
         stdOutWr.release();
         stdErrWr.release();
 
-        scoped_resource<HANDLE> hProcess(procInfo.hProcess, CloseHandle);
-        scoped_resource<HANDLE> hThread(procInfo.hThread, CloseHandle);
+        scoped_handle hProcess(procInfo.hProcess);
+        scoped_handle hThread(procInfo.hThread);
 
         // Use a Job Object to group any child processes spawned by the CreateProcess invocation, so we can
         // easily stop them in case of a timeout.
-        scoped_resource<HANDLE> hJob;
+        scoped_handle hJob;
         if (use_job_object) {
-            hJob = scoped_resource<HANDLE>(CreateJobObjectW(nullptr, nullptr), CloseHandle);
+            hJob = scoped_handle(CreateJobObjectW(nullptr, nullptr));
             if (hJob == NULL) {
                 LOG_ERROR("failed to create job object: %1%.", system_error());
                 throw execution_exception("failed to create job object.");
@@ -585,9 +586,9 @@ namespace leatherman { namespace execution {
         });
 
         // Create a waitable timer if given a timeout
-        scoped_resource<HANDLE> timer;
+        scoped_handle timer;
         if (timeout) {
-            timer = scoped_resource<HANDLE>(CreateWaitableTimer(nullptr, TRUE, nullptr), CloseHandle);
+            timer = scoped_handle(CreateWaitableTimer(nullptr, TRUE, nullptr));
             if (!timer) {
                 LOG_ERROR("failed to create waitable timer: %1%.", system_error());
                 throw execution_exception("failed to create waitable timer.");
@@ -611,7 +612,7 @@ namespace leatherman { namespace execution {
                 pipe("stderr", stdErrRd, process_stderr)
             } };
 
-            input_pipe inpipe = {scoped_resource<HANDLE>(INVALID_HANDLE_VALUE, CloseHandle), "", false};
+            input_pipe inpipe;
             if (input) {
                 inpipe = {move(stdInWr), *input, false};
             }
