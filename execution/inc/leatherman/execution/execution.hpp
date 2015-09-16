@@ -187,6 +187,34 @@ namespace leatherman { namespace execution {
     };
 
     /**
+     * Encapsulates return value from executing a process.
+     */
+    struct result
+    {
+        /**
+         * Constructor.
+         */
+        result(bool s, std::string o, std::string e, int ec)
+            : success(s), output(move(o)), error(move(e)), exit_code(ec) {}
+        /**
+         * Whether or not the command succeeded, defaults to true.
+         */
+        bool success = true;
+        /**
+         * Output from stdout.
+         */
+        std::string output;
+        /**
+         * Output from stderr (if not redirected).
+         */
+        std::string error;
+        /**
+         * The process exit code, defaults to 0.
+         */
+        int exit_code = 0;
+    };
+
+    /**
      * Searches the given paths for the given executable file.
      * @param file The file to search for.
      * @param directories The directories to search.
@@ -207,9 +235,9 @@ namespace leatherman { namespace execution {
      * @param file The name or path of the program to execute.
      * @param timeout The timeout, in seconds.  Defaults to no timeout.
      * @param options The execution options.  Defaults to trimming output, merging the environment, and redirecting stderr to null.
-     * @return Returns a tuple of whether or not the command succeeded, output from stdout, and output from stderr (if not redirected).
+     * @return Returns a result struct.
      */
-    std::tuple<bool, std::string, std::string> execute(
+    result execute(
         std::string const& file,
         uint32_t timeout = 0,
         lth_util::option_set<execution_options> const& options = { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_null });
@@ -220,9 +248,9 @@ namespace leatherman { namespace execution {
      * @param arguments The arguments to pass to the program. On Windows they will be quoted as needed for spaces.
      * @param timeout The timeout, in seconds. Defaults to no timeout.
      * @param options The execution options.  Defaults to trimming output, merging the environment, and redirecting stderr to null.
-     * @return Returns a tuple of whether or not the command succeeded, output from stdout, and output from stderr (if not redirected).
+     * @return Returns a result struct.
      */
-    std::tuple<bool, std::string, std::string> execute(
+    result execute(
         std::string const& file,
         std::vector<std::string> const& arguments,
         uint32_t timeout = 0,
@@ -235,9 +263,9 @@ namespace leatherman { namespace execution {
      * @param environment The environment variables to pass to the child process.
      * @param timeout The timeout, in seconds. Defaults to no timeout.
      * @param options The execution options.  Defaults to trimming output, merging the environment, and redirecting stderr to null.
-     * @return Returns a tuple of whether or not the command succeeded, output from stdout, and output from stderr (if not redirected).
+     * @return Returns a result struct.
      */
-    std::tuple<bool, std::string, std::string> execute(
+    result execute(
         std::string const& file,
         std::vector<std::string> const& arguments,
         std::map<std::string, std::string> const& environment,

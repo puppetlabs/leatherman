@@ -136,7 +136,7 @@ namespace leatherman { namespace execution {
         return file + remainder;
     }
 
-    tuple<bool, string, string> execute(
+    result execute(
         string const& file,
         vector<string> const* arguments,
         map<string, string> const* environment,
@@ -157,7 +157,7 @@ namespace leatherman { namespace execution {
         }
     }
 
-    tuple<bool, string, string> execute(
+    result execute(
         string const& file,
         uint32_t timeout,
         option_set<execution_options> const& options)
@@ -168,7 +168,7 @@ namespace leatherman { namespace execution {
         return execute(file, nullptr, nullptr, nullptr, stderr_callback, actual_options, timeout);
     }
 
-    tuple<bool, string, string> execute(
+    result execute(
         string const& file,
         vector<string> const& arguments,
         uint32_t timeout,
@@ -180,7 +180,7 @@ namespace leatherman { namespace execution {
         return execute(file, &arguments, nullptr, nullptr, stderr_callback, actual_options, timeout);
     }
 
-    tuple<bool, string, string> execute(
+    result execute(
         string const& file,
         vector<string> const& arguments,
         map<string, string> const& environment,
@@ -225,7 +225,7 @@ namespace leatherman { namespace execution {
     {
         auto actual_options = options;
         setup_each_line(stdout_callback, stderr_callback, actual_options);
-        return get<0>(execute(file, nullptr, nullptr, stdout_callback, stderr_callback, actual_options, timeout));
+        return execute(file, nullptr, nullptr, stdout_callback, stderr_callback, actual_options, timeout).success;
     }
 
     bool each_line(
@@ -238,7 +238,7 @@ namespace leatherman { namespace execution {
     {
         auto actual_options = options;
         setup_each_line(stdout_callback, stderr_callback, actual_options);
-        return get<0>(execute(file, &arguments, nullptr, stdout_callback, stderr_callback, actual_options, timeout));
+        return execute(file, &arguments, nullptr, stdout_callback, stderr_callback, actual_options, timeout).success;
     }
 
     bool each_line(
@@ -252,7 +252,7 @@ namespace leatherman { namespace execution {
     {
         auto actual_options = options;
         setup_each_line(stdout_callback, stderr_callback, actual_options);
-        return get<0>(execute(file, &arguments, &environment, stdout_callback, stderr_callback, actual_options, timeout));
+        return execute(file, &arguments, &environment, stdout_callback, stderr_callback, actual_options, timeout).success;
     }
 
     static bool process_data(bool trim, string const& data, string& buffer, string const& logger, function<bool(string&)> const& callback)

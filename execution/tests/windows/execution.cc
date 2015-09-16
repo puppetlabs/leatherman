@@ -99,39 +99,41 @@ SCENARIO("executing commands with execution::execute") {
         });
         return variables;
     };
-    bool success = false;
-    string output, error;
     GIVEN("a command that succeeds") {
         THEN("the output should be returned") {
-            tie(success, output, error) = execute("cmd.exe", { "/c", "type", normalize(EXEC_TESTS_DIRECTORY "/fixtures/ls/file3.txt") });
-            REQUIRE(success);
-            REQUIRE(output == "file3");
-            REQUIRE(error == "");
+            auto exec = execute("cmd.exe", { "/c", "type", normalize(EXEC_TESTS_DIRECTORY "/fixtures/ls/file3.txt") });
+            REQUIRE(exec.success);
+            REQUIRE(exec.output == "file3");
+            REQUIRE(exec.error == "");
+            REQUIRE(exec.exit_code == 0);
         }
     }
     GIVEN("a command that fails") {
         WHEN("default options are used") {
-            tie(success, output, error) = execute("cmd.exe", { "/c", "dir", "/B", "does_not_exist" });
+            auto exec = execute("cmd.exe", { "/c", "dir", "/B", "does_not_exist" });
             THEN("no output is returned") {
-                REQUIRE_FALSE(success);
-                REQUIRE(output == "");
-                REQUIRE(error == "");
+                REQUIRE_FALSE(exec.success);
+                REQUIRE(exec.output == "");
+                REQUIRE(exec.error == "");
+                REQUIRE(exec.exit_code > 0);
             }
         }
         WHEN("the redirect stderr option is used") {
-            tie(success, output, error) = execute("cmd.exe", { "/c", "dir", "/B", "does_not_exist" }, 0, { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_stdout });
+            auto exec = execute("cmd.exe", { "/c", "dir", "/B", "does_not_exist" }, 0, { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_stdout });
             THEN("error output is returned on stdout") {
-                REQUIRE_FALSE(success);
-                REQUIRE(output == "File Not Found");
-                REQUIRE(error == "");
+                REQUIRE_FALSE(exec.success);
+                REQUIRE(exec.output == "File Not Found");
+                REQUIRE(exec.error == "");
+                REQUIRE(exec.exit_code > 0);
             }
         }
         WHEN("not redirecting stderr to null") {
-            tie(success, output, error) = execute("cmd.exe", { "/c", "dir", "/B", "does_not_exist" }, 0, { execution_options::trim_output, execution_options::merge_environment });
+            auto exec = execute("cmd.exe", { "/c", "dir", "/B", "does_not_exist" }, 0, { execution_options::trim_output, execution_options::merge_environment });
             THEN("error output is returned") {
-                REQUIRE_FALSE(success);
-                REQUIRE(output == "");
-                REQUIRE(error == "File Not Found");
+                REQUIRE_FALSE(exec.success);
+                REQUIRE(exec.output == "");
+                REQUIRE(exec.error == "File Not Found");
+                REQUIRE(exec.exit_code > 0);
             }
         }
         WHEN("the 'throw on non-zero exit' option is used") {
@@ -141,11 +143,11 @@ SCENARIO("executing commands with execution::execute") {
         }
         WHEN("requested to merge the environment") {
             SetEnvironmentVariableW(L"TEST_INHERITED_VARIABLE", L"TEST_INHERITED_VALUE");
-            tie(success, output, error) = execute("cmd.exe", { "/c", "set" }, { { "TEST_VARIABLE1", "TEST_VALUE1" }, { "TEST_VARIABLE2", "TEST_VALUE2" } });
+            auto exec = execute("cmd.exe", { "/c", "set" }, { { "TEST_VARIABLE1", "TEST_VALUE1" }, { "TEST_VARIABLE2", "TEST_VALUE2" } });
             SetEnvironmentVariableW(L"TEST_INHERITED_VARIABLE", nullptr);
-            REQUIRE(success);
-            REQUIRE(error == "");
-            auto variables = get_variables(output);
+            REQUIRE(exec.success);
+            REQUIRE(exec.error == "");
+            auto variables = get_variables(exec.output);
             THEN("the child environment should contain the given variables") {
                 REQUIRE(variables.size() > 4u);
                 REQUIRE(variables.count("TEST_VARIABLE1") == 1u);
@@ -162,11 +164,11 @@ SCENARIO("executing commands with execution::execute") {
         }
         WHEN("requested to override the environment") {
             SetEnvironmentVariableW(L"TEST_INHERITED_VARIABLE", L"TEST_INHERITED_VALUE");
-            tie(success, output, error) = execute("cmd.exe", { "/c", "set" }, { { "TEST_VARIABLE1", "TEST_VALUE1" }, { "TEST_VARIABLE2", "TEST_VALUE2" } }, 0, { execution_options::trim_output });
+            auto exec = execute("cmd.exe", { "/c", "set" }, { { "TEST_VARIABLE1", "TEST_VALUE1" }, { "TEST_VARIABLE2", "TEST_VALUE2" } }, 0, { execution_options::trim_output });
             SetEnvironmentVariableW(L"TEST_INHERITED_VARIABLE", nullptr);
-            REQUIRE(success);
-            REQUIRE(error == "");
-            auto variables = get_variables(output);
+            REQUIRE(exec.success);
+            REQUIRE(exec.error == "");
+            auto variables = get_variables(exec.output);
             THEN("the child environment should only contain the given variables") {
                 REQUIRE(variables.count("TEST_VARIABLE1") == 1u);
                 REQUIRE(variables["TEST_VARIABLE1"] == "TEST_VALUE1");
@@ -181,10 +183,10 @@ SCENARIO("executing commands with execution::execute") {
             }
         }
         WHEN("requested to override LC_ALL or LANG") {
-            tie(success, output, error) = execute("cmd.exe", { "/c", "set" }, { { "LANG", "FOO" }, { "LC_ALL", "BAR" } });
-            REQUIRE(success);
-            REQUIRE(error == "");
-            auto variables = get_variables(output);
+            auto exec = execute("cmd.exe", { "/c", "set" }, { { "LANG", "FOO" }, { "LC_ALL", "BAR" } });
+            REQUIRE(exec.success);
+            REQUIRE(exec.error == "");
+            auto variables = get_variables(exec.output);
             THEN("the values should be passed to the child process") {
                 REQUIRE(variables.count("LC_ALL") == 1u);
                 REQUIRE(variables["LC_ALL"] == "BAR");
@@ -195,17 +197,17 @@ SCENARIO("executing commands with execution::execute") {
     }
     GIVEN("a command that outputs leading/trailing whitespace") {
         THEN("whitespace should be trimmed by default") {
-            tie(success, output, error) = execute("cmd.exe", { "/c", "type", normalize(EXEC_TESTS_DIRECTORY "/fixtures/ls/file1.txt") });
-            REQUIRE(success);
-            REQUIRE(output == "this is a test of trimming");
-            REQUIRE(error == "");
+            auto exec = execute("cmd.exe", { "/c", "type", normalize(EXEC_TESTS_DIRECTORY "/fixtures/ls/file1.txt") });
+            REQUIRE(exec.success);
+            REQUIRE(exec.output == "this is a test of trimming");
+            REQUIRE(exec.error == "");
         }
         WHEN("the 'trim whitespace' option is not used") {
-            tie(success, output, error) = execute("cmd.exe", { "/c", "type", normalize(EXEC_TESTS_DIRECTORY "/fixtures/ls/file1.txt") }, 0, { execution_options::merge_environment });
-            REQUIRE(success);
+            auto exec = execute("cmd.exe", { "/c", "type", normalize(EXEC_TESTS_DIRECTORY "/fixtures/ls/file1.txt") }, 0, { execution_options::merge_environment });
+            REQUIRE(exec.success);
             THEN("whitespace should not be trimmed") {
-                REQUIRE(output == "   this is a test of trimming   ");
-                REQUIRE(error == "");
+                REQUIRE(exec.output == "   this is a test of trimming   ");
+                REQUIRE(exec.error == "");
             }
         }
     }
@@ -233,10 +235,10 @@ SCENARIO("executing commands with execution::execute") {
     GIVEN("stderr is redirected to null") {
         WHEN("using a debug log level") {
             log_capture capture(log_level::debug);
-            tie(success, output, error) = execute(EXEC_TESTS_DIRECTORY "/fixtures/windows/error_message.bat");
-            REQUIRE(success);
-            REQUIRE(output == "foo=bar");
-            REQUIRE(error.empty());
+            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/windows/error_message.bat");
+            REQUIRE(exec.success);
+            REQUIRE(exec.output == "foo=bar");
+            REQUIRE(exec.error.empty());
             THEN("stderr is logged") {
                 auto output = capture.result();
                 CAPTURE(output);
@@ -245,10 +247,10 @@ SCENARIO("executing commands with execution::execute") {
         }
         WHEN("not using a debug log level") {
             log_capture capture(log_level::warning);
-            tie(success, output, error) = execute(EXEC_TESTS_DIRECTORY "/fixtures/windows/error_message.bat");
-            REQUIRE(success);
-            REQUIRE(output == "foo=bar");
-            REQUIRE(error.empty());
+            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/windows/error_message.bat");
+            REQUIRE(exec.success);
+            REQUIRE(exec.output == "foo=bar");
+            REQUIRE(exec.error.empty());
             THEN("stderr is not logged") {
                 auto output = capture.result();
                 CAPTURE(output);

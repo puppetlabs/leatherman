@@ -470,27 +470,24 @@ namespace leatherman { namespace ruby {
         }
         LOG_DEBUG("ruby was found at \"%1%\".", ruby);
 
-        bool success;
-        string output, none;
-
-        tie(success, output, none) = execute(ruby, { "-e", "print(['libdir', 'archlibdir', 'sitearchlibdir', 'bindir'].find do |name|"
-                                                                  "dir = RbConfig::CONFIG[name];"
-                                                                  "next unless dir;"
-                                                                  "file = File.join(dir, RbConfig::CONFIG['LIBRUBY_SO']);"
-                                                                  "break file if File.exist? file;"
-                                                                  "false end)" });
-        if (!success) {
-            LOG_WARNING("ruby failed to run: %1%", output);
+        auto exec = execute(ruby, { "-e", "print(['libdir', 'archlibdir', 'sitearchlibdir', 'bindir'].find do |name|"
+                "dir = RbConfig::CONFIG[name];"
+                "next unless dir;"
+                "file = File.join(dir, RbConfig::CONFIG['LIBRUBY_SO']);"
+                "break file if File.exist? file;"
+                "false end)" });
+        if (!exec.success) {
+            LOG_WARNING("ruby failed to run: %1%", exec.output);
             return library;
         }
 
         boost::system::error_code ec;
-        if (!exists(output, ec) || is_directory(output, ec)) {
-            LOG_DEBUG("ruby library \"%1%\" was not found: ensure ruby was built with the --enable-shared configuration option.", output);
+        if (!exists(exec.output, ec) || is_directory(exec.output, ec)) {
+            LOG_DEBUG("ruby library \"%1%\" was not found: ensure ruby was built with the --enable-shared configuration option.", exec.output);
             return library;
         }
 
-        library.load(output);
+        library.load(exec.output);
         return library;
     }
 
