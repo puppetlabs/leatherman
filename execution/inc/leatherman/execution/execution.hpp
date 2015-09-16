@@ -192,9 +192,14 @@ namespace leatherman { namespace execution {
     struct result
     {
         /**
-         * Whether or not the command succeeded.
+         * Constructor.
          */
-        bool success;
+        result(bool s, std::string o, std::string e, int ec)
+            : success(s), output(move(o)), error(move(e)), exit_code(ec) {}
+        /**
+         * Whether or not the command succeeded, defaults to true.
+         */
+        bool success = true;
         /**
          * Output from stdout.
          */
@@ -204,9 +209,9 @@ namespace leatherman { namespace execution {
          */
         std::string error;
         /**
-         * The process exit code.
+         * The process exit code, defaults to 0.
          */
-        int exit_code;
+        int exit_code = 0;
     };
 
     /**
