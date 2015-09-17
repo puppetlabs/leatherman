@@ -288,7 +288,7 @@ namespace leatherman { namespace execution {
             for (auto& pipe : pipes) {
                 // If the handle is closed or is pending, skip
                 if (pipe.handle == INVALID_HANDLE_VALUE || pipe.pending) {
-                    break;
+                    continue;
                 }
 
                 // Read the pipe until pending
