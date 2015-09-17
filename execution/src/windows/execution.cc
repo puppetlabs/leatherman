@@ -118,7 +118,7 @@ namespace leatherman { namespace execution {
 
         // Format a name for the pipe based on the process and counter
         wstring name = boost::nowide::widen((boost::format("\\\\.\\Pipe\\leatherman.%1%.%2%") %
-            GetCurrentProcessId() %
+            GetCurrentThreadId() %
             InterlockedIncrement(&counter)).str());
 
         // Create the read pipe
