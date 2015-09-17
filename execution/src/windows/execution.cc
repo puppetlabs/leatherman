@@ -102,14 +102,10 @@ namespace leatherman { namespace execution {
     }
 
     // Create a pipe, throwing if there's an error. Returns {read, write} handles.
-    static tuple<scoped_handle, scoped_handle> CreatePipeThrow(DWORD read_mode = 0, DWORD write_mode = 0)
+    // Always creates overlapped pipes.
+    static tuple<scoped_handle, scoped_handle> CreatePipeThrow()
     {
         static LONG counter = 0;
-
-        // The only supported flag is FILE_FLAG_OVERLAPPED
-        if ((read_mode | write_mode) & (~FILE_FLAG_OVERLAPPED)) {
-            throw execution_exception("cannot create output pipe: invalid flag specified.");
-        }
 
         SECURITY_ATTRIBUTES attributes = {};
         attributes.nLength = sizeof(SECURITY_ATTRIBUTES);
@@ -124,7 +120,7 @@ namespace leatherman { namespace execution {
         // Create the read pipe
         scoped_handle read_handle(CreateNamedPipeW(
             name.c_str(),
-            PIPE_ACCESS_INBOUND | read_mode,
+            PIPE_ACCESS_INBOUND | FILE_FLAG_OVERLAPPED,
             PIPE_TYPE_BYTE | PIPE_WAIT,
             1,
             4096,
@@ -144,13 +140,14 @@ namespace leatherman { namespace execution {
             0,
             &attributes,
             OPEN_EXISTING,
-            FILE_ATTRIBUTE_NORMAL | write_mode,
+            FILE_ATTRIBUTE_NORMAL,
             nullptr));
 
         if (write_handle == INVALID_HANDLE_VALUE) {
             LOG_ERROR("failed to create write pipe: %1%.", system_error());
             throw execution_exception("failed to create write pipe.");
         }
+
         return make_tuple(move(read_handle), move(write_handle));
     }
 
@@ -202,12 +199,12 @@ namespace leatherman { namespace execution {
     // Represents information about a pipe
     struct pipe
     {
-        pipe(string pipe_name, HANDLE pipe_handle, function<bool(string const&)> const& cb) :
+        pipe(string pipe_name, HANDLE pipe_handle, function<bool(string const&)> cb) :
             name(move(pipe_name)),
             handle(pipe_handle),
             overlapped{},
             pending(false),
-            callback(cb)
+            callback(move(cb))
         {
             if (handle != INVALID_HANDLE_VALUE) {
                 event = scoped_handle(CreateEvent(nullptr, TRUE, FALSE, nullptr));
@@ -225,14 +222,32 @@ namespace leatherman { namespace execution {
         scoped_handle event;
         bool pending;
         string buffer;
-        function<bool(string const&)> const& callback;
+        function<bool(string const&)> callback;
     };
 
     struct input_pipe
     {
+        input_pipe(scoped_handle h, string b) :
+            handle(move(h)),
+            overlapped{},
+            pending(false),
+            buffer(move(b))
+        {
+            if (handle != INVALID_HANDLE_VALUE) {
+                event = scoped_handle(CreateEvent(nullptr, TRUE, FALSE, nullptr));
+                if (!event) {
+                    LOG_ERROR("failed to create stdin write event: %1%.", system_error());
+                    throw execution_exception("failed to create write event.");
+                }
+                overlapped.hEvent = event;
+            }
+        }
+
         scoped_handle handle;
-        string buffer;
+        OVERLAPPED overlapped;
+        scoped_handle event;
         bool pending;
+        string buffer;
     };
 
     static void rw_from_child(DWORD child, array<pipe, 2>& pipes, input_pipe input, uint32_t timeout, HANDLE timer)
@@ -244,7 +259,7 @@ namespace leatherman { namespace execution {
             if (input.handle != INVALID_HANDLE_VALUE && !input.pending) {
                 while (true) {
                     DWORD count;
-                    if (!WriteFile(input.handle, input.buffer.c_str(), input.buffer.size(), &count, nullptr)) {
+                    if (!WriteFile(input.handle, input.buffer.c_str(), input.buffer.size(), &count, &input.overlapped)) {
                         // Treat broken pipes as closed pipes
                         if (GetLastError() == ERROR_BROKEN_PIPE) {
                             input.handle = {};
@@ -388,6 +403,25 @@ namespace leatherman { namespace execution {
             if (input.handle != INVALID_HANDLE_VALUE && input.pending && input.handle == wait_handles[index]) {
                 // Mark input as not pending, loop will take care of updating the pipe.
                 input.pending = false;
+
+                // Get the overlapped result and process it
+                DWORD count = 0;
+                if (!GetOverlappedResult(input.handle, &input.overlapped, &count, FALSE)) {
+                    if (GetLastError() != ERROR_BROKEN_PIPE) {
+                        LOG_ERROR("failed to get asynchronous stdin write result: %1%.", system_error());
+                        throw execution_exception("failed to get asynchronous write result.");
+                    }
+                    // Treat a broken pipe as nothing left to read
+                    count = 0;
+                }
+                // Check for closed pipe
+                if (count == 0) {
+                    input.handle = {};
+                    break;
+                }
+
+                // Register written data
+                input.buffer.erase(0, count);
             }
         }
     }
@@ -487,7 +521,7 @@ namespace leatherman { namespace execution {
         }
 
         scoped_handle stdOutRd, stdOutWr;
-        tie(stdOutRd, stdOutWr) = CreatePipeThrow(FILE_FLAG_OVERLAPPED, 0);
+        tie(stdOutRd, stdOutWr) = CreatePipeThrow();
         if (!SetHandleInformation(stdOutRd, HANDLE_FLAG_INHERIT, 0)) {
             throw execution_exception("pipe could not be modified");
         }
@@ -505,7 +539,7 @@ namespace leatherman { namespace execution {
                 }
             } else {
                 // Otherwise, we're reading from stderr, so create a pipe
-                tie(stdErrRd, stdErrWr) = CreatePipeThrow(FILE_FLAG_OVERLAPPED, 0);
+                tie(stdErrRd, stdErrWr) = CreatePipeThrow();
                 if (!SetHandleInformation(stdErrRd, HANDLE_FLAG_INHERIT, 0)) {
                     throw execution_exception("pipe could not be modified");
                 }
@@ -612,9 +646,9 @@ namespace leatherman { namespace execution {
                 pipe("stderr", stdErrRd, process_stderr)
             } };
 
-            input_pipe inpipe;
+            input_pipe inpipe({}, "");
             if (input) {
-                inpipe = {move(stdInWr), *input, false};
+                inpipe = {move(stdInWr), *input};
             }
 
             rw_from_child(procInfo.dwProcessId, pipes, move(inpipe), timeout, timer);
