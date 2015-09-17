@@ -199,12 +199,39 @@ namespace leatherman { namespace execution {
     // Represents information about a pipe
     struct pipe
     {
-        pipe(string pipe_name, HANDLE pipe_handle, function<bool(string const&)> cb) :
+        pipe(string pipe_name, scoped_handle pipe_handle, function<bool(string const&)> cb) :
             name(move(pipe_name)),
-            handle(pipe_handle),
+            handle(move(pipe_handle)),
             overlapped{},
             pending(false),
+            read(true),
             callback(move(cb))
+        {
+            init();
+        }
+
+        pipe(string pipe_name, scoped_handle pipe_handle, string buf) :
+            name(move(pipe_name)),
+            handle(move(pipe_handle)),
+            overlapped{},
+            pending(false),
+            read(false),
+            buffer(move(buf))
+        {
+            init();
+        }
+
+        const string name;
+        scoped_handle handle;
+        OVERLAPPED overlapped;
+        scoped_handle event;
+        bool pending;
+        bool read;
+        string buffer;
+        function<bool(string const&)> callback;
+
+     private:
+        void init()
         {
             if (handle != INVALID_HANDLE_VALUE) {
                 event = scoped_handle(CreateEvent(nullptr, TRUE, FALSE, nullptr));
@@ -215,83 +242,21 @@ namespace leatherman { namespace execution {
                 overlapped.hEvent = event;
             }
         }
-
-        const string name;
-        HANDLE handle;
-        OVERLAPPED overlapped;
-        scoped_handle event;
-        bool pending;
-        string buffer;
-        function<bool(string const&)> callback;
     };
 
-    struct input_pipe
-    {
-        input_pipe(scoped_handle h, string b) :
-            handle(move(h)),
-            overlapped{},
-            pending(false),
-            buffer(move(b))
-        {
-            if (handle != INVALID_HANDLE_VALUE) {
-                event = scoped_handle(CreateEvent(nullptr, TRUE, FALSE, nullptr));
-                if (!event) {
-                    LOG_ERROR("failed to create stdin write event: %1%.", system_error());
-                    throw execution_exception("failed to create write event.");
-                }
-                overlapped.hEvent = event;
-            }
-        }
-
-        scoped_handle handle;
-        OVERLAPPED overlapped;
-        scoped_handle event;
-        bool pending;
-        string buffer;
-    };
-
-    static void rw_from_child(DWORD child, array<pipe, 2>& pipes, input_pipe input, uint32_t timeout, HANDLE timer)
+    static void rw_from_child(DWORD child, array<pipe, 3>& pipes, uint32_t timeout, HANDLE timer)
     {
         vector<HANDLE> wait_handles;
         while (true)
         {
-            // First try to write input
-            if (input.handle != INVALID_HANDLE_VALUE && !input.pending) {
-                while (true) {
-                    DWORD count;
-                    if (!WriteFile(input.handle, input.buffer.c_str(), input.buffer.size(), &count, &input.overlapped)) {
-                        // Treat broken pipes as closed pipes
-                        if (GetLastError() == ERROR_BROKEN_PIPE) {
-                            input.handle = {};
-                            break;
-                        }
-                        // Check to see if it's a pending operation
-                        if (GetLastError() == ERROR_IO_PENDING) {
-                            input.pending = true;
-                            break;
-                        }
-                        LOG_ERROR("failed to write child stdin input: %1%.", system_error());
-                        throw execution_exception("failed to write child process input.");
-                    }
-
-                    if (count == 0) {
-                        input.handle = {};
-                        break;
-                    }
-
-                    // Register written data
-                    input.buffer.erase(0, count);
-                }
-            }
-
-            // Read from all pipes
+            // Process all pipes
             for (auto& pipe : pipes) {
                 // If the handle is closed or is pending, skip
                 if (pipe.handle == INVALID_HANDLE_VALUE || pipe.pending) {
                     continue;
                 }
 
-                // Read the pipe until pending
+                // Process the pipe until pending
                 while (true) {
                     // Before doing anything, check to see if there's been a timeout
                     // This is done pre-emptively in case ReadFile never returns ERROR_IO_PENDING
@@ -299,13 +264,19 @@ namespace leatherman { namespace execution {
                         throw timeout_exception((boost::format("command timed out after %1% seconds.") % timeout).str(), static_cast<size_t>(child));
                     }
 
-                    // Read the data
-                    pipe.buffer.resize(4096);
+                    if (pipe.read) {
+                        // Read the data
+                        pipe.buffer.resize(4096);
+                    }
+
                     DWORD count = 0;
-                    if (!ReadFile(pipe.handle, &pipe.buffer[0], pipe.buffer.size(), &count, &pipe.overlapped)) {
+                    auto success = pipe.read ?
+                        ReadFile(pipe.handle, &pipe.buffer[0], pipe.buffer.size(), &count, &pipe.overlapped) :
+                        WriteFile(pipe.handle, pipe.buffer.c_str(), pipe.buffer.size(), &count, &pipe.overlapped);
+                    if (!success) {
                         // Treat broken pipes as closed pipes
                         if (GetLastError() == ERROR_BROKEN_PIPE) {
-                            pipe.handle = INVALID_HANDLE_VALUE;
+                            pipe.handle = {};
                             break;
                         }
                         // Check to see if it's a pending operation
@@ -313,21 +284,26 @@ namespace leatherman { namespace execution {
                             pipe.pending = true;
                             break;
                         }
-                        LOG_ERROR("failed to read child %1% output: %2%.", pipe.name, system_error());
-                        throw execution_exception("failed to read child process output.");
+                        LOG_ERROR("%1% pipe i/o failed: %2%.", pipe.name, system_error());
+                        throw execution_exception("child i/o failed.");
                     }
 
                     // Check for closed pipe
                     if (count == 0) {
-                        pipe.handle = INVALID_HANDLE_VALUE;
+                        pipe.handle = {};
                         break;
                     }
 
-                    // Read completed immediately, process the data
-                    pipe.buffer.resize(count);
-                    if (!pipe.callback(pipe.buffer)) {
-                        // Callback signaled that we're done
-                        return;
+                    if (pipe.read) {
+                        // Read completed immediately, process the data
+                        pipe.buffer.resize(count);
+                        if (!pipe.callback(pipe.buffer)) {
+                            // Callback signaled that we're done
+                            return;
+                        }
+                    } else {
+                        // Register written data
+                        pipe.buffer.erase(0, count);
                     }
                 }
             }
@@ -339,9 +315,6 @@ namespace leatherman { namespace execution {
                     continue;
                 }
                 wait_handles.push_back(pipe.event);
-            }
-            if (input.handle != INVALID_HANDLE_VALUE && input.pending) {
-                wait_handles.push_back(input.handle);
             }
 
             // If no wait handles, then we're done processing
@@ -356,8 +329,8 @@ namespace leatherman { namespace execution {
             // Wait for data (and, optionally, timeout)
             auto result = WaitForMultipleObjects(wait_handles.size(), wait_handles.data(), FALSE, INFINITE);
             if (result >= (WAIT_OBJECT_0 + wait_handles.size())) {
-                LOG_ERROR("failed to wait for child process output: %1%.", system_error());
-                throw execution_exception("failed to wait for child process output.");
+                LOG_ERROR("failed to wait for child process i/o: %1%.", system_error());
+                throw execution_exception("failed to wait for child process i/o.");
             }
 
             // Check for timeout
@@ -379,49 +352,30 @@ namespace leatherman { namespace execution {
                 DWORD count = 0;
                 if (!GetOverlappedResult(pipe.handle, &pipe.overlapped, &count, FALSE)) {
                     if (GetLastError() != ERROR_BROKEN_PIPE) {
-                        LOG_ERROR("failed to get asynchronous %1% read result: %2%.", pipe.name, system_error());
-                        throw execution_exception("failed to get asynchronous read result.");
+                        LOG_ERROR("asynchronous i/o on %1% failed: %2%.", pipe.name, system_error());
+                        throw execution_exception("asynchronous i/o failed.");
                     }
                     // Treat a broken pipe as nothing left to read
                     count = 0;
                 }
                 // Check for closed pipe
                 if (count == 0) {
-                    pipe.handle = INVALID_HANDLE_VALUE;
+                    pipe.handle = {};
                     break;
                 }
 
-                // Read completed, process the data
-                pipe.buffer.resize(count);
-                if (!pipe.callback(pipe.buffer)) {
-                    // Callback signaled that we're done
-                    return;
+                if (pipe.read) {
+                    // Read completed, process the data
+                    pipe.buffer.resize(count);
+                    if (!pipe.callback(pipe.buffer)) {
+                        // Callback signaled that we're done
+                        return;
+                    }
+                } else {
+                    // Register written data
+                    pipe.buffer.erase(0, count);
                 }
                 break;
-            }
-
-            if (input.handle != INVALID_HANDLE_VALUE && input.pending && input.handle == wait_handles[index]) {
-                // Mark input as not pending, loop will take care of updating the pipe.
-                input.pending = false;
-
-                // Get the overlapped result and process it
-                DWORD count = 0;
-                if (!GetOverlappedResult(input.handle, &input.overlapped, &count, FALSE)) {
-                    if (GetLastError() != ERROR_BROKEN_PIPE) {
-                        LOG_ERROR("failed to get asynchronous stdin write result: %1%.", system_error());
-                        throw execution_exception("failed to get asynchronous write result.");
-                    }
-                    // Treat a broken pipe as nothing left to read
-                    count = 0;
-                }
-                // Check for closed pipe
-                if (count == 0) {
-                    input.handle = {};
-                    break;
-                }
-
-                // Register written data
-                input.buffer.erase(0, count);
             }
         }
     }
@@ -641,21 +595,14 @@ namespace leatherman { namespace execution {
         string output, error;
         tie(output, error) = process_streams(options[execution_options::trim_output], stdout_callback, stderr_callback, [&](function<bool(string const&)> const& process_stdout, function<bool(string const&)> const& process_stderr) {
             // Read the child output
-            array<pipe, 2> pipes = { {
-                pipe("stdout", stdOutRd, process_stdout),
-                pipe("stderr", stdErrRd, process_stderr)
+            array<pipe, 3> pipes = { {
+                input ? pipe("stdin", move(stdInWr), *input) : pipe("stdin", {}, ""),
+                pipe("stdout", move(stdOutRd), process_stdout),
+                pipe("stderr", move(stdErrRd), process_stderr)
             } };
 
-            input_pipe inpipe({}, "");
-            if (input) {
-                inpipe = {move(stdInWr), *input};
-            }
-
-            rw_from_child(procInfo.dwProcessId, pipes, move(inpipe), timeout, timer);
+            rw_from_child(procInfo.dwProcessId, pipes, timeout, timer);
         });
-
-        stdOutRd.release();
-        stdErrRd.release();
 
         HANDLE handles[2] = { hProcess, timer };
         auto wait_result = WaitForMultipleObjects(timeout ? 2 : 1, handles, FALSE, INFINITE);
