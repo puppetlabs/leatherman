@@ -156,20 +156,30 @@ namespace leatherman { namespace execution {
     // Represents information about a pipe
     struct pipe
     {
-        pipe(string pipe_name, int desc, function<bool(string const&)> const& cb) :
-            name(std::move(pipe_name)),
-            descriptor(desc),
-            callback(cb)
+        pipe(string pipe_name, scoped_descriptor desc, function<bool(string const&)> cb) :
+            name(move(pipe_name)),
+            descriptor(move(desc)),
+            callback(move(cb)),
+            read(true)
+        {
+        }
+
+        pipe(string pipe_name, scoped_descriptor desc, string buf) :
+            name(move(pipe_name)),
+            descriptor(move(desc)),
+            buffer(move(buf)),
+            read(false)
         {
         }
 
         const string name;
-        int descriptor;
+        scoped_descriptor descriptor;
         string buffer;
-        function<bool(string const&)> const& callback;
+        function<bool(string const&)> callback;
+        bool read;
     };
 
-    static void rw_from_child(pid_t child, array<pipe, 2>& pipes, pair<scoped_descriptor, string> input, uint32_t timeout)
+    static void rw_from_child(pid_t child, array<pipe, 3>& pipes, uint32_t timeout)
     {
         // Each pipe is a tuple of descriptor, buffer to use to read data, and a callback to call when data is read
         // The input pair is a descriptor and text to write to it
@@ -184,18 +194,17 @@ namespace leatherman { namespace execution {
                 if (pipe.descriptor == -1) {
                     continue;
                 }
-                FD_SET(pipe.descriptor, &read_set);
+
+                FD_SET(pipe.descriptor, pipe.read ? &read_set : &write_set);
                 if (pipe.descriptor > max) {
                     max = pipe.descriptor;
                 }
-                pipe.buffer.resize(4096);
-            }
-            if (input.first != -1) {
-                FD_SET(input.first, &write_set);
-                if (input.first > max) {
-                    max = input.first;
+
+                if (pipe.read) {
+                    pipe.buffer.resize(4096);
                 }
             }
+
             if (max == -1) {
                 // All pipes closed; we're done
                 return;
@@ -208,66 +217,50 @@ namespace leatherman { namespace execution {
             if (result == -1) {
                 if (errno != EINTR) {
                     LOG_ERROR(format_error("select call failed"));
-                    throw execution_exception("failed to read child output.");
+                    throw execution_exception("child i/o failed.");
                 }
                 // Interrupted by signal
                 LOG_DEBUG("select call was interrupted and will be retried.");
                 continue;
-            }
-            if (result == 0) {
+            } else if (result == 0) {
                 // Read timeout, try again
                 continue;
             }
 
             for (auto& pipe : pipes) {
-                if (pipe.descriptor == -1 || !FD_ISSET(pipe.descriptor, &read_set)) {
+                if (pipe.descriptor == -1 || !FD_ISSET(pipe.descriptor, pipe.read ? &read_set : &write_set)) {
                     continue;
                 }
 
-                // There is data to read
-                auto count = read(pipe.descriptor, &pipe.buffer[0], pipe.buffer.size());
+                // There is data to read/write
+                auto count = pipe.read ?
+                    read(pipe.descriptor, &pipe.buffer[0], pipe.buffer.size()) :
+                    write(pipe.descriptor, pipe.buffer.c_str(), pipe.buffer.size());
                 if (count < 0) {
                     if (errno != EINTR) {
-                        LOG_ERROR("%1% pipe read failed: %2%.", pipe.name, format_error());
-                        throw execution_exception("failed to read child output.");
+                        LOG_ERROR("%1% pipe i/o failed: %2%.", pipe.name, format_error());
+                        throw execution_exception("child i/o failed.");
                     }
                     // Interrupted by signal
-                    LOG_DEBUG("%1% pipe read was interrupted and will be retried.", pipe.name);
+                    LOG_DEBUG("%1% pipe i/o was interrupted and will be retried.", pipe.name);
                     continue;
-                }
-                if (count == 0) {
+                } else if (count == 0) {
                     // Pipe has closed
-                    pipe.descriptor = -1;
+                    pipe.descriptor = {};
                     continue;
                 }
-                // Call the callback
-                pipe.buffer.resize(count);
-                if (!pipe.callback(pipe.buffer)) {
-                    // Callback signaled that we're done
-                    return;
-                }
-            }
 
-            if (input.first != -1 && FD_ISSET(input.first, &write_set)) {
-                // Expecting data on input
-                auto count = write(input.first, input.second.c_str(), input.second.size());
-                if (count < 0) {
-                    if (errno != EINTR) {
-                        LOG_ERROR("stdin pipe write failed: %1%.", format_error());
-                        throw execution_exception("failed to write child input.");
+                if (pipe.read) {
+                    // Call the callback
+                    pipe.buffer.resize(count);
+                    if (!pipe.callback(pipe.buffer)) {
+                        // Callback signaled that we're done
+                        return;
                     }
-                    // Interrupted by signal
-                    LOG_DEBUG("stdin pipe write was interrupted and will be retried.");
-                    continue;
+                } else {
+                    // Register written data
+                    pipe.buffer.erase(0, count);
                 }
-                if (count == 0) {
-                    // Pipe has closed
-                    input = {};
-                    continue;
-                }
-                // Register written data
-                input.second.erase(0, count);
-                continue;
             }
         }
 
@@ -532,17 +525,13 @@ namespace leatherman { namespace execution {
         // We return from the lambda when all data has been read
         string output, error;
         tie(output, error) = process_streams(options[execution_options::trim_output], stdout_callback, stderr_callback, [&](function<bool(string const&)> const& process_stdout, function<bool(string const&)> const& process_stderr) {
-            array<pipe, 2> pipes = { {
-                pipe("stdout", stdout_read, process_stdout),
-                pipe("stderr", stderr_read, process_stderr)
+            array<pipe, 3> pipes = { {
+                pipe("stdout", move(stdout_read), process_stdout),
+                pipe("stderr", move(stderr_read), process_stderr),
+                input ? pipe("stdin", move(stdin_write), *input) : pipe("", {}, "")
             }};
 
-            pair<scoped_descriptor, string> inpipe;
-            if (input) {
-                inpipe = {move(stdin_write), *input};
-            }
-
-            rw_from_child(child, pipes, move(inpipe), timeout);
+            rw_from_child(child, pipes, timeout);
         });
 
         // Close the read pipes
