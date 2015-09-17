@@ -24,6 +24,9 @@ namespace leatherman { namespace util { namespace windows {
          * Constructs a closed scoped_handle.
          */
         scoped_handle();
+
+     private:
+        static void close(HANDLE handle);
     };
 
 }}}  // namespace leatherman::util::windows
