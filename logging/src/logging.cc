@@ -187,7 +187,7 @@ namespace leatherman { namespace logging {
                 return in;
             }
         }
-        throw runtime_error((boost::format("invalid log level '%1%': expected none, trace, debug, info, warn, error, or fatal.") % level).str());
+        throw runtime_error((boost::format("invalid log level '%1%': expected none, trace, debug, info, warn, error, or fatal.") % value).str());
     }
 
     ostream& operator<<(ostream& strm, log_level level)
