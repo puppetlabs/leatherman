@@ -1,7 +1,7 @@
 #include <leatherman/execution/execution.hpp>
 #include <leatherman/util/environment.hpp>
 #include <leatherman/util/scope_exit.hpp>
-#include <leatherman/util/scoped_resource.hpp>
+#include <leatherman/util/windows/scoped_handle.hpp>
 #include <leatherman/util/scoped_env.hpp>
 #include <leatherman/windows/system_error.hpp>
 #include <leatherman/windows/windows.hpp>
@@ -18,6 +18,7 @@ using namespace std;
 using namespace leatherman::windows;
 using namespace leatherman::logging;
 using namespace leatherman::util;
+using namespace leatherman::util::windows;
 using namespace boost::filesystem;
 using namespace boost::algorithm;
 
@@ -101,14 +102,10 @@ namespace leatherman { namespace execution {
     }
 
     // Create a pipe, throwing if there's an error. Returns {read, write} handles.
-    static tuple<scoped_resource<HANDLE>, scoped_resource<HANDLE>> CreatePipeThrow(DWORD read_mode = 0, DWORD write_mode = 0)
+    // Always creates overlapped pipes.
+    static tuple<scoped_handle, scoped_handle> CreatePipeThrow()
     {
         static LONG counter = 0;
-
-        // The only supported flag is FILE_FLAG_OVERLAPPED
-        if ((read_mode | write_mode) & (~FILE_FLAG_OVERLAPPED)) {
-            throw execution_exception("cannot create output pipe: invalid flag specified.");
-        }
 
         SECURITY_ATTRIBUTES attributes = {};
         attributes.nLength = sizeof(SECURITY_ATTRIBUTES);
@@ -117,19 +114,19 @@ namespace leatherman { namespace execution {
 
         // Format a name for the pipe based on the process and counter
         wstring name = boost::nowide::widen((boost::format("\\\\.\\Pipe\\leatherman.%1%.%2%") %
-            GetCurrentProcessId() %
+            GetCurrentThreadId() %
             InterlockedIncrement(&counter)).str());
 
         // Create the read pipe
-        scoped_resource<HANDLE> read_handle(CreateNamedPipeW(
+        scoped_handle read_handle(CreateNamedPipeW(
             name.c_str(),
-            PIPE_ACCESS_INBOUND | read_mode,
+            PIPE_ACCESS_INBOUND | FILE_FLAG_OVERLAPPED,
             PIPE_TYPE_BYTE | PIPE_WAIT,
             1,
             4096,
             4096,
             0,
-            &attributes), CloseHandle);
+            &attributes));
 
         if (read_handle == INVALID_HANDLE_VALUE) {
             LOG_ERROR("failed to create read pipe: %1%.", system_error());
@@ -137,19 +134,20 @@ namespace leatherman { namespace execution {
         }
 
         // Open the write pipe
-        scoped_resource<HANDLE> write_handle(CreateFileW(
+        scoped_handle write_handle(CreateFileW(
             name.c_str(),
             GENERIC_WRITE,
             0,
             &attributes,
             OPEN_EXISTING,
-            FILE_ATTRIBUTE_NORMAL | write_mode,
-            nullptr), CloseHandle);
+            FILE_ATTRIBUTE_NORMAL,
+            nullptr));
 
         if (write_handle == INVALID_HANDLE_VALUE) {
             LOG_ERROR("failed to create write pipe: %1%.", system_error());
             throw execution_exception("failed to create write pipe.");
         }
+
         return make_tuple(move(read_handle), move(write_handle));
     }
 
@@ -201,15 +199,42 @@ namespace leatherman { namespace execution {
     // Represents information about a pipe
     struct pipe
     {
-        pipe(string pipe_name, HANDLE pipe_handle, function<bool(string const&)> const& cb) :
+        pipe(string pipe_name, scoped_handle pipe_handle, function<bool(string const&)> cb) :
             name(move(pipe_name)),
-            handle(pipe_handle),
+            handle(move(pipe_handle)),
             overlapped{},
             pending(false),
-            callback(cb)
+            read(true),
+            callback(move(cb))
+        {
+            init();
+        }
+
+        pipe(string pipe_name, scoped_handle pipe_handle, string buf) :
+            name(move(pipe_name)),
+            handle(move(pipe_handle)),
+            overlapped{},
+            pending(false),
+            read(false),
+            buffer(move(buf))
+        {
+            init();
+        }
+
+        const string name;
+        scoped_handle handle;
+        OVERLAPPED overlapped;
+        scoped_handle event;
+        bool pending;
+        bool read;
+        string buffer;
+        function<bool(string const&)> callback;
+
+     private:
+        void init()
         {
             if (handle != INVALID_HANDLE_VALUE) {
-                event = scoped_resource<HANDLE>(CreateEvent(nullptr, TRUE, FALSE, nullptr), CloseHandle);
+                event = scoped_handle(CreateEvent(nullptr, TRUE, FALSE, nullptr));
                 if (!event) {
                     LOG_ERROR("failed to create %1% read event: %2%.", name, system_error());
                     throw execution_exception("failed to create read event.");
@@ -217,29 +242,21 @@ namespace leatherman { namespace execution {
                 overlapped.hEvent = event;
             }
         }
-
-        const string name;
-        HANDLE handle;
-        OVERLAPPED overlapped;
-        scoped_resource<HANDLE> event;
-        bool pending;
-        string buffer;
-        function<bool(string const&)> const& callback;
     };
 
-    static void read_from_child(DWORD child, array<pipe, 2>& pipes, uint32_t timeout, HANDLE timer)
+    static void rw_from_child(DWORD child, array<pipe, 3>& pipes, uint32_t timeout, HANDLE timer)
     {
         vector<HANDLE> wait_handles;
         while (true)
         {
-            // Read from all pipes
+            // Process all pipes
             for (auto& pipe : pipes) {
                 // If the handle is closed or is pending, skip
                 if (pipe.handle == INVALID_HANDLE_VALUE || pipe.pending) {
-                    break;
+                    continue;
                 }
 
-                // Read the pipe until pending
+                // Process the pipe until pending
                 while (true) {
                     // Before doing anything, check to see if there's been a timeout
                     // This is done pre-emptively in case ReadFile never returns ERROR_IO_PENDING
@@ -247,13 +264,19 @@ namespace leatherman { namespace execution {
                         throw timeout_exception((boost::format("command timed out after %1% seconds.") % timeout).str(), static_cast<size_t>(child));
                     }
 
-                    // Read the data
-                    pipe.buffer.resize(4096);
+                    if (pipe.read) {
+                        // Read the data
+                        pipe.buffer.resize(4096);
+                    }
+
                     DWORD count = 0;
-                    if (!ReadFile(pipe.handle, &pipe.buffer[0], pipe.buffer.size(), &count, &pipe.overlapped)) {
+                    auto success = pipe.read ?
+                        ReadFile(pipe.handle, &pipe.buffer[0], pipe.buffer.size(), &count, &pipe.overlapped) :
+                        WriteFile(pipe.handle, pipe.buffer.c_str(), pipe.buffer.size(), &count, &pipe.overlapped);
+                    if (!success) {
                         // Treat broken pipes as closed pipes
                         if (GetLastError() == ERROR_BROKEN_PIPE) {
-                            pipe.handle = INVALID_HANDLE_VALUE;
+                            pipe.handle = {};
                             break;
                         }
                         // Check to see if it's a pending operation
@@ -261,21 +284,26 @@ namespace leatherman { namespace execution {
                             pipe.pending = true;
                             break;
                         }
-                        LOG_ERROR("failed to read child %1% output: %2%.", pipe.name, system_error());
-                        throw execution_exception("failed to read child process output.");
+                        LOG_ERROR("%1% pipe i/o failed: %2%.", pipe.name, system_error());
+                        throw execution_exception("child i/o failed.");
                     }
 
                     // Check for closed pipe
                     if (count == 0) {
-                        pipe.handle = INVALID_HANDLE_VALUE;
+                        pipe.handle = {};
                         break;
                     }
 
-                    // Read completed immediately, process the data
-                    pipe.buffer.resize(count);
-                    if (!pipe.callback(pipe.buffer)) {
-                        // Callback signaled that we're done
-                        return;
+                    if (pipe.read) {
+                        // Read completed immediately, process the data
+                        pipe.buffer.resize(count);
+                        if (!pipe.callback(pipe.buffer)) {
+                            // Callback signaled that we're done
+                            return;
+                        }
+                    } else {
+                        // Register written data
+                        pipe.buffer.erase(0, count);
                     }
                 }
             }
@@ -301,8 +329,8 @@ namespace leatherman { namespace execution {
             // Wait for data (and, optionally, timeout)
             auto result = WaitForMultipleObjects(wait_handles.size(), wait_handles.data(), FALSE, INFINITE);
             if (result >= (WAIT_OBJECT_0 + wait_handles.size())) {
-                LOG_ERROR("failed to wait for child process output: %1%.", system_error());
-                throw execution_exception("failed to wait for child process output.");
+                LOG_ERROR("failed to wait for child process i/o: %1%.", system_error());
+                throw execution_exception("failed to wait for child process i/o.");
             }
 
             // Check for timeout
@@ -324,23 +352,28 @@ namespace leatherman { namespace execution {
                 DWORD count = 0;
                 if (!GetOverlappedResult(pipe.handle, &pipe.overlapped, &count, FALSE)) {
                     if (GetLastError() != ERROR_BROKEN_PIPE) {
-                        LOG_ERROR("failed to get asynchronous %1% read result: %2%.", pipe.name, system_error());
-                        throw execution_exception("failed to get asynchronous read result.");
+                        LOG_ERROR("asynchronous i/o on %1% failed: %2%.", pipe.name, system_error());
+                        throw execution_exception("asynchronous i/o failed.");
                     }
                     // Treat a broken pipe as nothing left to read
                     count = 0;
                 }
                 // Check for closed pipe
                 if (count == 0) {
-                    pipe.handle = INVALID_HANDLE_VALUE;
+                    pipe.handle = {};
                     break;
                 }
 
-                // Read completed, process the data
-                pipe.buffer.resize(count);
-                if (!pipe.callback(pipe.buffer)) {
-                    // Callback signaled that we're done
-                    return;
+                if (pipe.read) {
+                    // Read completed, process the data
+                    pipe.buffer.resize(count);
+                    if (!pipe.callback(pipe.buffer)) {
+                        // Callback signaled that we're done
+                        return;
+                    }
+                } else {
+                    // Register written data
+                    pipe.buffer.erase(0, count);
                 }
                 break;
             }
@@ -350,6 +383,7 @@ namespace leatherman { namespace execution {
     result execute(
         string const& file,
         vector<string> const* arguments,
+        string const* input,
         map<string, string> const* environment,
         function<bool(string&)> const& stdout_callback,
         function<bool(string&)> const& stderr_callback,
@@ -434,32 +468,32 @@ namespace leatherman { namespace execution {
         // Execute the command, reading the results into a buffer until there's no more to read.
         // See http://msdn.microsoft.com/en-us/library/windows/desktop/ms682499(v=vs.85).aspx
         // for details on redirecting input/output.
-        scoped_resource<HANDLE> stdInRd, stdInWr;
+        scoped_handle stdInRd, stdInWr;
         tie(stdInRd, stdInWr) = CreatePipeThrow();
         if (!SetHandleInformation(stdInWr, HANDLE_FLAG_INHERIT, 0)) {
             throw execution_exception("pipe could not be modified");
         }
 
-        scoped_resource<HANDLE> stdOutRd, stdOutWr;
-        tie(stdOutRd, stdOutWr) = CreatePipeThrow(FILE_FLAG_OVERLAPPED, 0);
+        scoped_handle stdOutRd, stdOutWr;
+        tie(stdOutRd, stdOutWr) = CreatePipeThrow();
         if (!SetHandleInformation(stdOutRd, HANDLE_FLAG_INHERIT, 0)) {
             throw execution_exception("pipe could not be modified");
         }
 
-        scoped_resource<HANDLE> stdErrRd(INVALID_HANDLE_VALUE, nullptr), stdErrWr(INVALID_HANDLE_VALUE, nullptr);
+        scoped_handle stdErrRd, stdErrWr;
         if (!options[execution_options::redirect_stderr_to_stdout]) {
             // If redirecting to null, open the "NUL" device and inherit the handle
             if (options[execution_options::redirect_stderr_to_null]) {
                 SECURITY_ATTRIBUTES attributes = {};
                 attributes.nLength = sizeof(SECURITY_ATTRIBUTES);
                 attributes.bInheritHandle = TRUE;
-                stdErrWr = scoped_resource<HANDLE>(CreateFileW(L"nul", GENERIC_WRITE, FILE_SHARE_WRITE, &attributes, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr), CloseHandle);
+                stdErrWr = scoped_handle(CreateFileW(L"nul", GENERIC_WRITE, FILE_SHARE_WRITE, &attributes, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr));
                 if (stdErrWr == INVALID_HANDLE_VALUE) {
                     throw execution_exception("cannot open NUL device for redirecting stderr.");
                 }
             } else {
                 // Otherwise, we're reading from stderr, so create a pipe
-                tie(stdErrRd, stdErrWr) = CreatePipeThrow(FILE_FLAG_OVERLAPPED, 0);
+                tie(stdErrRd, stdErrWr) = CreatePipeThrow();
                 if (!SetHandleInformation(stdErrRd, HANDLE_FLAG_INHERIT, 0)) {
                     throw execution_exception("pipe could not be modified");
                 }
@@ -501,19 +535,21 @@ namespace leatherman { namespace execution {
         }
 
         // Release unused pipes, to avoid any races in process completion.
-        stdInWr.release();
+        if (!input) {
+            stdInWr.release();
+        }
         stdInRd.release();
         stdOutWr.release();
         stdErrWr.release();
 
-        scoped_resource<HANDLE> hProcess(procInfo.hProcess, CloseHandle);
-        scoped_resource<HANDLE> hThread(procInfo.hThread, CloseHandle);
+        scoped_handle hProcess(procInfo.hProcess);
+        scoped_handle hThread(procInfo.hThread);
 
         // Use a Job Object to group any child processes spawned by the CreateProcess invocation, so we can
         // easily stop them in case of a timeout.
-        scoped_resource<HANDLE> hJob;
+        scoped_handle hJob;
         if (use_job_object) {
-            hJob = scoped_resource<HANDLE>(CreateJobObjectW(nullptr, nullptr), CloseHandle);
+            hJob = scoped_handle(CreateJobObjectW(nullptr, nullptr));
             if (hJob == NULL) {
                 LOG_ERROR("failed to create job object: %1%.", system_error());
                 throw execution_exception("failed to create job object.");
@@ -538,9 +574,9 @@ namespace leatherman { namespace execution {
         });
 
         // Create a waitable timer if given a timeout
-        scoped_resource<HANDLE> timer;
+        scoped_handle timer;
         if (timeout) {
-            timer = scoped_resource<HANDLE>(CreateWaitableTimer(nullptr, TRUE, nullptr), CloseHandle);
+            timer = scoped_handle(CreateWaitableTimer(nullptr, TRUE, nullptr));
             if (!timer) {
                 LOG_ERROR("failed to create waitable timer: %1%.", system_error());
                 throw execution_exception("failed to create waitable timer.");
@@ -559,16 +595,14 @@ namespace leatherman { namespace execution {
         string output, error;
         tie(output, error) = process_streams(options[execution_options::trim_output], stdout_callback, stderr_callback, [&](function<bool(string const&)> const& process_stdout, function<bool(string const&)> const& process_stderr) {
             // Read the child output
-            array<pipe, 2> pipes = { {
-                pipe("stdout", stdOutRd, process_stdout),
-                pipe("stderr", stdErrRd, process_stderr)
+            array<pipe, 3> pipes = { {
+                input ? pipe("stdin", move(stdInWr), *input) : pipe("stdin", {}, ""),
+                pipe("stdout", move(stdOutRd), process_stdout),
+                pipe("stderr", move(stdErrRd), process_stderr)
             } };
 
-            read_from_child(procInfo.dwProcessId, pipes, timeout, timer);
+            rw_from_child(procInfo.dwProcessId, pipes, timeout, timer);
         });
-
-        stdOutRd.release();
-        stdErrRd.release();
 
         HANDLE handles[2] = { hProcess, timer };
         auto wait_result = WaitForMultipleObjects(timeout ? 2 : 1, handles, FALSE, INFINITE);

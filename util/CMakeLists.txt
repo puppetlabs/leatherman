@@ -6,7 +6,7 @@ add_leatherman_includes("${Boost_INCLUDE_DIRS}")
 leatherman_dependency(nowide)
 
 if(WIN32)
-    set(PLATFORM_SRCS "src/windows/time.cc" "src/windows/environment.cc")
+    set(PLATFORM_SRCS "src/windows/time.cc" "src/windows/environment.cc" "src/windows/scoped_handle.cc")
     set(PLATFORM_TESTS "tests/windows/environment.cc")
 else()
     set(PLATFORM_SRCS "src/posix/time.cc" "src/posix/environment.cc" "src/posix/scoped_descriptor.cc")
