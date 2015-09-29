@@ -79,15 +79,25 @@ namespace leatherman { namespace logging {
         format_record<boost::log::formatting_ostream>(rec, strm);
     }
 
-    void setup_logging(ostream &dst, string locale)
+    template <typename SinkT>
+    static void setup_common_logging_config(boost::shared_ptr<SinkT> sink)
     {
         // Remove existing sinks before adding a new one
         auto core = boost::log::core::get();
         core->remove_all_sinks();
 
+        core->add_sink(sink);
+
+        boost::log::add_common_attributes();
+
+        // Default to the warning level
+        set_level(log_level::warning);
+    }
+
+    void setup_logging(ostream &dst, string locale)
+    {
         using sink_t = sinks::synchronous_sink<color_writer>;
         boost::shared_ptr<sink_t> sink(new sink_t(&dst));
-        core->add_sink(sink);
 
 #if (!defined(__sun) && !defined(_AIX)) || !defined(__GNUC__)
         // Imbue the logging sink with the requested locale.
@@ -95,10 +105,7 @@ namespace leatherman { namespace logging {
         dst.imbue(leatherman::locale::get_locale(locale));
 #endif
 
-        boost::log::add_common_attributes();
-
-        // Default to the warning level
-        set_level(log_level::warning);
+        setup_common_logging_config<sink_t>(sink);
 
         // Set whether or not to use colorization depending if the destination is a tty
         g_colorize = color_supported(dst);
@@ -112,11 +119,7 @@ namespace leatherman { namespace logging {
                        int min_free_space,
                        std::string locale)
     {
-        // Remove existing sinks before adding a new one
-        auto core = boost::log::core::get();
-        core->remove_all_sinks();
-
-        // Add the text file backend, in order to set file rotation
+        // Use the text file as logging backend, in order to set file rotation
         using backend_t = sinks::text_file_backend;
         boost::shared_ptr<backend_t> backend(
             new backend_t(
@@ -145,15 +148,10 @@ namespace leatherman { namespace logging {
         sink->imbue(leatherman::locale::get_locale(locale));
 #endif
 
-        core->add_sink(sink);
-
-        boost::log::add_common_attributes();
-
-        // Default to the warning level
-        set_level(log_level::warning);
+        setup_common_logging_config<sink_t>(sink);
 
         // By default, don't use colorization when writing on file; on POSIX,
-        // the user can enable it by calling set_colorization(true)
+        // the user can still enable it by calling set_colorization(true)
         g_colorize = false;
     }
 
