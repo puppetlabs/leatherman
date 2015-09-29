@@ -154,6 +154,26 @@ namespace leatherman { namespace logging {
     void setup_logging(std::ostream &dst, std::string locale = "");
 
     /**
+     * Sets up logging; it will write records to the specified file.
+     * Log file rotation will be configured by file size as follows.
+     * The logging level is set to warning by default.
+     * @param file_name File name pattern and path; ex. '/var/log/my_app_%3N.log'.
+     * @param open_mode File open mode; ex. 'std::ios_base::app'.
+     * @param target Path of the directory where rotated files will be stored.
+     * @param rotation_size Max file size, after which it rotates (num chars).
+     * @param max_size Max size for all rotated files (in bytes).
+     * @param min_free_space Min drive space, to prevent logging (in bytes).
+     * @param locale The locale identifier to use for logging.
+     */
+    void setup_logging(std::string file_name,
+                       std::ios_base::openmode open_mode,
+                       std::string target,
+                       int rotation_size,
+                       int max_size,
+                       int min_free_space,
+                       std::string locale = "");
+
+    /**
      * Sets the current log level.
      * @param level The new current log level to set.
      */
@@ -167,6 +187,7 @@ namespace leatherman { namespace logging {
 
     /**
      * Sets whether or not log output is colorized.
+     * If logging was configured to file, colorization will be ignored on Windows.
      * @param color Pass true if log output is colorized or false if it is not colorized.
      */
     void set_colorization(bool color);
@@ -257,12 +278,20 @@ namespace leatherman { namespace logging {
     }
 
     /**
-     * Starts colorizing for the given log level.
+     * Starts colorizing the output stream for the given log level.
      * This is a no-op on platforms that don't natively support terminal colors.
      * @param dst The stream to colorize.
      * @param level The log level to colorize for. Defaults to none, which resets colorization.
      */
     void colorize(std::ostream &dst, log_level level = log_level::none);
+
+    /**
+     * Starts colorizing the formatting output stream for the given log level.
+     * This is a no-op on platforms that don't natively support terminal colors.
+     * @param strm The formatting output stream stream to colorize.
+     * @param level The log level to colorize for. Defaults to none, which resets colorization.
+     */
+    void colorize(boost::log::formatting_ostream& strm, log_level level = log_level::none);
 
     /**
      * Returns whether terminal colors are supported.
