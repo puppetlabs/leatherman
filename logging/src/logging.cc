@@ -1,6 +1,7 @@
 #include <leatherman/logging/logging.hpp>
 #include <leatherman/locale/locale.hpp>
 #include <vector>
+#include <locale>
 
 // boost includes are not always warning-clean. Disable warnings that
 // cause problems before including the headers, then re-enable the warnings.
@@ -18,6 +19,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem/path.hpp>
 
 #pragma GCC diagnostic pop
 
@@ -119,6 +121,11 @@ namespace leatherman { namespace logging {
                        int min_free_space,
                        std::string locale)
     {
+        // Initialize locale to default before boost::log in order to avoid
+        // crashes during process termination due to file sinks; refer to
+        // www.boost.org/doc/libs/1_59_0/libs/log/doc/html/log/rationale/why_crash_on_term.html
+        boost::filesystem::path::imbue(std::locale("C"));
+
         // Use the text file as logging backend, in order to set file rotation
         using backend_t = sinks::text_file_backend;
         boost::shared_ptr<backend_t> backend(
