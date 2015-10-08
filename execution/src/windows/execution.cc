@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <sstream>
 #include <cstring>
+#include <random>
 
 using namespace std;
 using namespace leatherman::windows;
@@ -106,16 +107,25 @@ namespace leatherman { namespace execution {
     static tuple<scoped_handle, scoped_handle> CreatePipeThrow()
     {
         static LONG counter = 0;
+        static std::mt19937 rd_gen{std::random_device{}()};
 
         SECURITY_ATTRIBUTES attributes = {};
         attributes.nLength = sizeof(SECURITY_ATTRIBUTES);
         attributes.bInheritHandle = TRUE;
         attributes.lpSecurityDescriptor = NULL;
 
-        // Format a name for the pipe based on the process and counter
-        wstring name = boost::nowide::widen((boost::format("\\\\.\\Pipe\\leatherman.%1%.%2%") %
+        // Format a name for the pipe. Use the thread id to ensure no two threads try to use the same
+        // pipe, and a counter to generate multiple pipes for the same process invocation.
+        // A scenario exists using timeouts where we could release the invoking end of a named pipe
+        // but the other end doesn't release. Then the invoking thread shuts down and another with
+        // the same thread id is started and reconnects to the existing named pipe. Use the process
+        // id and a random number to make that highly unlikely.
+        std::uniform_int_distribution<unsigned int> rd_dist;
+        wstring name = boost::nowide::widen((boost::format("\\\\.\\Pipe\\leatherman.%1%.%2%.%3%.%4%") %
+            GetCurrentProcessId() %
             GetCurrentThreadId() %
-            InterlockedIncrement(&counter)).str());
+            InterlockedIncrement(&counter) %
+            rd_dist(rd_gen)).str());
 
         // Create the read pipe
         scoped_handle read_handle(CreateNamedPipeW(
