@@ -30,6 +30,11 @@ namespace leatherman { namespace logging {
         }
     }
 
+    void colorize(boost::log::formatting_ostream& strm, log_level level)
+    {
+        return;
+    }
+
     bool color_supported(ostream& dst)
     {
         bool colorize = false;
