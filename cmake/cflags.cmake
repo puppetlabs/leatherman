@@ -10,6 +10,10 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "\\w*Clang")
     EXECUTE_PROCESS( COMMAND ${CMAKE_CXX_COMPILER} --version OUTPUT_VARIABLE clang_full_version_string )
     if ("${CMAKE_SYSTEM_NAME}" MATCHES "Darwin")
         string (REGEX REPLACE ".*based on LLVM ([0-9]+\\.[0-9]+).*" "\\1" CLANG_VERSION_STRING ${clang_full_version_string})
+        # Clang's output changed in Xcode 7.
+        if (NOT ${clang_full_version_string})
+            string(REGEX REPLACE "Apple LLVM version ([0-9]+\\.[0-9]+).*" "\\1" CLANG_VERSION_STRING ${clang_full_version_string})
+        endif()
     else()
         string (REGEX REPLACE ".*clang version ([0-9]+\\.[0-9]+).*" "\\1" CLANG_VERSION_STRING ${clang_full_version_string})
     endif()
@@ -20,6 +24,10 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "\\w*Clang")
         set(LEATHERMAN_CXX_FLAGS "${LEATHERMAN_CXX_FLAGS} -Wno-deprecated-register")
     else()
         set(LEATHERMAN_CXX_FLAGS "${LEATHERMAN_CXX_FLAGS} -Wno-deprecated")
+    endif()
+
+    if ("${CLANG_VERSION_STRING}" VERSION_GREATER "6.9")
+        set(LEATHERMAN_CXX_FLAGS "${LEATHERMAN_CXX_FLAGS} -Wno-unused-local-typedef")
     endif()
 
     # FreeBSD needs -fPIC
