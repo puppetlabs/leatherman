@@ -583,6 +583,12 @@ namespace leatherman {  namespace ruby {
         VALUE false_value() const;
 
         /**
+         * Get the length of a ruby array.
+         * @return Returns the length of the array.
+         */
+        long array_len(VALUE array) const;
+
+        /**
          * Looks up a constant based on the given names. The individual entries correspond to
          * namespaces, as in {"A", "B", "C"} => A::B::C.
          * @param names The names to lookup.

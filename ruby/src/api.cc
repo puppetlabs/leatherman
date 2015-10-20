@@ -292,7 +292,7 @@ namespace leatherman { namespace ruby {
 
     void api::array_for_each(VALUE array, std::function<bool(VALUE)> callback) const
     {
-        long size = rb_num2ulong(rb_funcall(array, rb_intern("size"), 0));
+        long size = array_len(array);
 
         for (long i = 0; i < size; ++i) {
             if (!callback(rb_ary_entry(array, i))) {
@@ -395,6 +395,11 @@ namespace leatherman { namespace ruby {
     VALUE api::false_value() const
     {
         return _false;
+    }
+
+    long api::array_len(VALUE array) const
+    {
+        return rb_num2ulong(rb_funcall(array, rb_intern("size"), 0));
     }
 
     VALUE api::lookup(std::initializer_list<std::string> const& names) const
