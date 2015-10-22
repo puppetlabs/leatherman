@@ -216,6 +216,7 @@ namespace leatherman { namespace curl {
         void set_client_protocols(context& ctx);
 
         static size_t read_body(char* buffer, size_t size, size_t count, void* ptr);
+        static int seek_body(void* ptr, curl_off_t offset, int origin);
         static size_t write_header(char* buffer, size_t size, size_t count, void* ptr);
         static size_t write_body(char* buffer, size_t size, size_t count, void* ptr);
         static int debug(CURL* handle, curl_infotype type, char* data, size_t size, void* ptr);

@@ -261,6 +261,14 @@ namespace leatherman { namespace curl {
         if (result != CURLE_OK) {
             throw http_request_exception(ctx.req, curl_easy_strerror(result));
         }
+        result = curl_easy_setopt(_handle, CURLOPT_SEEKFUNCTION, seek_body);
+        if (result != CURLE_OK) {
+            throw http_request_exception(ctx.req, curl_easy_strerror(result));
+        }
+        result = curl_easy_setopt(_handle, CURLOPT_SEEKDATA, &ctx);
+        if (result != CURLE_OK) {
+            throw http_request_exception(ctx.req, curl_easy_strerror(result));
+        }
     }
 
     void client::set_timeouts(context& ctx)
@@ -339,6 +347,26 @@ namespace leatherman { namespace curl {
             ctx->read_offset += requested;
         }
         return requested;
+    }
+
+    int client::seek_body(void* ptr, curl_off_t offset, int origin)
+    {
+        auto ctx = reinterpret_cast<context*>(ptr);
+
+        // Only setting offset from the beginning is supported and the CURL docs
+        // claim this is the only way this gets called
+        if (origin != SEEK_SET) {
+            return CURL_SEEKFUNC_FAIL;
+        }
+
+        // Since we only support an absolute offset, we should not support
+        // negative offsets to prevent reading data from before the buffer
+        if (offset < 0) {
+            return CURL_SEEKFUNC_FAIL;
+        }
+
+        ctx->read_offset = offset;
+        return CURL_SEEKFUNC_OK;
     }
 
     size_t client::write_header(char* buffer, size_t size, size_t count, void* ptr)
