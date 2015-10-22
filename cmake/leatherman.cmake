@@ -113,6 +113,9 @@ macro(enable_cpplint)
             "-runtime/int"            # Some C types are needed for library interop
             "-runtime/explicit"       # Using implicit conversion from string to regex for regex calls.
             "-build/header_guard"     # Disable header guards (cpplint doesn't yet support enforcing #pragma once)
+            "-runtime/indentation_namespace" # Our namespace indentation is not consistent
+            "-readability/inheritance" # virtual/override sometimes used together
+            "-whitespace/operators"   # Expects spaces around perfect forwarding (&&)
         )
 
 	set(CPPLINT_ARGS "--extensions=cc,cpp,hpp,h")
