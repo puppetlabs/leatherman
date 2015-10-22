@@ -208,7 +208,7 @@ namespace leatherman { namespace curl {
         void set_url(context& ctx);
         void set_headers(context& ctx);
         void set_cookies(context& ctx);
-        void set_body(context& ctx);
+        void set_body(context& ctx, http_method method);
         void set_timeouts(context& ctx);
         void set_write_callbacks(context& ctx);
         void set_client_info(context &ctx);

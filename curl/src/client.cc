@@ -149,7 +149,7 @@ namespace leatherman { namespace curl {
         set_url(ctx);
         set_headers(ctx);
         set_cookies(ctx);
-        set_body(ctx);
+        set_body(ctx, method);
         set_timeouts(ctx);
         set_write_callbacks(ctx);
         set_ca_info(ctx);
@@ -200,7 +200,7 @@ namespace leatherman { namespace curl {
             }
 
             case http_method::put: {
-                auto result = curl_easy_setopt(_handle, CURLOPT_PUT, 1);
+                auto result = curl_easy_setopt(_handle, CURLOPT_UPLOAD, 1);
                 if (result != CURLE_OK) {
                     throw http_request_exception(ctx.req, curl_easy_strerror(result));
                 }
@@ -251,7 +251,7 @@ namespace leatherman { namespace curl {
         }
     }
 
-    void client::set_body(context& ctx)
+    void client::set_body(context& ctx, http_method method)
     {
         auto result = curl_easy_setopt(_handle, CURLOPT_READFUNCTION, read_body);
         if (result != CURLE_OK) {
@@ -268,6 +268,25 @@ namespace leatherman { namespace curl {
         result = curl_easy_setopt(_handle, CURLOPT_SEEKDATA, &ctx);
         if (result != CURLE_OK) {
             throw http_request_exception(ctx.req, curl_easy_strerror(result));
+        }
+
+        switch (method) {
+            case http_method::post: {
+                auto result = curl_easy_setopt(_handle, CURLOPT_POSTFIELDSIZE_LARGE, ctx.req.body().size());
+                if (result != CURLE_OK) {
+                    throw http_request_exception(ctx.req, curl_easy_strerror(result));
+                }
+                break;
+            }
+            case http_method::put: {
+                auto result = curl_easy_setopt(_handle, CURLOPT_INFILESIZE_LARGE, ctx.req.body().size());
+                if (result != CURLE_OK) {
+                    throw http_request_exception(ctx.req, curl_easy_strerror(result));
+                }
+                break;
+            }
+            default:
+                break;
         }
     }
 
