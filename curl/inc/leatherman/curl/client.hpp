@@ -208,7 +208,7 @@ namespace leatherman { namespace curl {
         void set_url(context& ctx);
         void set_headers(context& ctx);
         void set_cookies(context& ctx);
-        void set_body(context& ctx);
+        void set_body(context& ctx, http_method method);
         void set_timeouts(context& ctx);
         void set_write_callbacks(context& ctx);
         void set_client_info(context &ctx);
@@ -216,6 +216,7 @@ namespace leatherman { namespace curl {
         void set_client_protocols(context& ctx);
 
         static size_t read_body(char* buffer, size_t size, size_t count, void* ptr);
+        static int seek_body(void* ptr, curl_off_t offset, int origin);
         static size_t write_header(char* buffer, size_t size, size_t count, void* ptr);
         static size_t write_body(char* buffer, size_t size, size_t count, void* ptr);
         static int debug(CURL* handle, curl_infotype type, char* data, size_t size, void* ptr);

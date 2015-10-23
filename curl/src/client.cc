@@ -149,7 +149,7 @@ namespace leatherman { namespace curl {
         set_url(ctx);
         set_headers(ctx);
         set_cookies(ctx);
-        set_body(ctx);
+        set_body(ctx, method);
         set_timeouts(ctx);
         set_write_callbacks(ctx);
         set_ca_info(ctx);
@@ -200,7 +200,7 @@ namespace leatherman { namespace curl {
             }
 
             case http_method::put: {
-                auto result = curl_easy_setopt(_handle, CURLOPT_PUT, 1);
+                auto result = curl_easy_setopt(_handle, CURLOPT_UPLOAD, 1);
                 if (result != CURLE_OK) {
                     throw http_request_exception(ctx.req, curl_easy_strerror(result));
                 }
@@ -251,7 +251,7 @@ namespace leatherman { namespace curl {
         }
     }
 
-    void client::set_body(context& ctx)
+    void client::set_body(context& ctx, http_method method)
     {
         auto result = curl_easy_setopt(_handle, CURLOPT_READFUNCTION, read_body);
         if (result != CURLE_OK) {
@@ -260,6 +260,33 @@ namespace leatherman { namespace curl {
         result = curl_easy_setopt(_handle, CURLOPT_READDATA, &ctx);
         if (result != CURLE_OK) {
             throw http_request_exception(ctx.req, curl_easy_strerror(result));
+        }
+        result = curl_easy_setopt(_handle, CURLOPT_SEEKFUNCTION, seek_body);
+        if (result != CURLE_OK) {
+            throw http_request_exception(ctx.req, curl_easy_strerror(result));
+        }
+        result = curl_easy_setopt(_handle, CURLOPT_SEEKDATA, &ctx);
+        if (result != CURLE_OK) {
+            throw http_request_exception(ctx.req, curl_easy_strerror(result));
+        }
+
+        switch (method) {
+            case http_method::post: {
+                auto result = curl_easy_setopt(_handle, CURLOPT_POSTFIELDSIZE_LARGE, ctx.req.body().size());
+                if (result != CURLE_OK) {
+                    throw http_request_exception(ctx.req, curl_easy_strerror(result));
+                }
+                break;
+            }
+            case http_method::put: {
+                auto result = curl_easy_setopt(_handle, CURLOPT_INFILESIZE_LARGE, ctx.req.body().size());
+                if (result != CURLE_OK) {
+                    throw http_request_exception(ctx.req, curl_easy_strerror(result));
+                }
+                break;
+            }
+            default:
+                break;
         }
     }
 
@@ -339,6 +366,26 @@ namespace leatherman { namespace curl {
             ctx->read_offset += requested;
         }
         return requested;
+    }
+
+    int client::seek_body(void* ptr, curl_off_t offset, int origin)
+    {
+        auto ctx = reinterpret_cast<context*>(ptr);
+
+        // Only setting offset from the beginning is supported and the CURL docs
+        // claim this is the only way this gets called
+        if (origin != SEEK_SET) {
+            return CURL_SEEKFUNC_FAIL;
+        }
+
+        // Since we only support an absolute offset, we should not support
+        // negative offsets to prevent reading data from before the buffer
+        if (offset < 0) {
+            return CURL_SEEKFUNC_FAIL;
+        }
+
+        ctx->read_offset = offset;
+        return CURL_SEEKFUNC_OK;
     }
 
     size_t client::write_header(char* buffer, size_t size, size_t count, void* ptr)

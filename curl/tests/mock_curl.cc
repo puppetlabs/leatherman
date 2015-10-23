@@ -166,6 +166,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLoption option, ...)
             }
             h->method = curl_impl::http_method::post;
             break;
+        case CURLOPT_UPLOAD:
         case CURLOPT_PUT:
             // Set the mock curl HTTP method as PUT
             if (h->test_failure_mode == curl_impl::error_mode::http_put_error) {
