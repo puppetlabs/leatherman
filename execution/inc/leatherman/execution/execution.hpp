@@ -307,6 +307,52 @@ namespace leatherman { namespace execution {
         lth_util::option_set<execution_options> const& options = { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_null });
 
     /**
+     * Executes the given program by calling a specified callback that receives the pid of the program's process.
+     * @param file The name or path of the program to execute.
+     * @param arguments The arguments to pass to the program. On Windows they will be quoted as needed for spaces.
+     * @param input A string to place on stdin for the child process before reading output.
+     * @param environment The environment variables to pass to the child process.
+     * @param pid_callback The callback that is called with the pid of the child process. Defaults to no callback, in which case the pid won't be processed.
+     * @param timeout The timeout, in seconds. Defaults to no timeout.
+     * @param options The execution options.  Defaults to trimming output, merging the environment, and redirecting stderr to null.
+     * @return Returns a result struct.
+     */
+    result execute(
+        std::string const& file,
+        std::vector<std::string> const& arguments,
+        std::string const& input,
+        std::map<std::string, std::string> const& environment,
+        std::function<void(size_t)> pid_callback = nullptr,
+        uint32_t timeout = 0,
+        lth_util::option_set<execution_options> const& options = { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_null });
+
+    /**
+     * Executes the given program by writing the output of stdout and stderr to specified files.
+     * @param file The name or path of the program to execute.
+     * @param arguments The arguments to pass to the program. On Windows they will be quoted as needed for spaces.
+     * @param input A string to place on stdin for the child process before reading output.
+     * @param out_file The file where the output on stdout will be written.
+     * @param err_file The file where the output on stderr will be written. Defaults to no file, in which case the output on stderr will be buffered and returned in the result struct.
+     * @param environment The environment variables to pass to the child process.
+     * @param pid_callback The callback that is called with the pid of the child process. Defaults to no callback, in which case the pid will not be processed.
+     * @param timeout The timeout, in seconds. Defaults to no timeout.
+     * @param options The execution options.  Defaults to trimming output and merging the environment.
+     * @return Returns a result struct that will not contain the output of the streams for which a file was specified.
+     *
+     * Throws an execution_exception error in case it fails to open a file.
+     */
+    result execute(
+        std::string const& file,
+        std::vector<std::string> const& arguments,
+        std::string const& input,
+        std::string const& out_file,
+        std::string const& err_file = "",
+        std::map<std::string, std::string> const& environment = {},
+        std::function<void(size_t)> pid_callback = nullptr,
+        uint32_t timeout = 0,
+        lth_util::option_set<execution_options> const& options = { execution_options::trim_output, execution_options::merge_environment });
+
+    /**
      * Executes the given program and returns each line of output.
      * @param file The name or path of the program to execute.
      * @param stdout_callback The callback that is called with each line of output on stdout.
@@ -364,7 +410,7 @@ namespace leatherman { namespace execution {
      * Processes stdout and stderror streams of a child process.
      * @param trim True if output should be trimmed or false if not.
      * @param stdout_callback The callback to use when a line is read for stdout.
-     * @param stderr_callback The callback to use when a line is read for stdout.
+     * @param stderr_callback The callback to use when a line is read for stderr.
      * @param read_streams The callback that is called to read stdout and stderr streams.
      * @return Returns a tuple of stdout and stderr output.  If stdout_callback or stderr_callback is given, it will return empty strings.
      */

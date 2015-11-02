@@ -1,9 +1,11 @@
 #include <catch.hpp>
 #include <leatherman/execution/execution.hpp>
 #include <leatherman/util/strings.hpp>
+#include <leatherman/util/scope_exit.hpp>
 #include <leatherman/windows/windows.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/nowide/fstream.hpp>
 #include <leatherman/util/regex.hpp>
 #include "../fixtures.hpp"
 #include "../log_capture.hpp"
@@ -27,19 +29,19 @@ static string normalize(const char *filepath)
 SCENARIO("searching for programs with execution::which") {
     GIVEN("an absolute path") {
         THEN("the same path should be returned") {
-            REQUIRE(which(EXEC_TESTS_DIRECTORY "/fixtures/windows/facts.bat") 
+            REQUIRE(which(EXEC_TESTS_DIRECTORY "/fixtures/windows/facts.bat")
                     == EXEC_TESTS_DIRECTORY "/fixtures/windows/facts.bat");
         }
     }
     GIVEN("a relative path") {
         THEN("it should find a file with the same relative offset from a directory on PATH") {
-            REQUIRE(which("windows/facts", { EXEC_TESTS_DIRECTORY "/fixtures" }) 
+            REQUIRE(which("windows/facts", { EXEC_TESTS_DIRECTORY "/fixtures" })
                     == EXEC_TESTS_DIRECTORY "/fixtures\\windows/facts.bat");
         }
     }
     GIVEN("a file without an extension") {
         THEN("it should find a batch file with the same base name") {
-            REQUIRE(which("facts", { EXEC_TESTS_DIRECTORY "/fixtures/windows" }) 
+            REQUIRE(which("facts", { EXEC_TESTS_DIRECTORY "/fixtures/windows" })
                     == EXEC_TESTS_DIRECTORY "/fixtures/windows\\facts.bat");
         }
     }
@@ -58,19 +60,19 @@ SCENARIO("searching for programs with execution::which") {
 SCENARIO("expanding command paths with execution::expand_command") {
     GIVEN("an executable on the PATH") {
         THEN("the executable is expanded to an absolute path") {
-            REQUIRE(expand_command("facts 1 2 3", { EXEC_TESTS_DIRECTORY "/fixtures/windows" }) 
+            REQUIRE(expand_command("facts 1 2 3", { EXEC_TESTS_DIRECTORY "/fixtures/windows" })
                     == EXEC_TESTS_DIRECTORY "/fixtures/windows\\facts.bat 1 2 3");
         }
     }
     GIVEN("a single-quoted command") {
         THEN("the expanded path should be single-quoted") {
-            REQUIRE(expand_command("'facts' 1 2 3", { EXEC_TESTS_DIRECTORY "/fixtures/windows" }) 
+            REQUIRE(expand_command("'facts' 1 2 3", { EXEC_TESTS_DIRECTORY "/fixtures/windows" })
                     == "'" EXEC_TESTS_DIRECTORY "/fixtures/windows\\facts.bat' 1 2 3");
         }
     }
     GIVEN("a double-quoted command") {
         THEN("the expanded path should be double-quoted") {
-            REQUIRE(expand_command("\"facts\" 1 2 3", { EXEC_TESTS_DIRECTORY "/fixtures/windows" }) 
+            REQUIRE(expand_command("\"facts\" 1 2 3", { EXEC_TESTS_DIRECTORY "/fixtures/windows" })
                     == "\"" EXEC_TESTS_DIRECTORY "/fixtures/windows\\facts.bat\" 1 2 3");
         }
     }
@@ -100,6 +102,19 @@ SCENARIO("executing commands with execution::execute") {
         });
         return variables;
     };
+    std::string spool_dir { EXEC_TESTS_DIRECTORY "/spool" };
+    auto get_file_content = [spool_dir](string const& filename) {
+        string filepath((path(spool_dir) / filename).string());
+        boost::nowide::ifstream strm(filepath.c_str());
+        if (!strm) FAIL("failed to open file: " + filename);
+        string content((istreambuf_iterator<char>(strm)), (istreambuf_iterator<char>()));
+        strm.close();
+        return content;
+    };
+    if (!exists(spool_dir) && !create_directories(spool_dir)) {
+        FAIL("failed to create spool directory");
+    }
+    scope_exit spool_cleaner([spool_dir]() { remove_all(spool_dir); });
     GIVEN("a command that succeeds") {
         THEN("the output should be returned") {
             auto exec = execute("cmd.exe", { "/c", "type", normalize(EXEC_TESTS_DIRECTORY "/fixtures/ls/file3.txt") });
@@ -122,6 +137,76 @@ SCENARIO("executing commands with execution::execute") {
             REQUIRE(exec.output == lth_cat::prefix+lth_cat::overwhelm+"hello\n"+lth_cat::overwhelm+"goodbye\n"+lth_cat::overwhelm+lth_cat::suffix);
             REQUIRE(exec.error == "hello\ngoodbye\n");
             REQUIRE(exec.exit_code == 0);
+        }
+        WHEN("requested to write stdout to file") {
+            string out_file(spool_dir + "/stdout_test.out");
+            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/windows/error_message.bat", {}, "", out_file);
+            REQUIRE(exists(out_file));
+            THEN("stdout is correctly redirected to file") {
+                auto output = get_file_content("stdout_test.out");
+                REQUIRE(output == "foo=bar\n");
+            }
+            THEN("the returned results are correct and stdout was not buffered") {
+                REQUIRE(exec.success);
+                REQUIRE(exec.output.empty());
+                REQUIRE(exec.error == "error message!");
+            }
+        }
+        WHEN("requested to write stdout and stderr to the same file") {
+            string out_file(spool_dir + "/stdout_stderr_test.out");
+            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/windows/error_message.bat", {}, "", out_file, "", {}, nullptr, 0, { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_stdout });
+            REQUIRE(boost::filesystem::exists(out_file));
+            THEN("stdout and stderr are correctly redirected to file") {
+                auto output = get_file_content("stdout_stderr_test.out");
+                REQUIRE(output == "error message!\nfoo=bar\n");
+            }
+            THEN("the returned results are correct and out/err streams were not buffered") {
+                REQUIRE(exec.success);
+                REQUIRE(exec.output.empty());
+                REQUIRE(exec.error.empty());
+            }
+        }
+        WHEN("requested to write stdout to a file in an unknown directory") {
+            bool success = false;
+            try {
+                execute("cmd.exe", { "/c", CMAKE_BIN_DIRECTORY "/lth_cat.exe" }, "spam", EXEC_TESTS_DIRECTORY "/spam/eggs/stdout.out");
+                success = true;
+            } catch (...) {
+                // pass
+            }
+            THEN("it fails") {
+                REQUIRE_FALSE(success);
+            }
+        }
+        WHEN("requested to write both stdout and stderr to file") {
+            string out_file(spool_dir + "/stdout_test_b.out");
+            string err_file(spool_dir + "/stderr_test_b.err");
+            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/windows/error_message.bat", {}, "", out_file, err_file);
+            REQUIRE(boost::filesystem::exists(out_file));
+            REQUIRE(boost::filesystem::exists(err_file));
+            THEN("stdout and stderr are correctly redirected to different files") {
+                auto output = get_file_content("stdout_test_b.out");
+                auto error = get_file_content("stderr_test_b.err");
+                REQUIRE(output == "foo=bar\n");
+                REQUIRE(error == "error message!\n");
+            }
+            THEN("the returned results are correct and out/err streams were not buffered") {
+                REQUIRE(exec.success);
+                REQUIRE(exec.output.empty());
+                REQUIRE(exec.error.empty());
+            }
+        }
+        WHEN("requested to execute a PID callback") {
+            int pid_from_callback = 0;
+            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/windows/error_message.bat", {}, "", {}, [&pid_from_callback](size_t pid) { pid_from_callback = pid; });
+            THEN("the returned results are correct") {
+                REQUIRE(exec.success);
+                REQUIRE(exec.output == "foo=bar");
+                REQUIRE(exec.error.empty());  // stderr is redirected to null
+            }
+            THEN("the callback is successfully executed") {
+                REQUIRE(pid_from_callback > 0);
+            }
         }
     }
     GIVEN("a command that fails") {

@@ -385,6 +385,7 @@ namespace leatherman { namespace execution {
         vector<string> const* arguments,
         string const* input,
         map<string, string> const* environment,
+        function<void(size_t)> const& pid_callback,
         function<bool(string&)> const& stdout_callback,
         function<bool(string&)> const& stderr_callback,
         option_set<execution_options> const& options,
@@ -590,6 +591,11 @@ namespace leatherman { namespace execution {
                 LOG_ERROR("failed to set waitable timer: %1%.", system_error());
                 throw execution_exception("failed to set waitable timer.");
             }
+        }
+
+        // Execute the PID callback
+        if (pid_callback) {
+            pid_callback(procInfo.dwProcessId);
         }
 
         string output, error;
