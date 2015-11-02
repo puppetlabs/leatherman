@@ -9,6 +9,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/nowide/convert.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <cstdlib>
 #include <cstdio>
 #include <sstream>
@@ -107,7 +110,7 @@ namespace leatherman { namespace execution {
     static tuple<scoped_handle, scoped_handle> CreatePipeThrow()
     {
         static LONG counter = 0;
-        static std::mt19937 rd_gen{std::random_device{}()};
+        static boost::uuids::random_generator rand_uuid;
 
         SECURITY_ATTRIBUTES attributes = {};
         attributes.nLength = sizeof(SECURITY_ATTRIBUTES);
@@ -119,13 +122,12 @@ namespace leatherman { namespace execution {
         // A scenario exists using timeouts where we could release the invoking end of a named pipe
         // but the other end doesn't release. Then the invoking thread shuts down and another with
         // the same thread id is started and reconnects to the existing named pipe. Use the process
-        // id and a random number to make that highly unlikely.
-        std::uniform_int_distribution<unsigned int> rd_dist;
+        // id and a random UUID to make that highly unlikely.
         wstring name = boost::nowide::widen((boost::format("\\\\.\\Pipe\\leatherman.%1%.%2%.%3%.%4%") %
             GetCurrentProcessId() %
             GetCurrentThreadId() %
             InterlockedIncrement(&counter) %
-            rd_dist(rd_gen)).str());
+            to_string(rand_uuid())).str());
 
         // Create the read pipe
         scoped_handle read_handle(CreateNamedPipeW(
