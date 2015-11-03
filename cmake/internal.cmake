@@ -70,7 +70,7 @@ endmacro()
 # Usage: add_leatherman_library(${SOURCES} [OPTS] [EXPORTS HEADER])
 #
 # Creates a static CMake library built from the provided sources. Sets
-# LETHERMAN_<LIBRARY>_LIB to the name of this library.
+# LEATHERMAN_<LIBRARY>_LIB to the name of this library.
 #
 # This macro directly calls add_library, so any add_library options
 # can be passed along with the sources.
