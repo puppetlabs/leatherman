@@ -1,6 +1,9 @@
 #include <catch.hpp>
 #include <leatherman/execution/execution.hpp>
+#include <leatherman/util/scope_exit.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/nowide/fstream.hpp>
 #include <leatherman/util/regex.hpp>
 #include <leatherman/util/strings.hpp>
 #include "../fixtures.hpp"
@@ -15,6 +18,7 @@ using namespace leatherman::logging;
 using namespace leatherman::execution::testing;
 using namespace leatherman::util;
 using namespace leatherman::execution;
+using namespace boost::filesystem;
 
 SCENARIO("searching for programs with execution::which") {
     GIVEN("an absolute path to an executable file") {
@@ -126,6 +130,19 @@ SCENARIO("executing commands with execution::execute") {
         });
         return variables;
     };
+    std::string spool_dir { EXEC_TESTS_DIRECTORY "/spool" };
+    auto get_file_content = [spool_dir](string const& filename) {
+        string filepath((path(spool_dir) / filename).string());
+        boost::nowide::ifstream strm(filepath.c_str());
+        if (!strm) FAIL("failed to open file: " + filename);
+        string content((istreambuf_iterator<char>(strm)), (istreambuf_iterator<char>()));
+        strm.close();
+        return content;
+    };
+    if (!exists(spool_dir) && !create_directories(spool_dir)) {
+        FAIL("failed to create spool directory");
+    }
+    scope_exit spool_cleaner([spool_dir]() { remove_all(spool_dir); });
     GIVEN("a command that succeeds") {
         THEN("the output should be returned") {
             auto exec = execute("cat", { EXEC_TESTS_DIRECTORY "/fixtures/ls/file3.txt" });
@@ -201,6 +218,90 @@ SCENARIO("executing commands with execution::execute") {
             REQUIRE(exec.output == lth_cat::prefix+lth_cat::overwhelm+"hello\n"+lth_cat::overwhelm+"goodbye\n"+lth_cat::overwhelm+lth_cat::suffix);
             REQUIRE(exec.error == "hello\ngoodbye\n");
             REQUIRE(exec.exit_code == 0);
+        }
+        WHEN("requested to write stdout to file") {
+            string out_file(spool_dir + "/stdout_test.out");
+            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message", {}, "", out_file);
+            REQUIRE(exists(out_file));
+            THEN("stdout is correctly redirected to file") {
+                auto output = get_file_content("stdout_test.out");
+                REQUIRE(output == "foo=bar\n");
+            }
+            THEN("the returned results are correct and stdout was not buffered") {
+                REQUIRE(exec.success);
+                REQUIRE(exec.output.empty());
+                REQUIRE(exec.error == "error message!");
+            }
+        }
+        WHEN("requested to write stdout and stderr to the same file") {
+            string out_file(spool_dir + "/stdout_stderr_test.out");
+            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message", {}, "", out_file, "", {}, nullptr, 0, { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_stdout });
+            REQUIRE(boost::filesystem::exists(out_file));
+            THEN("stdout and stderr are correctly redirected to file") {
+                auto output = get_file_content("stdout_stderr_test.out");
+                REQUIRE(output == "error message!\nfoo=bar\n");
+            }
+            THEN("the returned results are correct and out/err streams were not buffered") {
+                REQUIRE(exec.success);
+                REQUIRE(exec.output.empty());
+                REQUIRE(exec.error.empty());
+            }
+        }
+        WHEN("requested to write stdout to a file in an unknown directory") {
+            bool success = false;
+            try {
+                execute("cat", { EXEC_TESTS_DIRECTORY "/fixtures/ls/file1.txt" }, "", EXEC_TESTS_DIRECTORY "/spam/eggs/stdout.out");
+                success = true;
+            } catch (...) {
+                // pass
+            }
+            THEN("it fails") {
+                REQUIRE_FALSE(success);
+            }
+        }
+        WHEN("requested to write both stdout and stderr to file") {
+            string out_file(spool_dir + "/stdout_test_b.out");
+            string err_file(spool_dir + "/stderr_test_b.err");
+            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message", {}, "", out_file, err_file);
+            REQUIRE(boost::filesystem::exists(out_file));
+            REQUIRE(boost::filesystem::exists(err_file));
+            THEN("stdout and stderr are correctly redirected to different files") {
+                auto output = get_file_content("stdout_test_b.out");
+                auto error = get_file_content("stderr_test_b.err");
+                REQUIRE(output == "foo=bar\n");
+                REQUIRE(error == "error message!\n");
+            }
+            THEN("the returned results are correct and out/err streams were not buffered") {
+                REQUIRE(exec.success);
+                REQUIRE(exec.output.empty());
+                REQUIRE(exec.error.empty());
+            }
+        }
+        WHEN("requested to write stderr to a file in a directory that does not exist") {
+            string out_file(spool_dir + "/good.out");
+            string err_file(spool_dir + "/spam/eggs/bad.err");
+            bool success = false;
+            try {
+                execute("cat", { EXEC_TESTS_DIRECTORY "/fixtures/ls/file1.txt" }, "", out_file, err_file);
+                success = true;
+            } catch (...) {
+                // pass
+            }
+            THEN("it fails") {
+                REQUIRE_FALSE(success);
+            }
+        }
+        WHEN("requested to execute a PID callback") {
+            int pid_from_callback;
+            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/echo_pid", {}, "", {}, [&pid_from_callback](size_t pid) { pid_from_callback = pid; });
+            THEN("the returned results are correct") {
+                REQUIRE(exec.success);
+                REQUIRE_FALSE(exec.output.empty());
+                REQUIRE(exec.error.empty());
+            }
+            THEN("the callback is successfully executed") {
+                REQUIRE(to_string(pid_from_callback) == exec.output);
+            }
         }
     }
     GIVEN("a command that fails") {

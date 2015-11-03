@@ -400,6 +400,7 @@ namespace leatherman { namespace execution {
         vector<string> const* arguments,
         string const* input,
         map<string, string> const* environment,
+        function<void(size_t)> const& pid_callback,
         function<bool(string&)> const& stdout_callback,
         function<bool(string&)> const& stderr_callback,
         option_set<execution_options> const& options,
@@ -516,6 +517,11 @@ namespace leatherman { namespace execution {
                 setitimer(ITIMER_REAL, &timer, nullptr);
                 command_timedout = false;
             });
+        }
+
+        // Execute the PID callback
+        if (pid_callback) {
+            pid_callback(child);
         }
 
         // This somewhat complicated construct performs the following:
