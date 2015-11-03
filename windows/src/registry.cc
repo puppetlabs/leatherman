@@ -1,11 +1,12 @@
 #include <leatherman/windows/registry.hpp>
 #include <leatherman/windows/system_error.hpp>
 #include <leatherman/windows/windows.hpp>
-#include <boost/format.hpp>
+#include <leatherman/locale/locale.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/nowide/convert.hpp>
 
 using namespace std;
+namespace lth_locale = leatherman::locale;
 
 namespace leatherman { namespace windows {
 
@@ -41,16 +42,16 @@ namespace leatherman { namespace windows {
         DWORD size = 0u;
         auto err = RegGetValueW(hk, lpSubKeyW.c_str(), lpValueW.c_str(), flags, nullptr, nullptr, &size);
         if (err != ERROR_SUCCESS) {
-            throw registry_exception(str(boost::format("error reading registry key %1% %2%: %3%") %
-                lpSubKey % lpValue % system_error(err)));
+            throw registry_exception(lth_locale::format("error reading registry key {1} {2}: {3}",
+                lpSubKey, lpValue, windows::system_error(err)));
         }
 
         // Size is the number of bytes needed.
         wstring buffer((size*sizeof(char))/sizeof(wchar_t), '\0');
         err = RegGetValueW(hk, lpSubKeyW.c_str(), lpValueW.c_str(), flags, nullptr, &buffer[0], &size);
         if (err != ERROR_SUCCESS) {
-            throw registry_exception(str(boost::format("error reading registry key %1% %2%: %3%") %
-                lpSubKey % lpValue % system_error(err)));
+            throw registry_exception(lth_locale::format("error reading registry key {1} {2}: {3}",
+                lpSubKey, lpValue, windows::system_error(err)));
         }
 
         // Size now represents bytes copied (which can be less than we allocated). Resize, and also remove the

@@ -123,7 +123,7 @@ namespace leatherman { namespace ruby {
         if (!library.loaded()) {
             throw library_not_loaded_exception("could not locate a ruby library");
         } else if (library.first_load()) {
-            LOG_INFO("ruby loaded from \"%1%\".", library.name());
+            LOG_INFO("ruby loaded from \"{1}\".", library.name());
         } else {
             LOG_INFO("ruby was already loaded.");
         }
@@ -144,7 +144,7 @@ namespace leatherman { namespace ruby {
             ruby_init();
         }
 
-        LOG_INFO("using ruby version %1%", to_string(rb_const_get(*rb_cObject, rb_intern("RUBY_VERSION"))));
+        LOG_INFO("using ruby version {1}", to_string(rb_const_get(*rb_cObject, rb_intern("RUBY_VERSION"))));
 
         if (_library.first_load()) {
             // Run an empty script evaluation
@@ -453,7 +453,7 @@ namespace leatherman { namespace ruby {
             if (library.load(ruby_lib_location)) {
                 return library;
             }
-            LOG_WARNING("preferred ruby library \"%1%\" could not be loaded.", ruby_lib_location);
+            LOG_WARNING("preferred ruby library \"{1}\" could not be loaded.", ruby_lib_location);
         }
 
         // Next try an environment variable.
@@ -463,7 +463,7 @@ namespace leatherman { namespace ruby {
             if (library.load(value)) {
                 return library;
             } else {
-                LOG_WARNING("ruby library \"%1%\" could not be loaded.", value);
+                LOG_WARNING("ruby library \"{1}\" could not be loaded.", value);
             }
         }
 
@@ -473,7 +473,7 @@ namespace leatherman { namespace ruby {
             LOG_DEBUG("ruby could not be found on the PATH.");
             return library;
         }
-        LOG_DEBUG("ruby was found at \"%1%\".", ruby);
+        LOG_DEBUG("ruby was found at \"{1}\".", ruby);
 
         auto exec = execute(ruby, { "-e", "print(['libdir', 'archlibdir', 'sitearchlibdir', 'bindir'].find do |name|"
                 "dir = RbConfig::CONFIG[name];"
@@ -482,13 +482,13 @@ namespace leatherman { namespace ruby {
                 "break file if File.exist? file;"
                 "false end)" });
         if (!exec.success) {
-            LOG_WARNING("ruby failed to run: %1%", exec.output);
+            LOG_WARNING("ruby failed to run: {1}", exec.output);
             return library;
         }
 
         boost::system::error_code ec;
         if (!exists(exec.output, ec) || is_directory(exec.output, ec)) {
-            LOG_DEBUG("ruby library \"%1%\" was not found: ensure ruby was built with the --enable-shared configuration option.", exec.output);
+            LOG_DEBUG("ruby library \"{1}\" was not found: ensure ruby was built with the --enable-shared configuration option.", exec.output);
             return library;
         }
 

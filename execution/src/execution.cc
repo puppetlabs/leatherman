@@ -85,7 +85,7 @@ namespace leatherman { namespace execution {
                 command_line << ' ' << argument;
             }
         }
-        LOG_DEBUG("executing command: %1%", command_line.str());
+        LOG_DEBUG("executing command: {1}", command_line.str());
     }
 
     string expand_command(string const& command, vector<string> const& directories)

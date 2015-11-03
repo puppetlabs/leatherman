@@ -81,6 +81,9 @@ endif()
 # Enforce UTF-8 in Leatherman.Logging; disable deprecated names in Boost.System to avoid warnings on Windows.
 list(APPEND LEATHERMAN_DEFINITIONS -DBOOST_LOG_WITHOUT_WCHAR_T -DBOOST_SYSTEM_NO_DEPRECATED)
 
+# Set project name for locale customization. Also set build directory for testing.
+list(APPEND LEATHERMAN_DEFINITIONS -DPROJECT_NAME="${CMAKE_PROJECT_NAME}" -DPROJECT_DIR="${PROJECT_BINARY_DIR}")
+
 if (NOT BOOST_STATIC)
     # Boost.Log requires that BOOST_LOG_DYN_LINK is set when using dynamic linking. We set ALL for consistency.
     list(APPEND LEATHERMAN_DEFINITIONS -DBOOST_ALL_DYN_LINK)

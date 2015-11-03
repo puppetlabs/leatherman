@@ -162,7 +162,7 @@ namespace leatherman { namespace curl {
             throw http_request_exception(req, curl_easy_strerror(result));
         }
 
-        LOG_DEBUG("request completed (status %1%).", res.status_code());
+        LOG_DEBUG("request completed (status {1}).", res.status_code());
 
         // Set the body of the response
         res.body(move(ctx.response_buffer));
@@ -220,7 +220,7 @@ namespace leatherman { namespace curl {
             throw http_request_exception(ctx.req, curl_easy_strerror(result));
         }
 
-        LOG_DEBUG("requesting %1%.", ctx.req.url());
+        LOG_DEBUG("requesting {1}.", ctx.req.url());
     }
 
     void client::set_headers(context& ctx)
@@ -414,7 +414,7 @@ namespace leatherman { namespace curl {
 
         auto pos = input.find_first_of(':');
         if (pos == boost::string_ref::npos) {
-            LOG_WARNING("unexpected HTTP response header: %1%.", input);
+            LOG_WARNING("unexpected HTTP response header: {1}.", input);
             return written;
         }
 
@@ -476,7 +476,7 @@ namespace leatherman { namespace curl {
         } else if (type == CURLINFO_DATA_OUT) {
             header << "[request body: " << size << " bytes]\n";
         }
-        LOG_TRACE("%1%%2%", header.str(), str);
+        LOG_TRACE("{1}{2}", header.str(), str);
         return 0;
     }
 

@@ -3,6 +3,7 @@
 #include <dlfcn.h>
 
 using namespace std;
+namespace lth_locale = leatherman::locale;
 
 namespace leatherman { namespace dynamic_library {
 
@@ -43,7 +44,7 @@ namespace leatherman { namespace dynamic_library {
 
         _handle = dlopen(name.c_str(), load_mode);
         if (!_handle) {
-            LOG_DEBUG("library %1% not found %2% (%3%).", name.c_str(), strerror(errno), errno);
+            LOG_DEBUG("library {1} not found {2} ({3}).", name.c_str(), strerror(errno), errno);
             return false;
         }
         _first_load = true;
@@ -67,20 +68,20 @@ namespace leatherman { namespace dynamic_library {
             if (throw_if_missing) {
                 throw missing_import_exception("library is not loaded.");
             } else {
-                LOG_DEBUG("library %1% is not loaded when attempting to load symbol %2%.", _name.c_str(), name.c_str());
+                LOG_DEBUG("library {1} is not loaded when attempting to load symbol {2}.", _name.c_str(), name.c_str());
             }
             return nullptr;
         }
         void* symbol = dlsym(_handle, name.c_str());
         if (!symbol && !alias.empty()) {
-            LOG_DEBUG("symbol %1% not found in library %2%, trying alias %3%.", name.c_str(), _name.c_str(), alias.c_str());
+            LOG_DEBUG("symbol {1} not found in library {2}, trying alias {3}.", name.c_str(), _name.c_str(), alias.c_str());
             symbol = dlsym(_handle, alias.c_str());
         }
         if (!symbol) {
             if (throw_if_missing) {
-                throw missing_import_exception((boost::format("symbol %1% was not found in %2%.") % name %_name).str());
+                throw missing_import_exception(lth_locale::format("symbol {1} was not found in {2}.", name, _name));
             } else {
-                LOG_DEBUG("symbol %1% not found in library %2%.", name.c_str(), _name.c_str());
+                LOG_DEBUG("symbol {1} not found in library {2}.", name.c_str(), _name.c_str());
             }
         }
         return symbol;

@@ -34,6 +34,11 @@ if (LEATHERMAN_TOPLEVEL)
 endif()
 
 add_definitions(${LEATHERMAN_DEFINITIONS})
+add_definitions(-DLEATHERMAN_LOCALE_INSTALL="${CMAKE_INSTALL_PREFIX}/share/locale")
+
+file(GLOB_RECURSE ALL_LEATHERMAN_SOURCES */src/*.cc */inc/*.hpp)
+gettext_templates(${CMAKE_CURRENT_SOURCE_DIR}/locales ${ALL_LEATHERMAN_SOURCES})
+gettext_compile(${CMAKE_CURRENT_SOURCE_DIR}/locales share/locale)
 
 add_leatherman_dir(catch EXCLUDE_FROM_VARS)
 add_leatherman_dir(nowide)
@@ -50,7 +55,6 @@ endif()
 add_leatherman_dir(dynamic_library)
 add_leatherman_dir(execution)
 add_leatherman_dir(ruby)
-
 
 # Ensure no LEATHERMAN_LIBS are in LEATHERMAN_DEPS, LEATHERMAN_LIBS should be declared in dependency
 # order above, and we don't want them to come after other dependencies.
@@ -79,7 +83,6 @@ if(LEATHERMAN_ENABLE_TESTING)
 
     add_cppcheck_dirs(${LEATHERMAN_CPPCHECK_DIRS})
 
-    file(GLOB_RECURSE ALL_LEATHERMAN_SOURCES */src/*.cc */inc/*.hpp)
     add_cpplint_files(${ALL_LEATHERMAN_SOURCES})
 
     # If we're toplevel we want to own these targets. If not we assume
@@ -100,6 +103,7 @@ if (LEATHERMAN_INSTALL)
         cmake/leatherman.cmake
         cmake/options.cmake
         cmake/leatherman_config.cmake
+        cmake/normalize_pot.cmake
     )
     set(INSTALL_LOC "lib${LIB_SUFFIX}/cmake/leatherman")
     install(FILES ${CMAKE_FILES} DESTINATION "${INSTALL_LOC}/cmake/")

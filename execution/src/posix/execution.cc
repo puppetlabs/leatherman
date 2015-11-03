@@ -5,7 +5,6 @@
 #include <leatherman/logging/logging.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/format.hpp>
 #include <array>
 #include <unistd.h>
 #include <sys/types.h>
@@ -22,6 +21,7 @@ using namespace leatherman::execution;
 using namespace leatherman::logging;
 using namespace leatherman::file_util;
 using namespace boost::filesystem;
+namespace lth_locale = leatherman::locale;
 
 // Declare environ for OSX
 extern char** environ;
@@ -72,9 +72,9 @@ namespace leatherman { namespace execution {
     static string format_error(string const& message = string(), int error = errno)
     {
         if (message.empty()) {
-            return (boost::format("%1% (%2%)") % strerror(error) % error).str();
+            return lth_locale::format("{1} ({2})", strerror(error), error);
         }
-        return (boost::format("%1%: %2% (%3%).") % message % strerror(error) % error).str();
+        return lth_locale::format("{1}: {2} ({3}).", message, strerror(error), error);
     }
 
     static vector<gid_t> get_groups()
@@ -238,11 +238,11 @@ namespace leatherman { namespace execution {
                     write(pipe.descriptor, pipe.buffer.c_str(), pipe.buffer.size());
                 if (count < 0) {
                     if (errno != EINTR) {
-                        LOG_ERROR("%1% pipe i/o failed: %2%.", pipe.name, format_error());
+                        LOG_ERROR("{1} pipe i/o failed: {2}.", pipe.name, format_error());
                         throw execution_exception("child i/o failed.");
                     }
                     // Interrupted by signal
-                    LOG_DEBUG("%1% pipe i/o was interrupted and will be retried.", pipe.name);
+                    LOG_DEBUG("{1} pipe i/o was interrupted and will be retried.", pipe.name);
                     continue;
                 } else if (count == 0) {
                     // Pipe has closed
@@ -266,7 +266,7 @@ namespace leatherman { namespace execution {
 
         // Should only reach here if the command timed out
         // cppcheck-suppress zerodivcond - http://trac.cppcheck.net/ticket/5402
-        throw timeout_exception((boost::format("command timed out after %1% seconds.") % timeout).str(), static_cast<size_t>(child));
+        throw timeout_exception(lth_locale::format("command timed out after {1} seconds.", timeout), static_cast<size_t>(child));
     }
 
     static void exec_child(int in, int out, int err, char const* program, char const** argv, char const** envp)
@@ -359,7 +359,7 @@ namespace leatherman { namespace execution {
         // Add the given environment
         if (environment) {
             for (auto const& kvp : *environment) {
-                result.emplace_back((boost::format("%1%=%2%") % kvp.first % kvp.second).str());
+                result.emplace_back(lth_locale::format("{1}={2}", kvp.first, kvp.second));
             }
         }
 
@@ -410,7 +410,7 @@ namespace leatherman { namespace execution {
         string executable = which(file);
         log_execution(executable.empty() ? file : executable, arguments);
         if (executable.empty()) {
-            LOG_DEBUG("%1% was not found on the PATH.", file);
+            LOG_DEBUG("{1} was not found on the PATH.", file);
             if (options[execution_options::throw_on_nonzero_exit]) {
                 throw child_exit_exception("child process returned non-zero exit status.", 127, {}, {});
             }
@@ -550,18 +550,18 @@ namespace leatherman { namespace execution {
         reaper.invoke();
 
         if (signaled) {
-            LOG_DEBUG("process was signaled with signal %1%.", status);
+            LOG_DEBUG("process was signaled with signal {1}.", status);
         } else {
-            LOG_DEBUG("process exited with status code %1%.", status);
+            LOG_DEBUG("process exited with status code {1}.", status);
         }
 
         // Throw exception if needed
         if (!success) {
             if (!signaled && status != 0 && options[execution_options::throw_on_nonzero_exit]) {
-                throw child_exit_exception((boost::format("child process returned non-zero exit status (%1%).") % status).str(), status, move(output), move(error));
+                throw child_exit_exception(lth_locale::format("child process returned non-zero exit status ({1}).", status), status, move(output), move(error));
             }
             if (signaled && options[execution_options::throw_on_signal]) {
-                throw child_signal_exception((boost::format("child process was terminated by signal (%1%).") % status).str(), status, move(output), move(error));
+                throw child_signal_exception(lth_locale::format("child process was terminated by signal ({1}).", status), status, move(output), move(error));
             }
         }
         return {success, move(output), move(error), status};

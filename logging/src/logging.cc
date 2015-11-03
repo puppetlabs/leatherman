@@ -33,6 +33,8 @@ namespace leatherman { namespace logging {
     static bool g_colorize = false;
     static bool g_error_logged = false;
 
+    namespace lth_locale = leatherman::locale;
+
     class color_writer : public sinks::basic_sink_backend<sinks::synchronized_feeding>
     {
      public:
@@ -65,7 +67,7 @@ namespace leatherman { namespace logging {
         _dst << endl;
     }
 
-    void setup_logging(ostream &dst, string locale)
+    void setup_logging(ostream &dst, string locale, string domain)
     {
         // Remove existing sinks before adding a new one
         auto core = boost::log::core::get();
@@ -78,7 +80,9 @@ namespace leatherman { namespace logging {
 #if (!defined(__sun) && !defined(_AIX)) || !defined(__GNUC__)
         // Imbue the logging sink with the requested locale.
         // Locale in GCC is busted on Solaris, so skip it.
-        dst.imbue(leatherman::locale::get_locale(locale));
+        // TODO: Imbue may not be useful, as setup_logging can be called multiple times
+        // with different domains for the same ostream.
+        dst.imbue(lth_locale::get_locale(locale, domain));
 #endif
 
         boost::log::add_common_attributes();
@@ -128,11 +132,6 @@ namespace leatherman { namespace logging {
     void on_message(function<bool(log_level, string const&)> callback)
     {
         g_callback = callback;
-    }
-
-    void log(const string &logger, log_level level, int line_num, boost::format& message)
-    {
-        log(logger, level, line_num, message.str());
     }
 
     void log(const string &logger, log_level level, int line_num, string const& message)
@@ -187,7 +186,7 @@ namespace leatherman { namespace logging {
                 return in;
             }
         }
-        throw runtime_error((boost::format("invalid log level '%1%': expected none, trace, debug, info, warn, error, or fatal.") % value).str());
+        throw runtime_error(lth_locale::format("invalid log level '%1%': expected none, trace, debug, info, warn, error, or fatal.", value));
     }
 
     ostream& operator<<(ostream& strm, log_level level)

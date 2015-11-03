@@ -24,7 +24,7 @@ namespace leatherman { namespace windows { namespace process {
     {
         HANDLE temp_token = INVALID_HANDLE_VALUE;
         if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &temp_token)) {
-            LOG_DEBUG("OpenProcessToken call failed: %1%", system_error());
+            LOG_DEBUG("OpenProcessToken call failed: {1}", system_error());
             return false;
         }
         util::scoped_resource<HANDLE> token(temp_token, CloseHandle);
@@ -32,7 +32,7 @@ namespace leatherman { namespace windows { namespace process {
         TOKEN_ELEVATION token_elevation;
         DWORD token_elevation_length;
         if (!GetTokenInformation(token, TokenElevation, &token_elevation, sizeof(TOKEN_ELEVATION), &token_elevation_length)) {
-            LOG_DEBUG("GetTokenInformation call failed: %1%", system_error());
+            LOG_DEBUG("GetTokenInformation call failed: {1}", system_error());
             return false;
         }
 
