@@ -38,7 +38,7 @@ namespace leatherman { namespace curl {
          * @param name The header name to get.
          * @return Returns a pointer to the header's value or nullptr if the header is not present.
          */
-        std::string* header(std::string const& name);
+        const std::string* header(std::string const& name) const;
 
         /**
          * Removes a header from the response.
