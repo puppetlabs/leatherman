@@ -10,17 +10,9 @@
 // Forward declarations for rapidjson
 namespace rapidjson {
     class CrtAllocator;
-    template <typename BaseAllocator> class MemoryPoolAllocator;
     template <typename Encoding, typename Allocator> class GenericValue;
-    template<typename CharType> struct UTF8;
-    using Value = GenericValue<UTF8<char>, MemoryPoolAllocator<CrtAllocator>>;
-    using Allocator = MemoryPoolAllocator<CrtAllocator>;
-    template <typename Encoding,
-              typename Allocator,
-              typename StackAllocator> class GenericDocument;
-    using Document = GenericDocument<UTF8<char>,
-                                     MemoryPoolAllocator<CrtAllocator>,
-                                     CrtAllocator>;
+    template <typename CharType> struct UTF8;
+    template <typename Encoding, typename Allocator, typename StackAllocator> class GenericDocument;
 }  // namespace rapidjson
 
 namespace leatherman { namespace json_container {
@@ -65,6 +57,19 @@ namespace leatherman { namespace json_container {
         JsonContainerKey(const char* value) : std::string(value) {}
         JsonContainerKey(std::initializer_list<char> il) = delete;
     };
+
+    /**
+     * Typedef for RapidJSON allocator.
+     */
+    using json_allocator = rapidjson::CrtAllocator;
+    /**
+     * Typedef for RapidJSON value.
+     */
+    using json_value = rapidjson::GenericValue<rapidjson::UTF8<char>, json_allocator>;
+    /**
+     * Typedef for RapidJSON document.
+     */
+    using json_document = rapidjson::GenericDocument<rapidjson::UTF8<char>, json_allocator, json_allocator>;
 
     // Usage:
     //
@@ -113,14 +118,14 @@ namespace leatherman { namespace json_container {
     public:
         JsonContainer();
         explicit JsonContainer(const std::string& json_txt);
-        explicit JsonContainer(const rapidjson::Value& value);
+        explicit JsonContainer(const json_value& value);
         JsonContainer(const JsonContainer& data);
         JsonContainer(const JsonContainer&& data);
         JsonContainer& operator=(JsonContainer other);
 
         ~JsonContainer();
 
-        const rapidjson::Document& getRaw() const;
+        const json_document& getRaw() const;
 
         std::string toString() const;
 
@@ -334,33 +339,33 @@ namespace leatherman { namespace json_container {
         }
 
     private:
-        std::unique_ptr<rapidjson::Document> document_root_;
+        std::unique_ptr<json_document> document_root_;
 
-        size_t getSize(const rapidjson::Value& jval) const;
+        size_t getSize(const json_value& jval) const;
 
-        DataType getValueType(const rapidjson::Value& jval) const;
+        DataType getValueType(const json_value& jval) const;
 
-        bool hasKey(const rapidjson::Value& jval, const char* key) const;
+        bool hasKey(const json_value& jval, const char* key) const;
 
-        // NOTE(ale): we cant' use rapidjson::Value::IsObject directly
+        // NOTE(ale): we cant' use json_value::IsObject directly
         // since we have forward declarations for rapidjson; otherwise
         // we would have an implicit template instantiation error
-        bool isObject(const rapidjson::Value& jval) const;
+        bool isObject(const json_value& jval) const;
 
         // Root object entry accessor
         // Throws a data_type_error in case the specified value is not
         // an object.
         // Throws a data_key_error or if the key is unknown.
-        rapidjson::Value* getValueInJson(const rapidjson::Value& jval,
-                                         const char* key) const;
+        json_value* getValueInJson(const json_value& jval,
+                                   const char* key) const;
 
         // Root array entry accessor
         // Throws a data_type_error in case the specified value is not
         // an array.
         // Throws a data_index_error in case the arraye index is out
         // of bounds.
-        rapidjson::Value* getValueInJson(const rapidjson::Value& jval,
-                                         const size_t& idx) const;
+        json_value* getValueInJson(const json_value& jval,
+                                   const size_t& idx) const;
 
         // Generic entry accessor
         // In case any key is specified, throws a data_type_error if
@@ -368,51 +373,51 @@ namespace leatherman { namespace json_container {
         // data_key_error or if the key is unknown.
         // In case an array element is specified, throws a
         // data_index_error if the index is out of bounds.
-        rapidjson::Value* getValueInJson(
+        json_value* getValueInJson(
             std::vector<JsonContainerKey> keys = std::vector<JsonContainerKey> {},
             const bool is_array = false,
             const size_t idx = 0) const;
 
-        void createKeyInJson(const char* key, rapidjson::Value& jval);
+        void createKeyInJson(const char* key, json_value& jval);
 
         template<typename T>
-        T getValue(const rapidjson::Value& value) const;
+        T getValue(const json_value& value) const;
 
         template<typename T>
-        void setValue(rapidjson::Value& jval, T new_value);
+        void setValue(json_value& jval, T new_value);
     };
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, const std::string& new_value);
+    void JsonContainer::setValue<>(json_value& jval, const std::string& new_value);
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, const char* new_value);
+    void JsonContainer::setValue<>(json_value& jval, const char* new_value);
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, bool new_value);
+    void JsonContainer::setValue<>(json_value& jval, bool new_value);
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, int new_value);
+    void JsonContainer::setValue<>(json_value& jval, int new_value);
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, double new_value);
+    void JsonContainer::setValue<>(json_value& jval, double new_value);
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, std::vector<std::string> new_value);
+    void JsonContainer::setValue<>(json_value& jval, std::vector<std::string> new_value);
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, std::vector<bool> new_value);
+    void JsonContainer::setValue<>(json_value& jval, std::vector<bool> new_value);
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, std::vector<int> new_value);
+    void JsonContainer::setValue<>(json_value& jval, std::vector<int> new_value);
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, std::vector<double> new_value);
+    void JsonContainer::setValue<>(json_value& jval, std::vector<double> new_value);
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, std::vector<JsonContainer> new_value);
+    void JsonContainer::setValue<>(json_value& jval, std::vector<JsonContainer> new_value);
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, JsonContainer new_value);
+    void JsonContainer::setValue<>(json_value& jval, JsonContainer new_value);
 
 }}  // namespace leatherman::json_container

@@ -15,7 +15,7 @@ namespace leatherman { namespace json_container {
     // free functions
     //
 
-    std::string valueToString(const rapidjson::Value& jval) {
+    std::string valueToString(const json_value& jval) {
         rapidjson::StringBuffer buffer;
         rapidjson::Writer<rapidjson::StringBuffer> writer { buffer };
         jval.Accept(writer);
@@ -26,7 +26,7 @@ namespace leatherman { namespace json_container {
     // public interface
     //
 
-    JsonContainer::JsonContainer() : document_root_ { new rapidjson::Document() } {
+    JsonContainer::JsonContainer() : document_root_ { new json_document() } {
         document_root_->SetObject();
     }
 
@@ -38,7 +38,7 @@ namespace leatherman { namespace json_container {
         }
     }
 
-    JsonContainer::JsonContainer(const rapidjson::Value& value) : JsonContainer() {
+    JsonContainer::JsonContainer(const json_value& value) : JsonContainer() {
         // Because rapidjson disallows the use of copy constructors we pass
         // the json by const reference and recreate it by explicitly copying
         document_root_->CopyFrom(value, document_root_->GetAllocator());
@@ -63,7 +63,7 @@ namespace leatherman { namespace json_container {
 
     // representation
 
-    const rapidjson::Document& JsonContainer::getRaw() const {
+    const json_document& JsonContainer::getRaw() const {
         return *document_root_;
     }
 
@@ -179,7 +179,7 @@ namespace leatherman { namespace json_container {
         auto jval = getValueInJson();
 
         if (jval->IsObject()) {
-            for (rapidjson::Value::ConstMemberIterator itr = jval->MemberBegin();
+            for (json_value::ConstMemberIterator itr = jval->MemberBegin();
                  itr != jval->MemberEnd(); ++itr) {
                 k.push_back(itr->name.GetString());
             }
@@ -251,7 +251,7 @@ namespace leatherman { namespace json_container {
     // Private functions
     //
 
-    size_t JsonContainer::getSize(const rapidjson::Value& jval) const {
+    size_t JsonContainer::getSize(const json_value& jval) const {
         switch (getValueType(jval)) {
             case DataType::Array:
                 return jval.Size();
@@ -262,7 +262,7 @@ namespace leatherman { namespace json_container {
         }
     }
 
-    DataType JsonContainer::getValueType(const rapidjson::Value& jval) const {
+    DataType JsonContainer::getValueType(const json_value& jval) const {
         switch (jval.GetType()) {
             case rapidjson::Type::kNullType:
                 return DataType::Null;
@@ -290,15 +290,15 @@ namespace leatherman { namespace json_container {
 
     // Internal key / index manipulation methods
 
-    bool JsonContainer::hasKey(const rapidjson::Value& jval, const char* key) const {
+    bool JsonContainer::hasKey(const json_value& jval, const char* key) const {
         return (jval.IsObject() && jval.HasMember(key));
     }
 
-    bool JsonContainer::isObject(const rapidjson::Value& jval) const {
+    bool JsonContainer::isObject(const json_value& jval) const {
         return jval.IsObject();
     }
 
-    rapidjson::Value* JsonContainer::getValueInJson(const rapidjson::Value& jval,
+    json_value* JsonContainer::getValueInJson(const json_value& jval,
                                                     const char* key) const {
         if (!jval.IsObject()) {
             throw data_type_error { "not an object" };
@@ -309,10 +309,10 @@ namespace leatherman { namespace json_container {
             throw data_key_error { err_msg + key };
         }
 
-        return const_cast<rapidjson::Value*>(&jval[key]);
+        return const_cast<json_value*>(&jval[key]);
     }
 
-    rapidjson::Value* JsonContainer::getValueInJson(const rapidjson::Value& jval,
+    json_value* JsonContainer::getValueInJson(const json_value& jval,
                                                     const size_t& idx) const {
         if (getValueType(jval) != DataType::Array) {
             throw data_type_error { "not an array" };
@@ -322,13 +322,13 @@ namespace leatherman { namespace json_container {
             throw data_index_error { "array index out of bounds" };
         }
 
-        return const_cast<rapidjson::Value*>(&jval[idx]);
+        return const_cast<json_value*>(&jval[idx]);
     }
 
-    rapidjson::Value* JsonContainer::getValueInJson(std::vector<JsonContainerKey> keys,
+    json_value* JsonContainer::getValueInJson(std::vector<JsonContainerKey> keys,
                                                     const bool is_array,
                                                     const size_t idx) const {
-        auto jval = reinterpret_cast<rapidjson::Value*>(document_root_.get());
+        auto jval = dynamic_cast<json_value*>(document_root_.get());
 
         for (const auto& key : keys) {
             jval = getValueInJson(*jval, key.data());
@@ -342,16 +342,16 @@ namespace leatherman { namespace json_container {
     }
 
     void JsonContainer::createKeyInJson(const char* key,
-                                        rapidjson::Value& jval) {
-        jval.AddMember(rapidjson::Value(key, document_root_->GetAllocator()).Move(),
-                       rapidjson::Value(rapidjson::kObjectType).Move(),
+                                        json_value& jval) {
+        jval.AddMember(json_value(key, document_root_->GetAllocator()).Move(),
+                       json_value(rapidjson::kObjectType).Move(),
                        document_root_->GetAllocator());
     }
 
     // getValue specialisations
 
     template<>
-    int JsonContainer::getValue<>(const rapidjson::Value& value) const {
+    int JsonContainer::getValue<>(const json_value& value) const {
         if (value.IsNull()) {
             return 0;
         }
@@ -364,7 +364,7 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    bool JsonContainer::getValue<>(const rapidjson::Value& value) const {
+    bool JsonContainer::getValue<>(const json_value& value) const {
         if (value.IsNull()) {
             return false;
         }
@@ -377,7 +377,7 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    std::string JsonContainer::getValue<>(const rapidjson::Value& value) const {
+    std::string JsonContainer::getValue<>(const json_value& value) const {
         if (value.IsNull()) {
             return "";
         }
@@ -390,7 +390,7 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    double JsonContainer::getValue<>(const rapidjson::Value& value) const {
+    double JsonContainer::getValue<>(const json_value& value) const {
         if (value.IsNull()) {
             return 0.0;
         }
@@ -403,7 +403,7 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    JsonContainer JsonContainer::getValue<>(const rapidjson::Value& value) const {
+    JsonContainer JsonContainer::getValue<>(const json_value& value) const {
         if (value.IsNull()) {
             JsonContainer container {};
             return container;
@@ -417,14 +417,14 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    rapidjson::Value JsonContainer::getValue<>(const rapidjson::Value& value) const {
+    json_value JsonContainer::getValue<>(const json_value& value) const {
         JsonContainer* tmp_this = const_cast<JsonContainer*>(this);
-        rapidjson::Value v { value, tmp_this->document_root_->GetAllocator() };
+        json_value v { value, tmp_this->document_root_->GetAllocator() };
         return v;
     }
 
     template<>
-    std::vector<std::string> JsonContainer::getValue<>(const rapidjson::Value& value) const {
+    std::vector<std::string> JsonContainer::getValue<>(const json_value& value) const {
         std::vector<std::string> tmp {};
 
         if (value.IsNull()) {
@@ -435,7 +435,7 @@ namespace leatherman { namespace json_container {
             throw data_type_error { "not an array" };
         }
 
-        for (rapidjson::Value::ConstValueIterator itr = value.Begin();
+        for (json_value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
             if (!itr->IsString()) {
@@ -449,7 +449,7 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    std::vector<bool> JsonContainer::getValue<>(const rapidjson::Value& value) const {
+    std::vector<bool> JsonContainer::getValue<>(const json_value& value) const {
         std::vector<bool> tmp {};
 
         if (value.IsNull()) {
@@ -460,7 +460,7 @@ namespace leatherman { namespace json_container {
             throw data_type_error { "not an array" };
         }
 
-        for (rapidjson::Value::ConstValueIterator itr = value.Begin();
+        for (json_value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
             if (!itr->IsBool()) {
@@ -474,7 +474,7 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    std::vector<int> JsonContainer::getValue<>(const rapidjson::Value& value) const {
+    std::vector<int> JsonContainer::getValue<>(const json_value& value) const {
         std::vector<int> tmp {};
 
         if (value.IsNull()) {
@@ -485,7 +485,7 @@ namespace leatherman { namespace json_container {
             throw data_type_error { "not an array" };
         }
 
-        for (rapidjson::Value::ConstValueIterator itr = value.Begin();
+        for (json_value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
             if (!itr->IsInt()) {
@@ -499,7 +499,7 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    std::vector<double> JsonContainer::getValue<>(const rapidjson::Value& value) const {
+    std::vector<double> JsonContainer::getValue<>(const json_value& value) const {
         std::vector<double> tmp {};
 
         if (value.IsNull()) {
@@ -510,7 +510,7 @@ namespace leatherman { namespace json_container {
             throw data_type_error { "not an array" };
         }
 
-        for (rapidjson::Value::ConstValueIterator itr = value.Begin();
+        for (json_value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
             if (!itr->IsDouble()) {
@@ -524,7 +524,7 @@ namespace leatherman { namespace json_container {
     }
 
     template<>
-    std::vector<JsonContainer> JsonContainer::getValue<>(const rapidjson::Value& value) const {
+    std::vector<JsonContainer> JsonContainer::getValue<>(const json_value& value) const {
         std::vector<JsonContainer> tmp {};
 
         if (value.IsNull()) {
@@ -535,7 +535,7 @@ namespace leatherman { namespace json_container {
             throw data_type_error { "not an array" };
         }
 
-        for (rapidjson::Value::ConstValueIterator itr = value.Begin();
+        for (json_value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
             if (!itr->IsObject()) {
@@ -543,7 +543,7 @@ namespace leatherman { namespace json_container {
             }
 
             JsonContainer* tmp_this = const_cast<JsonContainer*>(this);
-            const rapidjson::Value tmpvalue(*itr, tmp_this->document_root_->GetAllocator());
+            const json_value tmpvalue(*itr, tmp_this->document_root_->GetAllocator());
             JsonContainer tmp_data { tmpvalue };
             tmp.push_back(tmp_data);
         }
@@ -554,88 +554,88 @@ namespace leatherman { namespace json_container {
     // setValue specialisations
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, bool new_value) {
+    void JsonContainer::setValue<>(json_value& jval, bool new_value) {
         jval.SetBool(new_value);
     }
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, int new_value) {
+    void JsonContainer::setValue<>(json_value& jval, int new_value) {
         jval.SetInt(new_value);
     }
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, const std::string new_value) {
+    void JsonContainer::setValue<>(json_value& jval, const std::string new_value) {
         jval.SetString(new_value.data(), new_value.size(), document_root_->GetAllocator());
     }
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, const char * new_value) {
+    void JsonContainer::setValue<>(json_value& jval, const char * new_value) {
         jval.SetString(new_value, std::string(new_value).size(), document_root_->GetAllocator());
     }
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, double new_value) {
+    void JsonContainer::setValue<>(json_value& jval, double new_value) {
         jval.SetDouble(new_value);
     }
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, std::vector<std::string> new_value ) {
+    void JsonContainer::setValue<>(json_value& jval, std::vector<std::string> new_value ) {
         jval.SetArray();
 
         for (const auto& value : new_value) {
             // rapidjson doesn't like std::string...
-            rapidjson::Value s;
+            json_value s;
             s.SetString(value.data(), value.size(), document_root_->GetAllocator());
             jval.PushBack(s, document_root_->GetAllocator());
         }
     }
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, std::vector<bool> new_value ) {
+    void JsonContainer::setValue<>(json_value& jval, std::vector<bool> new_value ) {
         jval.SetArray();
 
         for (const auto& value : new_value) {
-            rapidjson::Value tmp_val;
+            json_value tmp_val;
             tmp_val.SetBool(value);
             jval.PushBack(tmp_val, document_root_->GetAllocator());
         }
     }
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, std::vector<int> new_value ) {
+    void JsonContainer::setValue<>(json_value& jval, std::vector<int> new_value ) {
         jval.SetArray();
 
         for (const auto& value : new_value) {
-            rapidjson::Value tmp_val;
+            json_value tmp_val;
             tmp_val.SetInt(value);
             jval.PushBack(tmp_val, document_root_->GetAllocator());
         }
     }
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, std::vector<double> new_value ) {
+    void JsonContainer::setValue<>(json_value& jval, std::vector<double> new_value ) {
         jval.SetArray();
 
         for (const auto& value : new_value) {
-            rapidjson::Value tmp_val;
+            json_value tmp_val;
             tmp_val.SetDouble(value);
             jval.PushBack(tmp_val, document_root_->GetAllocator());
         }
     }
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, std::vector<JsonContainer> new_value ) {
+    void JsonContainer::setValue<>(json_value& jval, std::vector<JsonContainer> new_value ) {
         jval.SetArray();
 
         for (auto value : new_value) {
-            rapidjson::Document tmp_value;
+            json_document tmp_value;
             tmp_value.CopyFrom(*value.document_root_, document_root_->GetAllocator());
             jval.PushBack(tmp_value, document_root_->GetAllocator());
         }
     }
 
     template<>
-    void JsonContainer::setValue<>(rapidjson::Value& jval, JsonContainer new_value ) {
+    void JsonContainer::setValue<>(json_value& jval, JsonContainer new_value ) {
         jval.CopyFrom(new_value.getRaw(), document_root_->GetAllocator());
     }
 
