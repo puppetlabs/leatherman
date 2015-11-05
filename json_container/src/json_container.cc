@@ -63,11 +63,8 @@ namespace leatherman { namespace json_container {
 
     // representation
 
-    rapidjson::Document JsonContainer::getRaw() const {
-        rapidjson::Document tmp;
-        auto& a_t = document_root_->GetAllocator();
-        tmp.CopyFrom(*document_root_, a_t);
-        return tmp;
+    const rapidjson::Document& JsonContainer::getRaw() const {
+        return *document_root_;
     }
 
     std::string JsonContainer::toString() const {

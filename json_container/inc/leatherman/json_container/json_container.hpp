@@ -120,7 +120,7 @@ namespace leatherman { namespace json_container {
 
         ~JsonContainer();
 
-        rapidjson::Document getRaw() const;
+        const rapidjson::Document& getRaw() const;
 
         std::string toString() const;
 
