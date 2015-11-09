@@ -87,6 +87,8 @@ endif()
 if (LEATHERMAN_INSTALL)
     set(CMAKE_FILES
         cmake/cflags.cmake
+        cmake/GetGitRevisionDescription.cmake
+        cmake/GetGitRevisionDescription.cmake.in
         cmake/leatherman.cmake
         cmake/options.cmake
         cmake/leatherman_config.cmake
