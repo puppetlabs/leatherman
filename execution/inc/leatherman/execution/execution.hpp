@@ -347,7 +347,7 @@ namespace leatherman { namespace execution {
         std::string const& input,
         std::string const& out_file,
         std::string const& err_file = "",
-        std::map<std::string, std::string> const& environment = {},
+        std::map<std::string, std::string> const& environment = std::map<std::string, std::string>(),
         std::function<void(size_t)> pid_callback = nullptr,
         uint32_t timeout = 0,
         lth_util::option_set<execution_options> const& options = { execution_options::trim_output, execution_options::merge_environment });
