@@ -23,18 +23,21 @@ if(WIN32)
 else()
     set(PLATFORM_TESTS tests/posix/execution.cc)
 endif()
+
 add_leatherman_test(tests/log_capture.cc ${PLATFORM_TESTS})
 
-# Dumb implementation of cat.exe for testing stdin/stdout/stderr handling.
-include_directories(${LEATHERMAN_NOWIDE_INCLUDE})
-add_executable(lth_cat tests/lth_cat.cc)
-target_link_libraries(lth_cat ${LEATHERMAN_NOWIDE_LIBS})
-if (COVERALLS)
-    target_link_libraries(lth_cat gcov)
-endif()
-set_target_properties(lth_cat PROPERTIES COMPILE_FLAGS "${LEATHERMAN_CXX_FLAGS}")
+if (BUILDING_LEATHERMAN)
+    # Dumb implementation of cat.exe for testing stdin/stdout/stderr handling.
+    include_directories(${LEATHERMAN_NOWIDE_INCLUDE})
+    add_executable(lth_cat tests/lth_cat.cc)
+    target_link_libraries(lth_cat ${LEATHERMAN_NOWIDE_LIBS})
+    if (COVERALLS)
+        target_link_libraries(lth_cat gcov)
+    endif()
+    set_target_properties(lth_cat PROPERTIES COMPILE_FLAGS "${LEATHERMAN_CXX_FLAGS}")
 
-configure_file (
-    "${CMAKE_CURRENT_LIST_DIR}/tests/fixtures.hpp.in"
-    "${CMAKE_CURRENT_LIST_DIR}/tests/fixtures.hpp"
-)
+    configure_file (
+        "${CMAKE_CURRENT_LIST_DIR}/tests/fixtures.hpp.in"
+        "${CMAKE_CURRENT_LIST_DIR}/tests/fixtures.hpp"
+    )
+endif()
