@@ -22,13 +22,16 @@ endif()
 
 add_leatherman_test(tests/dynamic_library_tests.cc)
 
-#Build dummy dynamic libraries for use in testing
-add_library(libtest SHARED tests/test-lib/hello.cc)
-set_target_properties(libtest PROPERTIES PREFIX "" SUFFIX ".so")
-add_library(libtest1 SHARED tests/test-lib/hello.cc tests/test-lib/goodbye.cc)
-set_target_properties(libtest1 PROPERTIES PREFIX "" SUFFIX ".so")
+if (BUILDING_LEATHERMAN)
 
-configure_file (
-    "${CMAKE_CURRENT_LIST_DIR}/tests/fixtures.hpp.in"
-    "${CMAKE_CURRENT_LIST_DIR}/tests/fixtures.hpp"
-)
+    #Build dummy dynamic libraries for use in testing
+    add_library(libtest SHARED tests/test-lib/hello.cc)
+    set_target_properties(libtest PROPERTIES PREFIX "" SUFFIX ".so")
+    add_library(libtest1 SHARED tests/test-lib/hello.cc tests/test-lib/goodbye.cc)
+    set_target_properties(libtest1 PROPERTIES PREFIX "" SUFFIX ".so")
+
+    configure_file (
+        "${CMAKE_CURRENT_LIST_DIR}/tests/fixtures.hpp.in"
+        "${CMAKE_CURRENT_LIST_DIR}/tests/fixtures.hpp"
+    )
+endif()

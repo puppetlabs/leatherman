@@ -32,15 +32,18 @@ add_leatherman_headers(inc/leatherman)
 
 add_leatherman_test(tests/client_test.cc tests/request_test.cc tests/response_test.cc)
 
-# Create a mock curl library; it needs to be separate to allow for dllimport in the client source
-if (CURL_STATIC)
-    set(CURL_LINK STATIC)
-else()
-    set(CURL_LINK SHARED)
-endif()
-add_library(mock_curl ${CURL_LINK} tests/mock_curl.cc)
-set_target_properties(mock_curl PROPERTIES COMPILE_FLAGS "${LEATHERMAN_CXX_FLAGS}")
+if (BUILDING_LEATHERMAN)
 
-if (COVERALLS)
-    target_link_libraries(mock_curl gcov)
+    # Create a mock curl library; it needs to be separate to allow for dllimport in the client source
+    if (CURL_STATIC)
+        set(CURL_LINK STATIC)
+    else()
+        set(CURL_LINK SHARED)
+    endif()
+    add_library(mock_curl ${CURL_LINK} tests/mock_curl.cc)
+    set_target_properties(mock_curl PROPERTIES COMPILE_FLAGS "${LEATHERMAN_CXX_FLAGS}")
+
+    if (COVERALLS)
+        target_link_libraries(mock_curl gcov)
+    endif()
 endif()
