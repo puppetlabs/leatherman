@@ -76,7 +76,7 @@ namespace leatherman { namespace json_container {
         return valueToString(*jval);
     }
 
-    std::string JsonContainer::toString(std::vector<JsonContainerKey> keys) const {
+    std::string JsonContainer::toString(const std::vector<JsonContainerKey>& keys) const {
         auto jval = getValueInJson(keys);
         return valueToString(*jval);
     }
@@ -167,7 +167,7 @@ namespace leatherman { namespace json_container {
         return getSize(*jval);
     }
 
-    size_t JsonContainer::size(std::vector<JsonContainerKey> keys) const {
+    size_t JsonContainer::size(const std::vector<JsonContainerKey>& keys) const {
         auto jval = getValueInJson(keys);
         return getSize(*jval);
     }
@@ -201,7 +201,7 @@ namespace leatherman { namespace json_container {
         }
     }
 
-    bool JsonContainer::includes(std::vector<JsonContainerKey> keys) const {
+    bool JsonContainer::includes(const std::vector<JsonContainerKey>& keys) const {
         auto jval = getValueInJson();
 
         for (const auto& key : keys) {
@@ -226,7 +226,7 @@ namespace leatherman { namespace json_container {
         return getValueType(*jval);
     }
 
-    DataType JsonContainer::type(std::vector<JsonContainerKey> keys) const {
+    DataType JsonContainer::type(const std::vector<JsonContainerKey>& keys) const {
         auto jval = getValueInJson(keys);
         return getValueType(*jval);
     }
@@ -241,7 +241,7 @@ namespace leatherman { namespace json_container {
         return getValueType(*jval);
     }
 
-    DataType JsonContainer::type(std::vector<JsonContainerKey> keys,
+    DataType JsonContainer::type(const std::vector<JsonContainerKey>& keys,
                                  const size_t idx) const {
         auto jval = getValueInJson(keys, true, idx);
         return getValueType(*jval);
@@ -325,13 +325,14 @@ namespace leatherman { namespace json_container {
         return const_cast<json_value*>(&jval[idx]);
     }
 
-    json_value* JsonContainer::getValueInJson(std::vector<JsonContainerKey> keys,
+    json_value* JsonContainer::getValueInJson(std::vector<JsonContainerKey>::const_iterator begin,
+                                              std::vector<JsonContainerKey>::const_iterator end,
                                                     const bool is_array,
                                                     const size_t idx) const {
         auto jval = dynamic_cast<json_value*>(document_root_.get());
 
-        for (const auto& key : keys) {
-            jval = getValueInJson(*jval, key.data());
+        for (auto it = begin; it != end; ++it) {
+            jval = getValueInJson(*jval, it->data());
         }
 
         if (is_array) {

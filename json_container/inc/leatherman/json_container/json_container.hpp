@@ -132,11 +132,8 @@ namespace leatherman { namespace json_container {
         /// Throw a data_key_error in case the specified key is unknown.
         std::string toString(const JsonContainerKey& key) const;
 
-        // TODO(ale): we don't use const for the keys arg on a number
-        // of signatures due to gcc issues; fix this
-
         /// Throw a data_key_error in case the specified key is unknown.
-        std::string toString(std::vector<JsonContainerKey> keys) const;
+        std::string toString(const std::vector<JsonContainerKey>& keys) const;
 
         std::string toPrettyString(size_t left_padding) const;
         std::string toPrettyString() const;
@@ -157,7 +154,7 @@ namespace leatherman { namespace json_container {
         /// Return the number of entries of the specified element;
         /// return 0 in case it's scalar
         /// Throw a data_key_error in case of unknown keys.
-        size_t size(std::vector<JsonContainerKey> keys) const;
+        size_t size(const std::vector<JsonContainerKey>& keys) const;
 
         /// In case the root entry is an object, returns its keys,
         /// otherwise an empty vector.
@@ -167,7 +164,7 @@ namespace leatherman { namespace json_container {
         bool includes(const JsonContainerKey& key) const;
 
         /// Whether the specified entry exists.
-        bool includes(std::vector<JsonContainerKey> keys) const;
+        bool includes(const std::vector<JsonContainerKey>& keys) const;
 
         DataType type() const;
 
@@ -175,7 +172,7 @@ namespace leatherman { namespace json_container {
         DataType type(const JsonContainerKey& key) const;
 
         /// Throw a data_key_error in case of unknown keys.
-        DataType type(std::vector<JsonContainerKey> keys) const;
+        DataType type(const std::vector<JsonContainerKey>& keys) const;
 
         /// Throw a data_type_error in case the root entry is not an array.
         /// Throw a data_index_error in case the index is out of bounds.
@@ -189,7 +186,7 @@ namespace leatherman { namespace json_container {
         /// Throw a data_key_error in case of unknown keys.
         /// Throw a data_type_error in case the specified entry is not an array.
         /// Throw a data_index_error in case the index is out of bound.
-        DataType type(std::vector<JsonContainerKey> keys, const size_t idx) const;
+        DataType type(const std::vector<JsonContainerKey>& keys, const size_t idx) const;
 
         /// Return the value of the root entry.
         /// Throw a data_type_error in case the type of the root entry
@@ -279,10 +276,9 @@ namespace leatherman { namespace json_container {
         /// the specified one or in case the parent of the specified
         /// entry is not an object.
         template <typename T>
-        T getWithDefault(std::vector<JsonContainerKey> keys, const T& default_value) const {
+        T getWithDefault(const std::vector<JsonContainerKey>& keys, const T& default_value) const {
             auto key_data = keys.back().data();
-            keys.pop_back();
-            auto jval_obj = getValueInJson(keys);
+            auto jval_obj = getValueInJson(keys.cbegin(), keys.cend()-1);
 
             if (!isObject(*jval_obj)) {
                 throw data_type_error { "not an object" };
@@ -374,9 +370,23 @@ namespace leatherman { namespace json_container {
         // In case an array element is specified, throws a
         // data_index_error if the index is out of bounds.
         json_value* getValueInJson(
-            std::vector<JsonContainerKey> keys = std::vector<JsonContainerKey> {},
+            std::vector<JsonContainerKey>::const_iterator begin,
+            std::vector<JsonContainerKey>::const_iterator end,
             const bool is_array = false,
             const size_t idx = 0) const;
+
+        // Generic entry accessor
+        // In case any key is specified, throws a data_type_error if
+        // the specified entry is not an object; throws a
+        // data_key_error or if the key is unknown.
+        // In case an array element is specified, throws a
+        // data_index_error if the index is out of bounds.
+        json_value* getValueInJson(
+            const std::vector<JsonContainerKey>& keys = std::vector<JsonContainerKey> {},
+            const bool is_array = false,
+            const size_t idx = 0) const {
+            return getValueInJson(keys.cbegin(), keys.cend(), is_array, idx);
+        }
 
         void createKeyInJson(const char* key, json_value& jval);
 
