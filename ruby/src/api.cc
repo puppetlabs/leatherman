@@ -113,7 +113,7 @@ namespace leatherman { namespace ruby {
 
     api& api::instance()
     {
-        static api instance { move(create()) };
+        static api instance { create() };
         return instance;
     }
 
