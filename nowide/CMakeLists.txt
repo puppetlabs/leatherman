@@ -1,7 +1,11 @@
 if (BUILDING_LEATHERMAN)
     set(${include_var} "${PROJECT_SOURCE_DIR}/vendor/boost-nowide" PARENT_SCOPE)
     if (WIN32)
-        set(${lib_var} nowide-shared PARENT_SCOPE)
+        if (LEATHERMAN_SHARED)
+            set(${lib_var} nowide-shared PARENT_SCOPE)
+        else()
+            set(${lib_var} nowide-static PARENT_SCOPE)
+        endif()
     endif()
 
     set(BOOST_NOWIDE_SKIP_TESTS ON CACHE BOOL "Disable tests in Boost.Nowide")
@@ -22,26 +26,45 @@ if (BUILDING_LEATHERMAN)
         if (WIN32)
             # Have to install as FILES instead of TARGETS because the
             # target isn't in this CMake file
-            get_target_property(output_name nowide-shared OUTPUT_NAME)
-            install(FILES "${bindir}/${CMAKE_IMPORT_LIBRARY_PREFIX}${output_name}${CMAKE_IMPORT_LIBRARY_SUFFIX}" DESTINATION "lib/leatherman")
-            install(FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_SHARED_LIBRARY_PREFIX}${output_name}${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "bin")
+            if (LEATHERMAN_SHARED)
+                get_target_property(output_name nowide-shared OUTPUT_NAME)
+                install(FILES "${bindir}/${CMAKE_IMPORT_LIBRARY_PREFIX}${output_name}${CMAKE_IMPORT_LIBRARY_SUFFIX}" DESTINATION "lib")
+                install(FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_SHARED_LIBRARY_PREFIX}${output_name}${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "bin")
+            else()
+                get_target_property(output_name nowide-static OUTPUT_NAME)
+                install(FILES "${bindir}/${CMAKE_STATIC_LIBRARY_PREFIX}${output_name}${CMAKE_STATIC_LIBRARY_SUFFIX}" DESTINATION "lib")
+            endif()
         endif()
     endif()
 else()
     set(${include_var} "${LEATHERMAN_PREFIX}/include/leatherman/vendor/boost-nowide")
 
     if (WIN32)
-        set(${lib_var} nowide-shared)
-        add_library(nowide-shared SHARED IMPORTED)
-        find_library( NOWIDE_LIB
-            NAMES libnowide
-            PATHS "${LEATHERMAN_PREFIX}/lib/leatherman"
-            NO_DEFAULT_PATH
-            )
-        set_target_properties(nowide-shared PROPERTIES
-            IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
-            IMPORTED_LOCATION "${LEATHERMAN_PREFIX}/bin/libnowide.dll"
-            IMPORTED_IMPLIB ${NOWIDE_LIB}
-        )
+        if (LEATHERMAN_SHARED)
+            set(${lib_var} nowide-shared)
+            add_library(nowide-shared SHARED IMPORTED)
+            find_library(NOWIDE_LIB
+                NAMES libnowide
+                PATHS "${LEATHERMAN_PREFIX}/lib"
+                NO_DEFAULT_PATH
+                )
+            set_target_properties(nowide-shared PROPERTIES
+                IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+                IMPORTED_LOCATION "${LEATHERMAN_PREFIX}/bin/libnowide.dll"
+                IMPORTED_IMPLIB ${NOWIDE_LIB}
+                )
+        else()
+            set(${lib_var} nowide-static)
+            add_library(nowide-static STATIC IMPORTED)
+            find_library(NOWIDE_LIB
+                NAMES libnowide
+                PATHS "${LEATHERMAN_PREFIX}/lib"
+                NO_DEFAULT_PATH
+                )
+            set_target_properties(nowide-static PROPERTIES
+                IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+                IMPORTED_LOCATION ${NOWIDE_LIB}
+                )
+        endif()
     endif()
 endif()
