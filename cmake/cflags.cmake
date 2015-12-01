@@ -46,6 +46,11 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         set(LEATHERMAN_CXX_FLAGS "${LEATHERMAN_CXX_FLAGS} -Wextra")
     endif()
 
+    # On Windows with GCC 5.2.0, disable deprecated declarations because it causes warnings with Boost's use of auto_ptr
+    if (WIN32)
+        set(LEATHERMAN_CXX_FLAGS "${LEATHERMAN_CXX_FLAGS} -Wno-deprecated-declarations")
+    endif()
+
     # On unix systems we want to be sure to specify -fPIC for libraries
     if (NOT WIN32)
         set(LEATHERMAN_LIBRARY_FLAGS "-fPIC -nostdlib -nodefaultlibs")
@@ -73,7 +78,8 @@ if (WIN32)
     set(LEATHERMAN_DEFINITIONS -DUNICODE -D_UNICODE -DSECURITY_WIN32)
 endif()
 
-list(APPEND LEATHERMAN_DEFINITIONS -DBOOST_LOG_WITHOUT_WCHAR_T)
+# Enforce UTF-8 in Leatherman.Logging; disable deprecated names in Boost.System to avoid warnings on Windows.
+list(APPEND LEATHERMAN_DEFINITIONS -DBOOST_LOG_WITHOUT_WCHAR_T -DBOOST_SYSTEM_NO_DEPRECATED)
 
 if (NOT BOOST_STATIC)
     # Boost.Log requires that BOOST_LOG_DYN_LINK is set when using dynamic linking. We set ALL for consistency.
