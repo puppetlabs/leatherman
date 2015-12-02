@@ -12,18 +12,19 @@ if (BUILDING_LEATHERMAN)
     set(BOOST_NOWIDE_SKIP_INSTALL ON CACHE BOOL "Disable installing Boost.Nowide")
 
     # have to specify a bindir since this isn't actually a subdirectory of us
-    add_subdirectory("../vendor/boost-nowide" "../vendor/boost-nowide")
+    set(srcdir "../vendor/boost-nowide")
+    set(bindir "${CMAKE_CURRENT_BINARY_DIR}/${srcdir}")
+    add_subdirectory(${srcdir} ${bindir})
 
     if (LEATHERMAN_INSTALL)
-        install(DIRECTORY "../vendor/boost-nowide/boost" DESTINATION "include/leatherman/vendor/boost-nowide")
+        install(DIRECTORY "${srcdir}/boost" DESTINATION "include/leatherman/vendor/boost-nowide")
 
         if (WIN32)
-            set(bindir "${CMAKE_CURRENT_BINARY_DIR}/../vendor/boost-nowide")
             # Have to install as FILES instead of TARGETS because the
             # target isn't in this CMake file
             get_target_property(output_name nowide-shared OUTPUT_NAME)
             install(FILES "${bindir}/${CMAKE_IMPORT_LIBRARY_PREFIX}${output_name}${CMAKE_IMPORT_LIBRARY_SUFFIX}" DESTINATION "lib/leatherman")
-            install(FILES "${bindir}/${CMAKE_SHARED_LIBRARY_PREFIX}${output_name}${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "bin")
+            install(FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_SHARED_LIBRARY_PREFIX}${output_name}${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "bin")
         endif()
     endif()
 else()
