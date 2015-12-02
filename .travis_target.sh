@@ -44,7 +44,7 @@ else
   # Disable coveralls for private repos
   if [ ${TRAVIS_TARGET} == DEBUG ]; then
     # Ignore coveralls failures, keep service success uncoupled
-    coveralls --gcov gcov-4.8 --gcov-options '\-lp' -r .. >/dev/null || true
+    coveralls --gcov gcov-4.8 --gcov-options '\-lp' >/dev/null || true
   fi
 fi
 
