@@ -112,6 +112,7 @@ CMake helpers. These will be automatically added to your
   * Debugging macros
   * `cpplint` and `cppcheck` configuration
   * Logging configuration
+  * Install command with cross-platform defaults
 
 ### Using Logging
 
