@@ -113,6 +113,7 @@ CMake helpers. These will be automatically added to your
   * `cpplint` and `cppcheck` configuration
   * Logging configuration
   * Install command with cross-platform defaults
+  * Symbol visibility configuration
 
 ### Using Logging
 

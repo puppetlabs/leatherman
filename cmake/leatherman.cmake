@@ -169,3 +169,21 @@ function(get_commit_string varname)
         set(${varname} " (commit ${GIT_SHA1})" PARENT_SCOPE)
     endif()
 endfunction()
+
+include(GenerateExportHeader)
+# Usage: symbol_exports(TARGET HEADER)
+#
+# Generate the export header for restricting symbols exported from the library,
+# and configure the compiler. Restricting symbols has several advantages, noted
+# at https://gcc.gnu.org/wiki/Visibility.
+macro(symbol_exports target header)
+    generate_export_header(${target} EXPORT_FILE_NAME "${header}")
+    # Export on Apple resulted in issues finding symbols from library dependencies
+    # that we haven't solved. For now avoid the problem.
+    if (NOT APPLE)
+        add_compiler_export_flags()
+    endif()
+    if (WIN32)
+        add_definitions("-D${target}_EXPORTS")
+    endif()
+endmacro()
