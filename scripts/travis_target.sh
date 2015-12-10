@@ -13,6 +13,7 @@ function travis_make()
     export CC=gcc-4.8 CXX=g++-4.8
     # Generate build files
     [ $1 == "debug" ] && export CMAKE_VARS="-DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON"
+    [ $1 == "release" ] && export CMAKE_VARS="-DCMAKE_INSTALL_PREFIX=$USERDIR"
     cmake $CMAKE_VARS ..
     if [ $? -ne 0 ]; then
         echo "cmake failed."
@@ -45,6 +46,14 @@ function travis_make()
             # Ignore coveralls results, keep service success uncoupled
             coveralls --gcov gcov-4.8 --gcov-options '\-lp' -r .. >/dev/null || true
         fi
+    fi
+
+    # If this is a release build, prepare an artifact for github
+    if [ $1 == "release" ]; then
+        mkdir dest
+        make install DESTDIR=`pwd`/dest
+        cd dest/$USERDIR
+        tar czvf $TRAVIS_BUILD_DIR/leatherman.tar.gz `find . -type f -print`
     fi
 }
 
