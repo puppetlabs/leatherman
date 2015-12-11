@@ -10,7 +10,7 @@ TEST_CASE("api::eval", "[ruby-api]") {
         ruby.initialize();
         REQUIRE(ruby.initialized());
 
-        REQUIRE(ruby.get_load_path().size() > 0);
+        REQUIRE(ruby.get_load_path().size() > 0u);
 
         REQUIRE(ruby.to_string(ruby.eval("'foo'")) == "foo");
     }

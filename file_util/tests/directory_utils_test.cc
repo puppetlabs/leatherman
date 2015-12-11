@@ -19,7 +19,7 @@ namespace leatherman { namespace file_util {
                 file_contents.insert(read(path));
                 return true;
             });
-            REQUIRE(file_contents.size() == 3);
+            REQUIRE(file_contents.size() == 3u);
             REQUIRE(file_contents.find("1\n") != file_contents.end());
             REQUIRE(file_contents.find("2\n") != file_contents.end());
             REQUIRE(file_contents.find("3\n") != file_contents.end());
