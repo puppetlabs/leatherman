@@ -11,6 +11,9 @@ Leatherman is broken up into a number of focused component
 libraries. Both methods of using Leatherman allow you to control which
 components are built and used.
 
+Library install locations can be controlled using the LIB_SUFFIX
+variable, which results in installing libraries to `lib${LIB_SUFFIX}`.
+
 ### Dependencies
 
 * Boost, at least version 1.54
