@@ -317,7 +317,7 @@ TEST_CASE("JsonContainer::get for object entries", "[data]") {
                 JsonContainer o { "[ {\"spam\":\"eggs\"}, {\"foo\":\"bar\"} ]" };
                 auto retrieved_o = o.get<JsonContainer>(0);
 
-                REQUIRE(retrieved_o.size() == 1);
+                REQUIRE(retrieved_o.size() == 1u);
                 REQUIRE(retrieved_o.get<std::string>("spam") == "eggs");
             }
 
@@ -352,7 +352,7 @@ TEST_CASE("JsonContainer::get for object entries", "[data]") {
             SECTION("object") {
                 auto retrieved_o = a.get<JsonContainer>(6);
 
-                REQUIRE(retrieved_o.size() == 1);
+                REQUIRE(retrieved_o.size() == 1u);
                 REQUIRE(retrieved_o.get<std::string>("spam") == "eggs");
             }
 
@@ -514,28 +514,28 @@ TEST_CASE("JsonContainer::size", "[data]") {
     SECTION("works correctly on the root (no key argument)") {
         SECTION("empty object") {
             JsonContainer data {};
-            REQUIRE(data.size() == 0);
+            REQUIRE(data.size() == 0u);
         }
 
         SECTION("the root is an empty array") {
             JsonContainer data {  "[]" };
-            REQUIRE(data.size() == 0);
+            REQUIRE(data.size() == 0u);
         }
 
         SECTION("non-empty singleton object") {
             JsonContainer data {};
             data.set<int>("spam", 1);
-            REQUIRE(data.size() == 1);
+            REQUIRE(data.size() == 1u);
         }
 
         SECTION("non-empty multi element object") {
             JsonContainer bigger_data { JSON };
-            REQUIRE(bigger_data.size() == 8);
+            REQUIRE(bigger_data.size() == 8u);
         }
 
         SECTION("non-empty array") {
             JsonContainer data {  "[1, 2, 3]" };
-            REQUIRE(data.size() == 3);
+            REQUIRE(data.size() == 3u);
         }
     }
 
@@ -543,15 +543,15 @@ TEST_CASE("JsonContainer::size", "[data]") {
 
     SECTION("works correctly on an object entry") {
         SECTION("entry is a scalar") {
-            REQUIRE(data.size("goo") == 0);
+            REQUIRE(data.size("goo") == 0u);
         }
 
         SECTION("entry is an object") {
-            REQUIRE(data.size("foo") == 1);
+            REQUIRE(data.size("foo") == 1u);
         }
 
         SECTION("entry is an array") {
-            REQUIRE(data.size("vec") == 2);
+            REQUIRE(data.size("vec") == 2u);
         }
     }
 
@@ -559,15 +559,15 @@ TEST_CASE("JsonContainer::size", "[data]") {
         data.set<JsonContainer>({ "foo", "spam" }, JsonContainer { JSON });
 
         SECTION("entry is a scalar") {
-            REQUIRE(data.size({ "foo", "spam", "goo" }) == 0);
+            REQUIRE(data.size({ "foo", "spam", "goo" }) == 0u);
         }
 
         SECTION("entry is an object") {
-            REQUIRE(data.size({ "foo", "spam", "nested" }) == 1);
+            REQUIRE(data.size({ "foo", "spam", "nested" }) == 1u);
         }
 
         SECTION("entry is an array") {
-            REQUIRE(data.size({ "foo", "spam", "vec" }) == 2);
+            REQUIRE(data.size({ "foo", "spam", "vec" }) == 2u);
         }
     }
 }
@@ -738,12 +738,12 @@ TEST_CASE("JsonContainer::keys", "[data]") {
 
     SECTION("It returns an empty vector when the JsonContainer is empty") {
         JsonContainer data {};
-        REQUIRE(data.keys().size() == 0);
+        REQUIRE(data.keys().size() == 0u);
     }
 
     SECTION("It returns an empty vector when the JsonContainer is an array") {
         JsonContainer data_array { "[1, 2, 3]" };
-        REQUIRE(data_array.keys().size() == 0);
+        REQUIRE(data_array.keys().size() == 0u);
     }
 }
 
