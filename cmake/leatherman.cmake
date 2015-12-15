@@ -59,6 +59,28 @@ macro(defoption name doc default)
     option(${name} ${doc} ${enabled})
 endmacro()
 
+# Usage: leatherman_install(TARGETS)
+#
+# Installs targets using common cross-platform configuration.
+# On Windows shared libraries go in bin, import and archive libraries
+# go in lib. On Linux shared libraries go in lib. Binaries go in bin.
+#
+# Also always drop the prefix; give the target its expected name.
+# We often have binaries and related dynamic libraries, and this
+# simplifies giving them different but related names, such as
+# `facter` and `libfacter`.
+macro(leatherman_install)
+    install(TARGETS ${ARGV}
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+    foreach(ARG ${ARGV})
+        if (TARGET ${ARG})
+            set_target_properties(${ARG} PROPERTIES PREFIX "" IMPORT_PREFIX "")
+        endif()
+    endforeach()
+endmacro()
+
 # Usage: add_cppcheck_dirs(dir1 dir2)
 #
 # Add the listed directories to the set that cppcheck will be run
@@ -147,3 +169,21 @@ function(get_commit_string varname)
         set(${varname} " (commit ${GIT_SHA1})" PARENT_SCOPE)
     endif()
 endfunction()
+
+include(GenerateExportHeader)
+# Usage: symbol_exports(TARGET HEADER)
+#
+# Generate the export header for restricting symbols exported from the library,
+# and configure the compiler. Restricting symbols has several advantages, noted
+# at https://gcc.gnu.org/wiki/Visibility.
+macro(symbol_exports target header)
+    generate_export_header(${target} EXPORT_FILE_NAME "${header}")
+    # Export on Apple resulted in issues finding symbols from library dependencies
+    # that we haven't solved. For now avoid the problem.
+    if (NOT APPLE)
+        add_compiler_export_flags()
+    endif()
+    if (WIN32)
+        add_definitions("-D${target}_EXPORTS")
+    endif()
+endmacro()
