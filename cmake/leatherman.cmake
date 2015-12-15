@@ -184,6 +184,10 @@ macro(symbol_exports target header)
         add_compiler_export_flags()
     endif()
     if (WIN32)
-        add_definitions("-D${target}_EXPORTS")
+        # If the target name is not a C identifier, generate_export_header will
+        # convert it to one. Fix the define to do the same.
+        string(MAKE_C_IDENTIFIER ${target} target_c_name)
+        string(TOLOWER ${target_c_name} target_name_lower)
+        add_definitions("-D${target_name_lower}_EXPORTS")
     endif()
 endmacro()
