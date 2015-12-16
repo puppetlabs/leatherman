@@ -55,7 +55,7 @@ env:
 deploy:
   provider: releases
   api_key:
-    secure: Pu4B74hKMM8658PTQg1KCmuHKtOSsrwZ97JYu6LV7WcHMiXe5XkCPgY14cP6dnIVhGGuMfD4RunlnxfxFzlR4I/qqweat4/96prsvu0FqgTjyxcbZ11tiFTkF7mly30YwNhDVCta9R0jHMCcLMmHYMNo8VEHuixh7mB1TDZy6fI=
+    secure: XARXGAo5DNbqu7/EVPlKocdAAdtVqui2yaJiqw8GVXMSsK5lxqkHNfm1UF204y9ONl7DTa1hzBS8VRLupfb2aIjIZWMM68tnWYbyJYNdRUevylPTK01rO9wpR8iVe7xFqQOlDXPrX0UVfKCvf+e1j+IleO5Eyjf1mTLIRR3fuOY=
   file: leatherman.tar.gz
   skip_cleanup: true
   on:
