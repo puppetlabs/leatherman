@@ -2,7 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.3.0] - TBD
+## [0.3.1] - 2015-12-16
+
+### Fixed
+
+- The key for publishing builds from travis was incorrectly encrypted.
+
+## [0.3.0] - 2015-12-16
 
 ### Added
 - Option to build dynamic libraries
