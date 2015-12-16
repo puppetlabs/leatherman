@@ -52,3 +52,13 @@ env:
     - TRAVIS_TARGET=CPPCHECK
     - TRAVIS_TARGET=RELEASE
     - TRAVIS_TARGET=DEBUG
+deploy:
+  provider: releases
+  api_key:
+    secure: Pu4B74hKMM8658PTQg1KCmuHKtOSsrwZ97JYu6LV7WcHMiXe5XkCPgY14cP6dnIVhGGuMfD4RunlnxfxFzlR4I/qqweat4/96prsvu0FqgTjyxcbZ11tiFTkF7mly30YwNhDVCta9R0jHMCcLMmHYMNo8VEHuixh7mB1TDZy6fI=
+  file: leatherman.tar.gz
+  skip_cleanup: true
+  on:
+    repo: puppetlabs/leatherman
+    tags: true
+    condition: '"$TRAVIS_TARGET" == "RELEASE"'
