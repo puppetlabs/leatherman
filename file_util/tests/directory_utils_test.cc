@@ -28,7 +28,7 @@ namespace leatherman { namespace file_util {
         SECTION("can find a file to match a pattern") {
             std::string content = "N/A";
             each_file(directory.get_dir_name(), [&content](std::string const &path) {
-                return read(path, content);
+                content.append(read(path));
             }, "[0-1]");
             REQUIRE(content == "1\n");
         }

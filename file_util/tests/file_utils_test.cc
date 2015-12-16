@@ -9,6 +9,8 @@
 
 namespace leatherman { namespace file_util {
 
+namespace boost_file = boost::filesystem;
+
     TEST_CASE("file_util::tilde_expand", "[utils]") {
 
 #ifdef _WIN32
@@ -130,23 +132,39 @@ _putenv("USERPROFILE=/testhome");
 
     TEST_CASE("file_util::read", "[utils]") {
 
-        SECTION("trying to read a nonexistent file returns the empty string"){
-            std::string contents;
-            REQUIRE(read("does_not_exist") == "");
-            REQUIRE_FALSE(read("does_not_exist", contents));
-            REQUIRE(contents.empty());
-        }
+      GIVEN("a totally normal file") {
+        auto file = unique_fixture_path().string();
+        std::string contents = "nothing at all to see here\nno, nothing at all\nmove along\n";
+        atomic_write_to_file(contents, file);
 
-        SECTION("it can read from a file") {
-            auto file_path = unique_fixture_path().string();
-            atomic_write_to_file("test\n", file_path);
-            REQUIRE(file_readable(file_path));
-            std::string contents;
-            REQUIRE(read(file_path, contents));
-            REQUIRE(contents == "test\n");
-            REQUIRE(read(file_path) == "test\n");
-            boost::filesystem::remove(file_path);
+        WHEN("we read the file") {
+          THEN("we receive its contents") {
+            REQUIRE(read(file) == contents);
+          }
         }
+      }
+
+      GIVEN("a nonexistent file") {
+        std::string bad_file = "HA HA NO SUCH FILE SUCKAAAAAHS";
+
+        WHEN("trying to read the file") {
+          THEN("a specific error is raised") {
+            REQUIRE_THROWS_AS(read(bad_file), file_error);
+          }
+        }
+      }
+
+      GIVEN("a file we can't see") {
+        auto cant_touch_this = unique_fixture_path().string();
+        atomic_write_to_file("M.C. Hammer", cant_touch_this);
+        boost_file::permissions(cant_touch_this, boost_file::no_perms);
+
+        WHEN("trying to read the file") {
+          THEN("a specific error is raised") {
+            REQUIRE_THROWS_AS(read(cant_touch_this), file_error);
+          }
+        }
+      }
     }
 
     TEST_CASE("file_util::each_line", "[utils]") {

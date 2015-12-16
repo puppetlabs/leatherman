@@ -27,23 +27,32 @@ namespace boost_file = boost::filesystem;
         return true;
     }
 
-    string read(string const& path) {
-        string contents;
-        if (!read(path, contents)) {
-            return {};
-        }
-        return contents;
-    }
+    // This function attempts to read a file at the given path in text mode and return its contents as
+    // a string. If the file at the path is a symlink, it will be followed until a non-symlink file is
+    // found. If anything goes wrong, a file_error will be thrown.
+    std::string read(const boost_file::path& path) {
+      boost_file::path p(path);
+      while (boost_file::is_symlink(p)) {
+        p = boost_file::read_symlink(p);
+      }
 
-    bool read(string const& path, string& contents) {
-        boost::nowide::ifstream in(path.c_str(), ios::in | ios::binary);
-        ostringstream buffer;
-        if (!in) {
-            return false;
-        }
-        buffer << in.rdbuf();
-        contents = buffer.str();
-        return true;
+      boost::nowide::ifstream file(p.c_str());
+      if (!file.is_open()) {
+        auto msg = boost::str(boost::format("Unable to open file %1% for reading: %2%")
+            % p.string() % strerror(errno));
+        throw file_error(msg);
+      }
+
+      std::stringstream contents_stream(std::ios_base::out);
+      contents_stream << file.rdbuf();
+
+      if (file.fail()) {
+        auto msg = boost::str(boost::format("An I/O error occurred while reading the file %1%: %2%")
+            % p.string() % strerror(errno));
+        throw file_error(msg);
+      }
+
+      return contents_stream.str();
     }
 
     bool file_readable(const std::string &file_path) {

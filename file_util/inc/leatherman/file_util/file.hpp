@@ -12,6 +12,12 @@
 
 namespace leatherman { namespace file_util {
 
+    class file_error : public std::runtime_error {
+      public:
+        explicit file_error(const char *desc) : runtime_error(desc) {}
+        explicit file_error(const std::string& desc) : runtime_error(desc) {}
+    };
+
     /**
      * Reads each line from the given file.
      * @param path The path to the file to read.
@@ -22,18 +28,13 @@ namespace leatherman { namespace file_util {
 
     /**
      * Reads the entire contents of the given file into a string.
+     * Follows symlinks until a non-symlink path is found.
+     * If the file doesn't exist or can't be opened, a file_error is thrown.
+     * If an I/O error occurs while reading the file, a file_error is thrown.
      * @param path The path of the file to read.
      * @return Returns the file contents as a string.
      */
     std::string read(std::string const& path);
-
-    /**
-     * Reads the entire contents of the given file into a string.
-     * @param path The path of the file to read.
-     * @param contents The returned file contents.
-     * @return Returns true if the contents were read or false if the file is not readable.
-     */
-    bool read(std::string const& path, std::string& contents);
 
     /**
      *@return Returns true if the specified file exists and can
