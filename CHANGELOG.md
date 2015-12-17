@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.3.2] - 2015-12-16
+
+### Fixed
+
+- The `windows` library incorrectly used `target_link_libraries` instead of `add_leatherman_deps`
+
 ## [0.3.1] - 2015-12-16
 
 ### Fixed
