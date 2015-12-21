@@ -1,5 +1,6 @@
 find_package(Boost 1.54 REQUIRED)
 
+add_leatherman_deps(Wbemuuid.lib userenv.lib)
 add_leatherman_includes("${Boost_INCLUDE_DIRS}")
 
 leatherman_dependency(nowide)
@@ -21,4 +22,3 @@ set(WINDOWS_UTIL_SOURCES
 
 add_leatherman_library(${WINDOWS_UTIL_SOURCES})
 add_leatherman_headers(inc/leatherman)
-add_leatherman_deps(Wbemuuid.lib userenv.lib)
