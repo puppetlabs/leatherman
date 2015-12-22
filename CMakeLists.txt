@@ -9,7 +9,7 @@ include(internal)
 if ("${CMAKE_PROJECT_NAME}" STREQUAL "${PROJECT_NAME}")
     if (NOT CMAKE_BUILD_TYPE)
         message(STATUS "Defaulting to a release build.")
-	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
+        set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
     endif()
 
     set(LEATHERMAN_TOPLEVEL TRUE)
