@@ -1,6 +1,7 @@
 version: 0.1.0.{build}
 clone_depth: 10
 install:
+  - set
   - git submodule update --init --recursive
 
   - choco install -y mingw-w64 -Version 4.8.3 -source https://www.myget.org/F/puppetlabs
@@ -16,12 +17,17 @@ install:
   - ps: 7z.exe x "curl-7.42.1-x86_64_mingw-w64_4.8.3_win32_seh.7z" -oC:\tools | FIND /V "ing "
 
 build_script:
-  - ps: cmake -G "MinGW Makefiles" -DBOOST_ROOT="C:\tools\boost_1_57_0-x86_64_mingw-w64_4.8.3_win32_seh" -DBOOST_STATIC=ON -DCMAKE_PREFIX_PATH="C:\tools\curl-7.42.1-x86_64_mingw-w64_4.8.3_win32_seh" -DCMAKE_INSTALL_PREFIX=C:\tools\leatherman -DCURL_STATIC=ON .
+  - ps: cmake -G "MinGW Makefiles" -DBOOST_ROOT="C:\tools\boost_1_57_0-x86_64_mingw-w64_4.8.3_win32_seh" -DBOOST_STATIC=ON -DCMAKE_PREFIX_PATH="C:\tools\curl-7.42.1-x86_64_mingw-w64_4.8.3_win32_seh" -DCMAKE_INSTALL_PREFIX=C:\tools\leatherman -DCURL_STATIC=ON -DLEATHERMAN_SHARED="$env:shared" .
   - ps: mingw32-make install
   - ps: 7z.exe a -t7z leatherman.7z C:\tools\leatherman\
 
 test_script:
-  - ps: ctest -V 2>&1 | %{ if ($_ -is [System.Management.Automation.ErrorRecord]) { $_ | c++filt } else { $_ } }
+  - ps: if ($env:shared -eq "OFF") { ctest -V 2>&1 | %{ if ($_ -is [System.Management.Automation.ErrorRecord]) { $_ | c++filt } else { $_ } } }
+
+environment:
+  matrix:
+  - shared: OFF
+  - shared: ON
 
 artifacts:
   - path: leatherman.7z
@@ -35,3 +41,4 @@ deploy:
   artifact: leatherman.7z
   on:
     appveyor_repo_tag: true
+    shared: OFF

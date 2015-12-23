@@ -13,8 +13,8 @@ function travis_make()
     export CC=gcc-4.8 CXX=g++-4.8
     # Generate build files
     [ $1 == "debug" ] && export CMAKE_VARS="-DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON"
-    [ $1 == "release" ] && export CMAKE_VARS="-DCMAKE_INSTALL_PREFIX=$USERDIR"
-    cmake $CMAKE_VARS ..
+    [ $1 == "shared_release" ] && export CMAKE_VARS="-DLEATHERMAN_SHARED=ON"
+    cmake $CMAKE_VARS -DCMAKE_INSTALL_PREFIX=$USERDIR ..
     if [ $? -ne 0 ]; then
         echo "cmake failed."
         exit 1
@@ -48,10 +48,11 @@ function travis_make()
         fi
     fi
 
+    mkdir dest
+    make install DESTDIR=`pwd`/dest
+
     # If this is a release build, prepare an artifact for github
     if [ $1 == "release" ]; then
-        mkdir dest
-        make install DESTDIR=`pwd`/dest
         cd dest/$USERDIR
         tar czvf $TRAVIS_BUILD_DIR/leatherman.tar.gz `find . -type f -print`
     fi
@@ -62,5 +63,6 @@ case $TRAVIS_TARGET in
   "CPPCHECK" ) travis_make cppcheck ;;
   "RELEASE" )  travis_make release ;;
   "DEBUG" )    travis_make debug ;;
+  "SHARED_RELEASE" ) travis_make shared_release ;;
   *)           echo "Nothing to do!"
 esac
