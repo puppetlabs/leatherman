@@ -2,6 +2,23 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.3.3] - 2015-12-23
+
+### Changed
+
+- The vendored `boost::nowide` has been updated to a version that supports C++11 iostream changes
+- `LIB_SUFFIX` is now respected for installing to `lib32` or `lib64` if needed
+
+### Fixed
+
+- It is now possible to buld Leatherman without curl support
+- It is now possible to build leatherman as a set of DLLs on Windows
+- An order-dependant unit test issue has been resolved
+
+### Known Issues
+
+- Leatherman cannot load ruby when built as a DLL on Windows (LTH-71)
+
 ## [0.3.2] - 2015-12-16
 
 ### Fixed
