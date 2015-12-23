@@ -67,7 +67,7 @@ macro(leatherman_dependency library)
     endif()
 endmacro()
 
-# Usage: add_leatherman_library(${SOURCES} [OPTS])
+# Usage: add_leatherman_library(${SOURCES} [OPTS] [EXPORTS HEADER])
 #
 # Creates a static CMake library built from the provided sources. Sets
 # LETHERMAN_<LIBRARY>_LIB to the name of this library.
@@ -75,18 +75,35 @@ endmacro()
 # This macro directly calls add_library, so any add_library options
 # can be passed along with the sources.
 #
+# If the EXPORTS keyword is given, the string following it describes
+# the location to put an export header using the symbol_exports
+# helper.
+#
 # This macro cannot be invoked multiple times
 macro(add_leatherman_library)
     include_directories(${${include_var}})
+
+    set(LIBRARY_ARGS ${ARGV})
+    list(FIND LIBRARY_ARGS EXPORTS EXPORTS_IDX)
+    if (NOT ${EXPORTS_IDX} EQUAL -1)
+        list(REMOVE_AT LIBRARY_ARGS ${EXPORTS_IDX})
+        list(GET LIBRARY_ARGS ${EXPORTS_IDX} EXPORT_HEADER)
+        list(REMOVE_AT LIBRARY_ARGS ${EXPORTS_IDX})
+    endif()
+
     if(LEATHERMAN_SHARED)
-        add_library(${libname} SHARED ${ARGV})
+        add_library(${libname} SHARED ${LIBRARY_ARGS})
         target_link_libraries(${libname} ${${deps_var}})
     else()
-        add_library(${libname} STATIC ${ARGV})
+        add_library(${libname} STATIC ${LIBRARY_ARGS})
     endif()
     set_target_properties(${libname} PROPERTIES COMPILE_FLAGS "${LEATHERMAN_CXX_FLAGS} ${LEATHERMAN_LIBRARY_FLAGS}")
     if(LEATHERMAN_INSTALL)
         leatherman_install(${libname} EXPORT LeathermanLibraries)
+    endif()
+
+    if (EXPORT_HEADER)
+        symbol_exports(${libname} ${EXPORT_HEADER})
     endif()
     set(${lib_var} "${libname}" PARENT_SCOPE)
 endmacro()

@@ -7,13 +7,14 @@
 #include <string>
 #include <functional>
 #include <map>
+#include "export.h"
 
 namespace leatherman { namespace curl {
 
     /**
      * Implements the HTTP response.
      */
-    struct response
+    struct LEATHERMAN_CURL_EXPORT response
     {
         /**
          * Constructs a HTTP response.

@@ -3,6 +3,11 @@
 #include <string>
 #include <functional>
 #include <curl/curl.h>
+#ifdef _WIN32
+    #include "export.h"
+#else
+    #define MOCK_CURL_EXPORT
+#endif
 
 struct curl_impl
 {
@@ -67,7 +72,7 @@ enum error_mode
     global_init_error
 };
 
-struct curl_fail_init
+struct MOCK_CURL_EXPORT curl_fail_init
 {
     curl_fail_init(error_mode mode);
     ~curl_fail_init();

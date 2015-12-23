@@ -12,3 +12,5 @@ compile_commands.json
 /.idea/
 /*build/
 /*/tests/fixtures.hpp
+/curl/inc/leatherman/curl/export.h
+/curl/tests/export.h
