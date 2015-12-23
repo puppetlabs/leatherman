@@ -37,18 +37,21 @@ namespace leatherman { namespace dynamic_library {
 
         boost::regex rx(pattern);
         do {
-            if (re_search(boost::nowide::narrow(me32.szModule), rx)) {
+            auto libname = boost::nowide::narrow(me32.szModule);
+            if (re_search(libname, rx)) {
                 // Use GetModuleHandleEx to ensure the reference count is incremented. If the module has been
                 // unloaded since the snapshot was made, this may fail and we should return an empty library.
                 HMODULE hMod;
                 if (GetModuleHandleEx(0, me32.szModule, &hMod)) {
                     library._handle = hMod;
                     library._first_load = false;
-                    LOG_DEBUG("library %1% found from pattern %2%", me32.szModule, pattern);
+                    LOG_DEBUG("library %1% found from pattern %2%", libname, pattern);
                 } else {
-                    LOG_DEBUG("library %1% found from pattern %2%, but unloaded before handle was acquired", me32.szModule, pattern);
+                    LOG_DEBUG("library %1% found from pattern %2%, but unloaded before handle was acquired", libname, pattern);
                 }
                 return library;
+            } else {
+                LOG_TRACE("library %1% didn't match pattern %2%", libname, pattern);
             }
         } while (Module32Next(hModSnap, &me32));
 
