@@ -7,18 +7,13 @@
 #include <boost/regex.hpp>
 #include <boost/iterator/zip_iterator.hpp>
 #include <boost/range.hpp>
-
-namespace boost {
-    /**
-     * Regex comparison, so catch can print pretty failure messages
-     */
-    bool operator== (boost::regex const& lhs, std::string const& rhs);
-    bool operator== (std::string const& lhs, boost::regex const& rhs);
-}  // namespace boost
+#include <boost/variant.hpp>
 
 namespace leatherman { namespace test {
     using namespace std;
     using namespace leatherman::logging;
+
+    using matcher = boost::variant<boost::regex, string, log_level>;
 
     /**
      * Declare colors.
@@ -59,20 +54,26 @@ namespace leatherman { namespace test {
      */
     struct logging_format_context
     {
-        logging_format_context(log_level lvl, std::string ns, int line_num = 0);
+        logging_format_context(log_level lvl, string ns, int line_num = 0);
         ~logging_format_context();
 
         vector<string> const& tokens() const;
         string message() const;
 
-        vector<boost::regex> const& expected() const;
+        vector<matcher> const& expected() const;
 
      private:
         string get_color(log_level lvl) const;
 
         colored_tokenizing_stringbuf _buf;
         streambuf *_strm_buf;
-        vector<boost::regex> _expected;
+        vector<matcher> _expected;
     };
 
 }}  // namespace leatherman::test
+
+namespace boost {
+
+    bool operator== (std::string const& lhs, leatherman::test::matcher const& rhs);
+
+}  // namespace boost
