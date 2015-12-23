@@ -167,7 +167,7 @@ macro(add_leatherman_dir dir)
             else()
                 set(COMPONENT_STRING "leatherman_component(${id})")
             endif()
-            install(FILES "${dir}/CMakeLists.txt" DESTINATION "lib/cmake/leatherman" RENAME "${id}.cmake")
+            install(FILES "${dir}/CMakeLists.txt" DESTINATION "lib${LIB_SUFFIX}/cmake/leatherman" RENAME "${id}.cmake")
             set(LEATHERMAN_COMPONENTS "${LEATHERMAN_COMPONENTS}\n${COMPONENT_STRING}")
         endif()
 

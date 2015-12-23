@@ -9,7 +9,7 @@ include(internal)
 if ("${CMAKE_PROJECT_NAME}" STREQUAL "${PROJECT_NAME}")
     if (NOT CMAKE_BUILD_TYPE)
         message(STATUS "Defaulting to a release build.")
-	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
+        set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
     endif()
 
     set(LEATHERMAN_TOPLEVEL TRUE)
@@ -94,11 +94,12 @@ if (LEATHERMAN_INSTALL)
         cmake/options.cmake
         cmake/leatherman_config.cmake
     )
-    install(FILES ${CMAKE_FILES} DESTINATION "lib/cmake/leatherman/cmake/")
+    set(INSTALL_LOC "lib${LIB_SUFFIX}/cmake/leatherman")
+    install(FILES ${CMAKE_FILES} DESTINATION "${INSTALL_LOC}/cmake/")
 
     configure_file(LeathermanConfig.cmake.in "${PROJECT_BINARY_DIR}/LeathermanConfig.cmake" @ONLY)
-    install(FILES "${PROJECT_BINARY_DIR}/LeathermanConfig.cmake" DESTINATION "lib/cmake/leatherman")
-    install(EXPORT LeathermanLibraries DESTINATION "lib/cmake/leatherman")
+    install(FILES "${PROJECT_BINARY_DIR}/LeathermanConfig.cmake" DESTINATION ${INSTALL_LOC})
+    install(EXPORT LeathermanLibraries DESTINATION ${INSTALL_LOC})
 
-    install(FILES "scripts/cpplint.py" DESTINATION "lib/cmake/leatherman/scripts/")
+    install(FILES "scripts/cpplint.py" DESTINATION "${INSTALL_LOC}/scripts/")
 endif()

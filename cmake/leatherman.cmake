@@ -72,8 +72,8 @@ endmacro()
 macro(leatherman_install)
     install(TARGETS ${ARGV}
         RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+        LIBRARY DESTINATION lib${LIB_SUFFIX}
+        ARCHIVE DESTINATION lib${LIB_SUFFIX})
     foreach(ARG ${ARGV})
         if (TARGET ${ARG})
             set_target_properties(${ARG} PROPERTIES PREFIX "" IMPORT_PREFIX "")
