@@ -235,7 +235,7 @@ SCENARIO("executing commands with execution::execute") {
         }
         WHEN("requested to write stdout and stderr to the same file") {
             string out_file(spool_dir + "/stdout_stderr_test.out");
-            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message", {}, "", out_file, "", {}, nullptr, 0, { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_stdout });
+            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message", {}, "", out_file, "", map<string, string>(), nullptr, 0, { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_stdout });
             REQUIRE(boost::filesystem::exists(out_file));
             THEN("stdout and stderr are correctly redirected to file") {
                 auto output = get_file_content("stdout_stderr_test.out");
@@ -293,7 +293,7 @@ SCENARIO("executing commands with execution::execute") {
         }
         WHEN("requested to execute a PID callback") {
             int pid_from_callback;
-            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/echo_pid", {}, "", {}, [&pid_from_callback](size_t pid) { pid_from_callback = pid; });
+            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/echo_pid", {}, "", map<string,string>(), [&pid_from_callback](size_t pid) { pid_from_callback = pid; });
             THEN("the returned results are correct") {
                 REQUIRE(exec.success);
                 REQUIRE_FALSE(exec.output.empty());
