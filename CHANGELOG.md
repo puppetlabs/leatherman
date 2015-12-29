@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.3.4] - 2015-12-29
+
+### Fixed
+
+- Fixed a compilation issue with the execution tests on OSX.
+
 ## [0.3.3] - 2015-12-23
 
 ### Changed
