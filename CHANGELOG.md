@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.3.5] - 2016-01-14
+
+### Fixed
+
+- `leatherman.ruby` can now find a Ruby DLL on Windows when Leatherman is compiled as shared libraries (LTH-71)
+- `leatherman.dynamic_library` debug logging when searching for a library will now correctly print the name of the library
+- Leatherman unit tests will now run successfully under Cygwin
+
 ## [0.3.4] - 2015-12-29
 
 ### Fixed
