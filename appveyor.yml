@@ -1,4 +1,3 @@
-version: 0.1.0.{build}
 clone_depth: 10
 install:
   - set
