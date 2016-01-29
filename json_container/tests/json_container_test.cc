@@ -50,6 +50,10 @@ TEST_CASE("JsonContainer::JsonContainer - passing JSON string", "[data]") {
             }
         }
 
+        SECTION("std::string instance containing an empty JSON string") {
+            json_value = "\"\"";
+        }
+
         SECTION("string") {
             json_value = "\"foo\"";
         }
@@ -75,6 +79,11 @@ TEST_CASE("JsonContainer::JsonContainer - passing JSON string", "[data]") {
         }
 
         REQUIRE_NOTHROW(JsonContainer { json_value });
+    }
+
+    SECTION("it should throw a data_parse_error in case of empty string") {
+        json_value = "";
+        REQUIRE_THROWS_AS(JsonContainer { json_value }, data_parse_error);
     }
 
     SECTION("it should throw a data_parse_error in case of invalid JSON") {

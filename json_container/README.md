@@ -28,6 +28,17 @@ The JsonContainer's constructor can throw the following exception:
 
  - data_parse_error - This error is thrown when invalid JSON is passed to the constructor.
 
+Note that you can instantiate JsonContainer by passing a non-empty `std::string`
+representing a JSON object, array, or value. In case you want to pass a JSON
+string, you must include escaped double quotes. For example:
+
+```
+    JsonContainer { "4" };  // a number
+    JsonContainer { "\"fast'n bulbous\"" };  // a string
+    JsonContainer { "null" };  // the null value
+    JsonContainer { "" };  // JsonContainer will throw a data_parse_error!
+```
+
 The following calls to the _get_ method will retrieve values from the JsonContainer.
 
 ```
