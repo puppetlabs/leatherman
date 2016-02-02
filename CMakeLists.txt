@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2.2)
-project(LEATHERMAN)
+project(LEATHERMAN VERSION 0.3.5)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(internal)
@@ -98,7 +98,11 @@ if (LEATHERMAN_INSTALL)
     install(FILES ${CMAKE_FILES} DESTINATION "${INSTALL_LOC}/cmake/")
 
     configure_file(LeathermanConfig.cmake.in "${PROJECT_BINARY_DIR}/LeathermanConfig.cmake" @ONLY)
-    install(FILES "${PROJECT_BINARY_DIR}/LeathermanConfig.cmake" DESTINATION ${INSTALL_LOC})
+    configure_file(LeathermanConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/LeathermanConfigVersion.cmake" @ONLY)
+    install(FILES
+        "${PROJECT_BINARY_DIR}/LeathermanConfig.cmake"
+        "${PROJECT_BINARY_DIR}/LeathermanConfigVersion.cmake"
+        DESTINATION ${INSTALL_LOC})
     install(EXPORT LeathermanLibraries DESTINATION ${INSTALL_LOC})
 
     install(FILES "scripts/cpplint.py" DESTINATION "${INSTALL_LOC}/scripts/")
