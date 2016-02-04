@@ -1,5 +1,30 @@
 # Leatherman - a C++ toolkit
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Usage](#usage)
+  - [Dependencies](#dependencies)
+  - [As a Standalone Library](#as-a-standalone-library)
+    - [Building Leatherman](#building-leatherman)
+    - [Using Leatherman](#using-leatherman)
+  - [As a Submodule](#as-a-submodule)
+  - [Variables Set by Leatherman](#variables-set-by-leatherman)
+  - [CMake Helpers Provided by Leatherman](#cmake-helpers-provided-by-leatherman)
+  - [Using Logging](#using-logging)
+  - [Using Catch](#using-catch)
+  - [Using Windows](#using-windows)
+  - [Using JsonContainer](#using-jsoncontainer)
+  - [Using curl](#using-curl)
+- [Extending Leatherman](#extending-leatherman)
+  - [Typical Leatherman Directory Structure](#typical-leatherman-directory-structure)
+  - [Sample Library CMakeLists.txt file](#sample-library-cmakeliststxt-file)
+  - [Vendoring Other Libraries](#vendoring-other-libraries)
+- [How To Release](#how-to-release)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Usage
 
 Leatherman can be used in one of two ways: It can be installed as a
