@@ -221,6 +221,13 @@ won't help you, and you'll need to write a lower-level CMake
 file. This README can't cover all the possible situations here, but
 the `nowide` and `catch` CMake files are both solid examples.
 
+## How To Release
+
+1. Update [CHANGELOG.md](CHANGELOG.md) with release notes based on
+``git log `git describe --abbrev=0 --tags`..HEAD``
+1. Update the version in the project declaration of [CMakeLists.txt](CMakeLists.txt)
+1. `git tag -s <version> -m '<version>' && git push <puppetlabs> master`
+
 [1]: https://github.com/philsquared/Catch
 [2]: https://github.com/miloyip/rapidjson
 [3]: json_container/README.md
