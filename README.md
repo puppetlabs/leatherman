@@ -143,6 +143,8 @@ CMake helpers. These will be automatically added to your
   * Install command with cross-platform defaults
   * Symbol visibility configuration
 
+* `pod2man`: Adds a `pod2man` macro to generate man files from source.
+
 ### Using Logging
 
 Each `.cc` file that uses logging (or includes a header which uses
