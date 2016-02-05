@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.3.6] - 2016-02-05
+
+### Fixed
+
+- Added version to Leatherman CMake config, so downstream projects can depend on a particular version.
+
+### Added
+
+- Added pod2man macro for generating man pages.
+
 ## [0.3.5] - 2016-01-14
 
 ### Fixed
