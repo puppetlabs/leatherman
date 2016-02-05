@@ -1,5 +1,30 @@
 # Leatherman - a C++ toolkit
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Usage](#usage)
+  - [Dependencies](#dependencies)
+  - [As a Standalone Library](#as-a-standalone-library)
+    - [Building Leatherman](#building-leatherman)
+    - [Using Leatherman](#using-leatherman)
+  - [As a Submodule](#as-a-submodule)
+  - [Variables Set by Leatherman](#variables-set-by-leatherman)
+  - [CMake Helpers Provided by Leatherman](#cmake-helpers-provided-by-leatherman)
+  - [Using Logging](#using-logging)
+  - [Using Catch](#using-catch)
+  - [Using Windows](#using-windows)
+  - [Using JsonContainer](#using-jsoncontainer)
+  - [Using curl](#using-curl)
+- [Extending Leatherman](#extending-leatherman)
+  - [Typical Leatherman Directory Structure](#typical-leatherman-directory-structure)
+  - [Sample Library CMakeLists.txt file](#sample-library-cmakeliststxt-file)
+  - [Vendoring Other Libraries](#vendoring-other-libraries)
+- [How To Release](#how-to-release)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Usage
 
 Leatherman can be used in one of two ways: It can be installed as a
@@ -220,6 +245,13 @@ Leatherman. In these cases the standard Leatherman macros probably
 won't help you, and you'll need to write a lower-level CMake
 file. This README can't cover all the possible situations here, but
 the `nowide` and `catch` CMake files are both solid examples.
+
+## How To Release
+
+1. Update [CHANGELOG.md](CHANGELOG.md) with release notes based on
+``git log `git describe --abbrev=0 --tags`..HEAD``
+1. Update the version in the project declaration of [CMakeLists.txt](CMakeLists.txt)
+1. `git tag -s <version> -m '<version>' && git push <puppetlabs> master`
 
 [1]: https://github.com/philsquared/Catch
 [2]: https://github.com/miloyip/rapidjson
