@@ -90,6 +90,7 @@ if (LEATHERMAN_INSTALL)
         cmake/cflags.cmake
         cmake/GetGitRevisionDescription.cmake
         cmake/GetGitRevisionDescription.cmake.in
+        cmake/pod2man.cmake
         cmake/leatherman.cmake
         cmake/options.cmake
         cmake/leatherman_config.cmake
