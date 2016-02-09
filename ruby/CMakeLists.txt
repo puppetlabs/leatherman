@@ -1,3 +1,8 @@
+find_package(Boost 1.54 REQUIRED COMPONENTS filesystem system)
+
+add_leatherman_deps("${Boost_LIBRARIES}")
+add_leatherman_includes("${Boost_INCLUDE_DIRS}")
+
 leatherman_dependency(dynamic_library)
 leatherman_dependency(util)
 leatherman_dependency(execution)
