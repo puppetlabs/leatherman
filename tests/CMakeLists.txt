@@ -1,7 +1,13 @@
 include_directories(${LEATHERMAN_CATCH_INCLUDE} ${LEATHERMAN_INCLUDE_DIRS})
 add_executable(leatherman_test main.cc ${LEATHERMAN_TEST_SRCS})
 
-set(LEATHERMAN_TEST_LIBS ${LEATHERMAN_LIBRARIES})
+if (LEATHERMAN_SHARED)
+    # Include deps first, as they may be static. If they are, linking on Windows can
+    # fail due to multiple definitions for the same symbol.
+    set(LEATHERMAN_TEST_LIBS ${LEATHERMAN_DEPS} ${LEATHERMAN_LIBS})
+else()
+    set(LEATHERMAN_TEST_LIBS ${LEATHERMAN_LIBS} ${LEATHERMAN_DEPS})
+endif()
 
 if (LEATHERMAN_USE_CURL)
     list(REMOVE_ITEM LEATHERMAN_TEST_LIBS ${LEATHERMAN_INT_CURL_LIBS})
