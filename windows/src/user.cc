@@ -26,7 +26,7 @@ namespace leatherman { namespace windows { namespace user {
         unsigned char sid_buffer[SECURITY_MAX_SID_SIZE];
         auto sid = static_cast<PSID>(&sid_buffer);
         if (!CreateWellKnownSid(WinBuiltinAdministratorsSid, nullptr, sid, &sid_size)) {
-            LOG_DEBUG("Failed to create administrators SID: %1%", system_error());
+            LOG_DEBUG("Failed to create administrators SID: {1}", system_error());
             return false;
         }
 
@@ -37,7 +37,7 @@ namespace leatherman { namespace windows { namespace user {
 
         BOOL is_member;
         if (!CheckTokenMembership(nullptr, sid, &is_member)) {
-            LOG_DEBUG("Failed to check membership: %1%", system_error());
+            LOG_DEBUG("Failed to check membership: {1}", system_error());
             return false;
         }
 
@@ -47,7 +47,7 @@ namespace leatherman { namespace windows { namespace user {
     string home_dir() {
         HANDLE temp_token = INVALID_HANDLE_VALUE;
         if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &temp_token)) {
-            LOG_DEBUG("OpenProcessToken call failed: %1%", system_error());
+            LOG_DEBUG("OpenProcessToken call failed: {1}", system_error());
             return {};
         }
         util::scoped_resource <HANDLE> token(temp_token, CloseHandle);
@@ -57,13 +57,13 @@ namespace leatherman { namespace windows { namespace user {
             LOG_DEBUG("GetUserProfileDirectoryW call returned unexpectedly");
             return {};
         } else if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
-            LOG_DEBUG("GetUserProfileDirectoryW call failed: %1%", system_error());
+            LOG_DEBUG("GetUserProfileDirectoryW call failed: {1}", system_error());
             return {};
         }
 
         wstring buffer(pathLen, '\0');
         if (!GetUserProfileDirectoryW(token, &buffer[0], &pathLen)) {
-            LOG_DEBUG("GetUserProfileDirectoryW call failed: %1%", system_error());
+            LOG_DEBUG("GetUserProfileDirectoryW call failed: {1}", system_error());
             return {};
         }
 

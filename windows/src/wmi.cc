@@ -11,6 +11,8 @@
 #include <wbemidl.h>
 
 using namespace std;
+namespace lth_locale = leatherman::locale;
+#define _ lth_locale::translate
 
 namespace leatherman { namespace windows {
 
@@ -19,9 +21,10 @@ namespace leatherman { namespace windows {
     {
     }
 
-    string format_hresult(char const* s, HRESULT hres)
+    static string format_hresult(std::string s, HRESULT hres)
     {
-        return str(boost::format("%1% (%2%)") % s % boost::io::group(hex, showbase, hres));
+        // LOCALE: format a pointer as hex for printing an error message.
+        return lth_locale::format("{1} (0x{2,num=hex})", s, hres);
     }
 
     // GUID taken from a Windows installation and unaccepted change to MinGW-w64. The MinGW-w64 library
@@ -36,7 +39,7 @@ namespace leatherman { namespace windows {
             if (hres == RPC_E_CHANGED_MODE) {
                 LOG_DEBUG("using prior COM concurrency model");
             } else {
-                throw wmi_exception(format_hresult("failed to initialize COM library", hres));
+                throw wmi_exception(format_hresult(_("failed to initialize COM library"), hres));
             }
         } else {
             _coInit = util::scoped_resource<bool>(true, [](bool b) { CoUninitialize(); });
@@ -46,7 +49,7 @@ namespace leatherman { namespace windows {
         hres = CoCreateInstance(MyCLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator,
             reinterpret_cast<LPVOID *>(&pLoc));
         if (FAILED(hres)) {
-            throw wmi_exception(format_hresult("failed to create IWbemLocator object", hres));
+            throw wmi_exception(format_hresult(_("failed to create IWbemLocator object"), hres));
         }
         _pLoc = util::scoped_resource<IWbemLocator *>(pLoc,
             [](IWbemLocator *loc) { if (loc) loc->Release(); });
@@ -54,7 +57,7 @@ namespace leatherman { namespace windows {
         IWbemServices *pSvc;
         hres = (*_pLoc).ConnectServer(_bstr_t(L"ROOT\\CIMV2"), nullptr, nullptr, nullptr, 0, nullptr, nullptr, &pSvc);
         if (FAILED(hres)) {
-            throw wmi_exception(format_hresult("could not connect to WMI server", hres));
+            throw wmi_exception(format_hresult(_("could not connect to WMI server"), hres));
         }
         _pSvc = util::scoped_resource<IWbemServices *>(pSvc,
             [](IWbemServices *svc) { if (svc) svc->Release(); });
@@ -62,7 +65,7 @@ namespace leatherman { namespace windows {
         hres = CoSetProxyBlanket(_pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL,
             RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
         if (FAILED(hres)) {
-            throw wmi_exception(format_hresult("could not set proxy blanket", hres));
+            throw wmi_exception(format_hresult(_("could not set proxy blanket"), hres));
         }
     }
 
@@ -73,7 +76,7 @@ namespace leatherman { namespace windows {
             // To keep this simple, ignore multi-dimensional arrays.
             SAFEARRAY *arr = V_ARRAY(vtProp);
             if (arr->cDims != 1) {
-                LOG_DEBUG("ignoring %1%-dimensional array in query %2%.%3%", arr->cDims, group, s);
+                LOG_DEBUG("ignoring {1}-dimensional array in query {2}.{3}", arr->cDims, group, s);
                 return;
             }
 
@@ -89,7 +92,7 @@ namespace leatherman { namespace windows {
         } else if (FAILED(VariantChangeType(vtProp, vtProp, 0, VT_BSTR)) || V_VT(vtProp) != VT_BSTR) {
             // Uninitialized (null) values can just be ignored. Any others get reported.
             if (V_VT(vtProp) != VT_NULL) {
-                LOG_DEBUG("WMI query %1%.%2% result could not be converted from type %3% to a string", group, s, V_VT(vtProp));
+                LOG_DEBUG("WMI query {1}.{2} result could not be converted from type {3} to a string", group, s, V_VT(vtProp));
             }
         } else {
             vals.emplace(s, boost::trim_copy(boost::nowide::narrow(V_BSTR(vtProp))));
@@ -107,7 +110,7 @@ namespace leatherman { namespace windows {
         auto hres = (*_pSvc).ExecQuery(_bstr_t(L"WQL"), _bstr_t(boost::nowide::widen(qry).c_str()),
             WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &_pEnum);
         if (FAILED(hres)) {
-            LOG_DEBUG("query %1% failed", qry);
+            LOG_DEBUG("query {1} failed", qry);
             return {};
         }
         util::scoped_resource<IEnumWbemClassObject *> pEnum(_pEnum,
@@ -130,7 +133,7 @@ namespace leatherman { namespace windows {
                     CIMTYPE vtType;
                     hr = pclsObj->Get(_bstr_t(boost::nowide::widen(s).c_str()), 0, &vtProp, &vtType, 0);
                     if (FAILED(hr)) {
-                        LOG_DEBUG("query %1%.%2% could not be found", group, s);
+                        LOG_DEBUG("query {1}.{2} could not be found", group, s);
                         break;
                     }
 
@@ -153,7 +156,7 @@ namespace leatherman { namespace windows {
             return empty;
         } else {
             if (kvmap.count(key) > 1) {
-                LOG_DEBUG("only single value requested from array for key %1%", key);
+                LOG_DEBUG("only single value requested from array for key {1}", key);
             }
             return valIt->second;
         }
@@ -168,11 +171,11 @@ namespace leatherman { namespace windows {
     {
         if (kvmaps.size() > 0) {
             if (kvmaps.size() > 1) {
-                LOG_DEBUG("only single entry requested from array of entries for key %1%", key);
+                LOG_DEBUG("only single entry requested from array of entries for key {1}", key);
             }
             return get(kvmaps[0], key);
         } else {
-            throw wmi_exception("unable to get from empty array of objects");
+            throw wmi_exception(_("unable to get from empty array of objects"));
         }
     }
 
@@ -180,11 +183,11 @@ namespace leatherman { namespace windows {
     {
         if (kvmaps.size() > 0) {
             if (kvmaps.size() > 1) {
-                LOG_DEBUG("only single entry requested from array of entries for key %1%", key);
+                LOG_DEBUG("only single entry requested from array of entries for key {1}", key);
             }
             return get_range(kvmaps[0], key);
         } else {
-            throw wmi_exception("unable to get_range from empty array of objects");
+            throw wmi_exception(_("unable to get_range from empty array of objects"));
         }
     }
 

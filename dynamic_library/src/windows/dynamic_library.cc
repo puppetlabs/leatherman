@@ -4,13 +4,13 @@
 #include <leatherman/windows/system_error.hpp>
 #include <leatherman/windows/windows.hpp>
 #include <leatherman/logging/logging.hpp>
-#include <boost/format.hpp>
 #include <boost/nowide/convert.hpp>
 #include <tlhelp32.h>
 
 using namespace std;
 using namespace leatherman::util;
 using namespace leatherman::windows;
+namespace lth_locale = leatherman::locale;
 
 namespace leatherman { namespace dynamic_library {
 
@@ -23,7 +23,7 @@ namespace leatherman { namespace dynamic_library {
         // the Tool Help library.
         HANDLE hModuleSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, GetCurrentProcessId());
         if (hModuleSnap == INVALID_HANDLE_VALUE) {
-            LOG_DEBUG("library matching pattern %1% not found, CreateToolhelp32Snapshot failed: %2%.", pattern.c_str(), windows::system_error());
+            LOG_DEBUG("library matching pattern {1} not found, CreateToolhelp32Snapshot failed: {2}.", pattern.c_str(), windows::system_error());
             return library;
         }
         scoped_resource<HANDLE> hModSnap(hModuleSnap, CloseHandle);
@@ -31,7 +31,7 @@ namespace leatherman { namespace dynamic_library {
         MODULEENTRY32 me32 = {};
         me32.dwSize = sizeof(MODULEENTRY32);
         if (!Module32First(hModSnap, &me32)) {
-            LOG_DEBUG("library matching pattern %1% not found, Module32First failed: %2%.", pattern.c_str(), windows::system_error());
+            LOG_DEBUG("library matching pattern {1} not found, Module32First failed: {2}.", pattern.c_str(), windows::system_error());
             return library;
         }
 
@@ -45,9 +45,9 @@ namespace leatherman { namespace dynamic_library {
                 if (GetModuleHandleEx(0, me32.szModule, &hMod)) {
                     library._handle = hMod;
                     library._first_load = false;
-                    LOG_DEBUG("library %1% found from pattern %2%", libname, pattern);
+                    LOG_DEBUG("library {1} found from pattern {2}", libname, pattern);
                 } else {
-                    LOG_DEBUG("library %1% found from pattern %2%, but unloaded before handle was acquired", libname, pattern);
+                    LOG_DEBUG("library {1} found from pattern {2}, but unloaded before handle was acquired", libname, pattern);
                 }
                 return library;
             } else {
@@ -55,7 +55,7 @@ namespace leatherman { namespace dynamic_library {
             }
         } while (Module32Next(hModSnap, &me32));
 
-        LOG_DEBUG("no loaded libraries found matching pattern %1%", pattern);
+        LOG_DEBUG("no loaded libraries found matching pattern {1}", pattern);
         return library;
     }
 
@@ -76,7 +76,7 @@ namespace leatherman { namespace dynamic_library {
             // Load now
             hMod = LoadLibraryW(wname.c_str());
             if (!hMod) {
-                LOG_DEBUG("library %1% not found %2%.", name.c_str(), windows::system_error());
+                LOG_DEBUG("library {1} not found {2}.", name.c_str(), windows::system_error());
                 return false;
             }
             _first_load = true;
@@ -102,20 +102,20 @@ namespace leatherman { namespace dynamic_library {
             if (throw_if_missing) {
                 throw missing_import_exception("library is not loaded");
             } else {
-                LOG_DEBUG("library %1% is not loaded when attempting to load symbol %2%.", _name.c_str(), name.c_str());
+                LOG_DEBUG("library {1} is not loaded when attempting to load symbol {2}.", _name.c_str(), name.c_str());
             }
             return nullptr;
         }
         auto symbol = GetProcAddress(static_cast<HMODULE>(_handle), name.c_str());
         if (!symbol && !alias.empty()) {
-            LOG_DEBUG("symbol %1% not found in library %2%, trying alias %3%.", name.c_str(), _name.c_str(), alias.c_str());
+            LOG_DEBUG("symbol {1} not found in library {2}, trying alias {3}.", name.c_str(), _name.c_str(), alias.c_str());
             symbol = GetProcAddress(static_cast<HMODULE>(_handle), alias.c_str());
         }
         if (!symbol) {
             if (throw_if_missing) {
-                throw missing_import_exception((boost::format("symbol %1% was not found in %2%.") %name %_name).str());
+                throw missing_import_exception(lth_locale::format("symbol {1} was not found in {2}.", name, _name));
             } else {
-                LOG_DEBUG("symbol %1% not found in library %2%.", name.c_str(), _name.c_str());
+                LOG_DEBUG("symbol {1} not found in library {2}.", name.c_str(), _name.c_str());
             }
         }
         return reinterpret_cast<void *>(symbol);

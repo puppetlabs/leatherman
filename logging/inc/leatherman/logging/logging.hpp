@@ -11,9 +11,9 @@
 /**
  * See Boost.Log's documentation.
  */
+#include <leatherman/locale/locale.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/expressions.hpp>
-#include <boost/format.hpp>
 #include <cstdio>
 #include <functional>
 
@@ -150,8 +150,9 @@ namespace leatherman { namespace logging {
      * The logging level is set to warning by default.
      * @param dst Destination stream for logging output.
      * @param locale The locale identifier to use for logging.
+     * @param domain The catalog domain to use for i18n via gettext.
      */
-    void setup_logging(std::ostream &dst, std::string locale = "");
+    void setup_logging(std::ostream &dst, std::string locale = "", std::string domain = PROJECT_NAME);
 
     /**
      * Sets the current log level.
@@ -215,33 +216,6 @@ namespace leatherman { namespace logging {
 
     /**
      * Logs a given format message to the given logger with the specified line number (if > 0).
-     * @param logger The logger to log the message to.
-     * @param level The logging level to log with.
-     * @param line_num The source line number of the logging call.
-     * @param message The message being formatted.
-     */
-    void log(const std::string &logger, log_level level, int line_num, boost::format& message);
-
-    /**
-     * Logs a given format message to the given logger with the specified line number (if > 0).
-     * @tparam T The type of the first argument.
-     * @tparam TArgs The types of the remaining arguments.
-     * @param logger The logger to log to.
-     * @param level The logging level to log with.
-     * @param line_num The source line number of the logging call.
-     * @param message The message being formatted.
-     * @param arg The first argument to the message.
-     * @param args The remaining arguments to the message.
-     */
-    template <typename T, typename... TArgs>
-    void log(const std::string &logger, log_level level, int line_num, boost::format& message, T arg, TArgs... args)
-    {
-        message % arg;
-        log(logger, level, line_num, message, std::forward<TArgs>(args)...);
-    }
-
-    /**
-     * Logs a given format message to the given logger with the specified line number (if > 0).
      * @tparam TArgs The types of the arguments to format the message with.
      * @param logger The logger to log to.
      * @param level The logging level to log with.
@@ -250,10 +224,9 @@ namespace leatherman { namespace logging {
      * @param args The remaining arguments to the message.
      */
     template <typename... TArgs>
-    void log(const std::string &logger, log_level level, int line_num, std::string const& format, TArgs... args)
+    void log(const std::string &logger, log_level level, int line_num, std::string const& fmt, TArgs... args)
     {
-        boost::format message(format);
-        log(logger, level, line_num, message, std::forward<TArgs>(args)...);
+        log(logger, level, line_num, leatherman::locale::format(fmt, std::forward<TArgs>(args)...));
     }
 
     /**

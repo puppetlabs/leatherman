@@ -12,6 +12,7 @@
   - [As a Submodule](#as-a-submodule)
   - [Variables Set by Leatherman](#variables-set-by-leatherman)
   - [CMake Helpers Provided by Leatherman](#cmake-helpers-provided-by-leatherman)
+  - [Internationalization (i18n)](#internationalization-i18n)
   - [Using Logging](#using-logging)
   - [Using Catch](#using-catch)
   - [Using Windows](#using-windows)
@@ -145,6 +146,49 @@ CMake helpers. These will be automatically added to your
 
 * `pod2man`: Adds a `pod2man` macro to generate man files from source.
 
+### Internationalization (i18n)
+
+Leatherman and its components provide support for generating and using
+`gettext`-based message catalogs. Two helpers are provided for
+generating message catalogs:
+
+* `gettext_templates <dir> <sources>`: creates a `${PROJECT_NAME}.pot`
+  target (used by `all`) that (re)generates the .pot file from specified
+  source files. If the project is configured with `LEATHERMAN_LOCALES`
+  containing a list of language codes, it will add a target
+  `${PROJECT_NAME}-${LANG}.po` to create or update translation (.po)
+  files matching those codes. Files are put in `dir`.
+* `gettext_compile <dir> <inst>`: creates a `translation` target (also
+  used by `all`) to generate the binary message catalogs (.mo files) and
+  configure installing them to the specified install location (`inst`).
+
+`LEATHERMAN_LOCALES` expects a quoted semi-colon separated list, as
+in `LEATHERMAN_LOCALES="en;fr;ja"`.
+
+Normal use of cmake/make should ensure the translation files are up-to-
+date. Translations can be tested by setting the `LC_CTYPE` environment
+variable.
+
+By default i18n support is disabled. To enable it, define `LEATHERMAN_I18N`
+when compiling your project.
+
+To translate strings outside of logging, use the
+`leatherman::locale::translate` and `leatherman::locale::format`
+helpers. Strings passed to the helpers will be extracted to .po files.
+`leatherman::locale::format` is a drop-in replacement for
+[`boost::locale::format`](http://www.boost.org/doc/libs/1_58_0/libs/locale/doc/html/localized_text_formatting.html),
+which adds locale-aware formatting to `boost::format`, but requires
+different substitution tokens. To support transparently enabling
+`LEATHERMAN_I18N` for only some platforms in a project,
+`leatherman::locale::format` falls-back to using `boost::format`, and
+will convert substitution tokens using the regex `{(\d+)}` to `%\1%`.
+To be safe, assume both formats are special when using `format`, and
+use `{N}` in as the substitution token for your strings.
+
+Translation isn't supported on AIX or Solaris, as GCC on those platforms
+doesn't support `std::locale`. In fact std::locale is buggy, so avoid
+using `get_locale` as well.
+
 ### Using Logging
 
 Each `.cc` file that uses logging (or includes a header which uses
@@ -161,10 +205,13 @@ globally. This can be used as follows:
     leatherman_logging_namespace("logging.namespace")
     ...
 
+Initializing logging via setup\_logging will configure the ostream
+for the default UTF-8 locale (or the specified locale).
+
 ### Using Catch
 
 Since [Catch][1] is a testing-only utility, its include directory is
-excluded from LEATHERMAN_INCLUDE_DIRS. To use Catch, explicitly add
+excluded from LEATHERMAN\_INCLUDE\_DIRS. To use Catch, explicitly add
 
     include_directories(${LEATHERMAN_CATCH_INCLUDE})
 

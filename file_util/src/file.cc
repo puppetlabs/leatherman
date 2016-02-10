@@ -58,7 +58,7 @@ namespace boost_file = boost::filesystem;
                 exists = file_stream.good();
                 file_stream.close();
             } else {
-                LOG_DEBUG("Error reading file: %1%", ec.message());
+                LOG_DEBUG("Error reading file: {1}", ec.message());
                 exists = false;
             }
         }
@@ -107,7 +107,7 @@ namespace boost_file = boost::filesystem;
         if (result){
             return result;
         } else {
-            LOG_WARNING("%1% has not been set", home_var);
+            LOG_WARNING("{1} has not been set", home_var);
             return "";
         }
     }

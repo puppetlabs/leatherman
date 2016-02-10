@@ -1,6 +1,10 @@
 # This file contains utilities used by both leatherman and consuming
 # projects.
 
+# Save the directory this script is from, to reference other files
+# located in the same directory when using cmake in script mode.
+set(LEATHERMAN_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
+
 # Usage: leatherman_logging_namespace("namespace")
 #
 # Sets the LEATHERMAN_LOGGING_NAMESPACE preprocessor definition to the
@@ -153,6 +157,101 @@ macro(enable_cpplint)
             COMMAND ${PYTHON_EXECUTABLE} ${LEATHERMAN_CPPLINT_PATH} ${CPPLINT_ARGS} ${CPPLINT_FILES}
             VERBATIM
 	)
+    endif()
+endmacro()
+
+# Usage: gettext_templates(dir)
+#
+# Create templates for gettext in `dir` from the source files specified as additional arguments.
+# Creates a custom target `translation`.
+macro(gettext_templates dir)
+    # Don't even try to find gettext on AIX or Solaris, we don't want it.
+    if (LEATHERMAN_ENABLE_LOCALE)
+        find_program(XGETTEXT_EXE xgettext)
+    endif()
+
+    if (XGETTEXT_EXE)
+        set(TRANSLATION_DIR "${dir}")
+        file(MAKE_DIRECTORY ${TRANSLATION_DIR})
+
+        set(ALL_PROJECT_SOURCES ${ARGN})
+        set(lang_template ${TRANSLATION_DIR}/${PROJECT_NAME}.pot)
+        add_custom_command(OUTPUT ${lang_template}
+            COMMAND ${XGETTEXT_EXE}
+                --sort-by-file
+                --copyright-holder "Puppet Labs \\<docs@puppetlabs.com\\>"
+                --package-name=${PROJECT_NAME} --package-version=${PROJECT_VERSION}
+                --msgid-bugs-address "docs@puppetlabs.com"
+                -d ${PROJECT_NAME} -o ${lang_template}
+                --keyword=LOG_DEBUG:1,\\"debug\\"
+                --keyword=LOG_INFO:1,\\"info\\"
+                --keyword=LOG_WARNING:1,\\"warning\\"
+                --keyword=LOG_ERROR:1,\\"error\\"
+                --keyword=LOG_FATAL:1,\\"fatal\\"
+                --keyword=_
+                --keyword=translate
+                --keyword=format
+                --add-comments=LOCALE
+                ${ALL_PROJECT_SOURCES}
+            COMMAND ${CMAKE_COMMAND}
+                -DPOT_FILE=${lang_template}
+                -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+                -P ${LEATHERMAN_CMAKE_DIR}/normalize_pot.cmake
+            DEPENDS ${ALL_PROJECT_SOURCES})
+
+        add_custom_target(${PROJECT_NAME}.pot ALL DEPENDS ${lang_template})
+
+        find_program(MSGINIT_EXE msginit)
+        find_program(MSGMERGE_EXE msgmerge)
+        if (MSGINIT_EXE AND MSGMERGE_EXE)
+            foreach(lang ${LEATHERMAN_LOCALES})
+                set(lang_file ${TRANSLATION_DIR}/${lang}.po)
+                add_custom_command(OUTPUT ${lang_file}
+                    COMMAND ${CMAKE_COMMAND}
+                        -DPOT_FILE=${lang_template}
+                        -DLANG_FILE=${lang_file}
+                        -DLANG=${lang}
+                        -DMSGMERGE_EXE=${MSGMERGE_EXE}
+                        -DMSGINIT_EXE=${MSGINIT_EXE}
+                        -P ${LEATHERMAN_CMAKE_DIR}/generate_translations.cmake
+                    DEPENDS ${lang_template})
+                add_custom_target(${PROJECT_NAME}-${lang}.pot ALL DEPENDS ${lang_file})
+            endforeach()
+        endif()
+    else()
+        message(STATUS "Could not find gettext executables, skipping gettext_templates.")
+    endif()
+endmacro()
+
+# Usage: gettext_compile(dir inst)
+#
+# Compile gettext .po files into .mo files and configure installing to inst
+# Creates a custom target `translations`.
+macro(gettext_compile dir inst)
+    # Don't even try to find gettext on AIX or Solaris, we don't want it.
+    if (LEATHERMAN_ENABLE_LOCALE)
+        find_program(MSGFMT_EXE msgfmt)
+    endif()
+
+    if (MSGFMT_EXE)
+        file(GLOB TRANSLATIONS ${dir}/*.po)
+        if (NOT TARGET translations)
+            add_custom_target(translations ALL)
+        endif()
+
+        foreach(fpath ${TRANSLATIONS})
+            get_filename_component(lang ${fpath} NAME_WE)
+            set(mo ${CMAKE_BINARY_DIR}/${lang}/LC_MESSAGES/${PROJECT_NAME}.mo)
+            add_custom_command(OUTPUT ${mo}
+                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/${lang}/LC_MESSAGES
+                COMMAND ${MSGFMT_EXE} -c -v -o ${mo} ${fpath} 2>&1
+                DEPENDS ${fpath})
+            add_custom_target(${lang}-${PROJECT_NAME} DEPENDS ${mo})
+            add_dependencies(translations ${lang}-${PROJECT_NAME})
+            install(FILES ${mo} DESTINATION "${inst}/${lang}/LC_MESSAGES")
+        endforeach()
+    else()
+        message(STATUS "Could not find gettext executables, skipping gettext_compile.")
     endif()
 endmacro()
 

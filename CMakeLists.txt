@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2.2)
-project(LEATHERMAN VERSION 0.3.7)
+project(leatherman VERSION 0.3.7)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(internal)
@@ -34,6 +34,11 @@ if (LEATHERMAN_TOPLEVEL)
 endif()
 
 add_definitions(${LEATHERMAN_DEFINITIONS})
+add_definitions(-DLEATHERMAN_LOCALE_INSTALL="${CMAKE_INSTALL_PREFIX}/share/locale")
+
+file(GLOB_RECURSE ALL_LEATHERMAN_SOURCES */src/*.cc */inc/*.hpp)
+gettext_templates(${CMAKE_CURRENT_SOURCE_DIR}/locales ${ALL_LEATHERMAN_SOURCES})
+gettext_compile(${CMAKE_CURRENT_SOURCE_DIR}/locales share/locale)
 
 add_leatherman_dir(catch EXCLUDE_FROM_VARS)
 add_leatherman_dir(nowide)
@@ -51,14 +56,19 @@ add_leatherman_dir(dynamic_library)
 add_leatherman_dir(execution)
 add_leatherman_dir(ruby)
 
-
 # Ensure no LEATHERMAN_LIBS are in LEATHERMAN_DEPS, LEATHERMAN_LIBS should be declared in dependency
 # order above, and we don't want them to come after other dependencies.
 if (LEATHERMAN_LIBS)
     list(REMOVE_ITEM LEATHERMAN_DEPS ${LEATHERMAN_LIBS})
 endif()
 if (LEATHERMAN_LIBS OR LEATHERRMAN_DEPS)
-    list(APPEND LEATHERMAN_LIBRARIES ${LEATHERMAN_LIBS} ${LEATHERMAN_DEPS})
+    if (LEATHERMAN_SHARED)
+        # When using shared libraries, leave out dependencies as they're already handled in the shared libs.
+        # Including deps after the shared libraries can lead to "multiple definition" errors.
+        list(APPEND LEATHERMAN_LIBRARIES ${LEATHERMAN_LIBS})
+    else()
+        list(APPEND LEATHERMAN_LIBRARIES ${LEATHERMAN_LIBS} ${LEATHERMAN_DEPS})
+    endif()
 endif()
 if (LEATHERMAN_INCLUDE_DIRS)
     list(REMOVE_DUPLICATES LEATHERMAN_INCLUDE_DIRS)
@@ -73,7 +83,6 @@ if(LEATHERMAN_ENABLE_TESTING)
 
     add_cppcheck_dirs(${LEATHERMAN_CPPCHECK_DIRS})
 
-    file(GLOB_RECURSE ALL_LEATHERMAN_SOURCES */src/*.cc */inc/*.hpp)
     add_cpplint_files(${ALL_LEATHERMAN_SOURCES})
 
     # If we're toplevel we want to own these targets. If not we assume
@@ -94,6 +103,7 @@ if (LEATHERMAN_INSTALL)
         cmake/leatherman.cmake
         cmake/options.cmake
         cmake/leatherman_config.cmake
+        cmake/normalize_pot.cmake
     )
     set(INSTALL_LOC "lib${LIB_SUFFIX}/cmake/leatherman")
     install(FILES ${CMAKE_FILES} DESTINATION "${INSTALL_LOC}/cmake/")
