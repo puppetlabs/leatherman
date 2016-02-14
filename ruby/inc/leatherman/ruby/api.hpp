@@ -249,6 +249,10 @@ namespace leatherman {  namespace ruby {
         /**
          * See MRI documentation.
          */
+        VALUE (* const rb_str_encode)(VALUE, VALUE, int, VALUE);
+        /**
+         * See MRI documentation.
+         */
         VALUE (* const rb_load)(VALUE, int);
         /**
          * See MRI documentation.
@@ -613,7 +617,7 @@ namespace leatherman {  namespace ruby {
         bool case_equals(VALUE first, VALUE second) const;
 
         /**
-         * Evalutes a string as ruby code.
+         * Evalutes a ASCII string as ruby code.
          * Any exception raised will be propagated as a C++ runtime_error
          * @param code the ruby code to execute
          */

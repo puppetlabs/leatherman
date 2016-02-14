@@ -163,3 +163,16 @@ TEST_CASE("api::lookup", "[ruby-api]") {
         REQUIRE(ruby.to_string(ruby.lookup({ "Foo", "Bar" })) == "Foo::Bar");
     }
 }
+
+TEST_CASE("api::to_string", "[ruby-api]") {
+    auto& ruby = api::instance();
+    ruby.initialize();
+    REQUIRE(ruby.initialized());
+
+    SECTION("can normalize encodings") {
+        string john {"J\xc3\xb6hn"};
+        auto obj = ruby.utf8_value(john);
+        auto encoded = ruby.rb_funcall(obj, ruby.rb_intern("encode"), 1, ruby.utf8_value("Windows-1252"));
+        REQUIRE(ruby.to_string(encoded) == john);
+    }
+}
