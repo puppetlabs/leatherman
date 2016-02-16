@@ -81,7 +81,7 @@ endmacro()
 #
 # This macro cannot be invoked multiple times
 macro(add_leatherman_library)
-    include_directories(${${include_var}})
+    include_directories(BEFORE ${${include_var}})
 
     set(LIBRARY_ARGS ${ARGV})
     list(FIND LIBRARY_ARGS EXPORTS EXPORTS_IDX)
