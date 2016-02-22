@@ -58,6 +58,7 @@ namespace leatherman { namespace ruby {
         LOAD_SYMBOL(rb_int2inum),
         LOAD_SYMBOL(rb_enc_str_new),
         LOAD_SYMBOL(rb_utf8_encoding),
+        LOAD_SYMBOL(rb_str_encode),
         LOAD_SYMBOL(rb_load),
         LOAD_SYMBOL(rb_raise),
         LOAD_SYMBOL(rb_block_proc),
@@ -144,8 +145,6 @@ namespace leatherman { namespace ruby {
             ruby_init();
         }
 
-        LOG_INFO("using ruby version {1}", to_string(rb_const_get(*rb_cObject, rb_intern("RUBY_VERSION"))));
-
         if (_library.first_load()) {
             // Run an empty script evaluation
             // ruby_options is a required call as it sets up some important stuff (unfortunately)
@@ -172,6 +171,9 @@ namespace leatherman { namespace ruby {
         _nil = rb_ivar_get(*rb_cObject, rb_intern("@expected_to_be_nil"));
         _true = rb_funcall(_nil, rb_intern("nil?"), 0);
         _false = rb_funcall(_true, rb_intern("nil?"), 0);
+
+        // Delay logging until now; to_string depends on _nil.
+        LOG_INFO("using ruby version {1}", to_string(rb_const_get(*rb_cObject, rb_intern("RUBY_VERSION"))));
 
         // Set SIGINT handling to system default
         // This prevents ruby from raising an interrupt exception.
@@ -235,6 +237,7 @@ namespace leatherman { namespace ruby {
     string api::to_string(VALUE v) const
     {
         v = rb_funcall(v, rb_intern("to_s"), 0);
+        v = rb_str_encode(v, utf8_value("UTF-8"), 0, _nil);
         size_t size = static_cast<size_t>(rb_num2ulong(rb_funcall(v, rb_intern("bytesize"), 0)));
         return string(rb_string_value_ptr(&v), size);
     }
