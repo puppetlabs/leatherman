@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.4.0] - 2016-02-23
+
+### Fixed
+
+- Header search order when Leatherman is installed to a default system path
+- Ruby string conversion when the Ruby string is in a non-unicode locale
+- Link order when building a shared library on Windows
+
+### Added
+
+- i18n support using Boost::Locale and gettext .po files
+
 ## [0.3.7] - 2016-02-10
 
 ### Fixed
