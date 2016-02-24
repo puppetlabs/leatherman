@@ -170,7 +170,14 @@ date. Translations can be tested by setting the `LC_CTYPE` environment
 variable.
 
 By default i18n support is disabled. To enable it, define `LEATHERMAN_I18N`
-when compiling your project.
+when compiling your project. To do so, add these two lines to your projects
+CMakeLists.txt file below where you have `find_package(LEATHERMAN ...)` and
+also below where you do `include(cflags)`.
+
+```
+add_definitions(${LEATHERMAN_DEFINITIONS})
+add_definitions(-DLEATHERMAN_I18N)
+```
 
 To translate strings outside of logging, use the
 `leatherman::locale::translate` and `leatherman::locale::format`
@@ -188,6 +195,21 @@ use `{N}` in as the substitution token for your strings.
 Translation isn't supported on AIX or Solaris, as GCC on those platforms
 doesn't support `std::locale`. In fact std::locale is buggy, so avoid
 using `get_locale` as well.
+
+To use `leatherman::locale::translate` or `leatherman::locale::format`
+in your project, add an include to the top of your cpp file:
+
+```
+#include <leatherman/locale/locale.hpp>
+```
+
+Next, if you would like to use either of the functions, you could do so
+by following this example:
+
+```
+std::cout << leatherman::locale::translate("This is translated") << std::endl;
+std::cout << leatherman::locale::format("This is {1} translated message", 1) << std::endl;
+```
 
 ### Using Logging
 
