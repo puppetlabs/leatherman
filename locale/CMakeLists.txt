@@ -11,7 +11,13 @@ add_leatherman_headers(inc/leatherman)
 
 if (LEATHERMAN_USE_LOCALES)
     add_leatherman_library(src/locale.cc)
-    add_leatherman_test(tests/locale.cc)
+    if (GETTEXT_ENABLED)
+        # This test relies on translation .mo files being generated.
+        # Projects that don't support localization yet still need
+        # tests to pass, so only enable these tests if gettext is
+        # available.
+        add_leatherman_test(tests/locale.cc)
+    endif()
 else()
     add_leatherman_library(disabled/locale.cc)
 endif()
