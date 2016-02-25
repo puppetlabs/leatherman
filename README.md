@@ -194,7 +194,9 @@ use `{N}` in as the substitution token for your strings.
 
 Translation isn't supported on AIX or Solaris, as GCC on those platforms
 doesn't support `std::locale`. In fact std::locale is buggy, so avoid
-using `get_locale` as well.
+using `get_locale` as well. The CMake option `LEATHERMAN_USE_LOCALES`
+can be used to enable or disable building with Boost.Locale and using
+`std::locale`.
 
 To use `leatherman::locale::translate` or `leatherman::locale::format`
 in your project, add an include to the top of your cpp file:

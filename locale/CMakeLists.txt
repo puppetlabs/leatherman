@@ -1,4 +1,4 @@
-if (LEATHERMAN_ENABLE_LOCALE)
+if (LEATHERMAN_USE_LOCALES)
     find_package(Boost 1.54 REQUIRED COMPONENTS locale system)
 else()
     find_package(Boost 1.54 REQUIRED regex)
@@ -9,7 +9,7 @@ add_leatherman_deps(${Boost_LIBRARIES})
 
 add_leatherman_headers(inc/leatherman)
 
-if (LEATHERMAN_ENABLE_LOCALE)
+if (LEATHERMAN_USE_LOCALES)
     add_leatherman_library(src/locale.cc)
     add_leatherman_test(tests/locale.cc)
 else()

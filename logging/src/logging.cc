@@ -77,7 +77,7 @@ namespace leatherman { namespace logging {
         boost::shared_ptr<sink_t> sink(new sink_t(&dst));
         core->add_sink(sink);
 
-#if (!defined(__sun) && !defined(_AIX)) || !defined(__GNUC__)
+#ifdef LEATHERMAN_USE_LOCALES
         // Imbue the logging sink with the requested locale.
         // Locale in GCC is busted on Solaris, so skip it.
         // TODO: Imbue may not be useful, as setup_logging can be called multiple times

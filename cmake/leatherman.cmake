@@ -166,7 +166,7 @@ endmacro()
 # Creates a custom target `translation`.
 macro(gettext_templates dir)
     # Don't even try to find gettext on AIX or Solaris, we don't want it.
-    if (LEATHERMAN_ENABLE_LOCALE)
+    if (LEATHERMAN_USE_LOCALES)
         find_program(XGETTEXT_EXE xgettext)
     endif()
 
@@ -229,7 +229,7 @@ endmacro()
 # Creates a custom target `translations`.
 macro(gettext_compile dir inst)
     # Don't even try to find gettext on AIX or Solaris, we don't want it.
-    if (LEATHERMAN_ENABLE_LOCALE)
+    if (LEATHERMAN_USE_LOCALES)
         find_program(MSGFMT_EXE msgfmt)
     endif()
 
