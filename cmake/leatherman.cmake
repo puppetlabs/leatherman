@@ -166,7 +166,7 @@ endmacro()
 # Creates a custom target `translation`.
 macro(gettext_templates dir)
     # Don't even try to find gettext on AIX or Solaris, we don't want it.
-    if (LEATHERMAN_ENABLE_LOCALE)
+    if (LEATHERMAN_USE_LOCALES)
         find_program(XGETTEXT_EXE xgettext)
     endif()
 
@@ -227,9 +227,14 @@ endmacro()
 #
 # Compile gettext .po files into .mo files and configure installing to inst
 # Creates a custom target `translations`.
+#
+# Does nothing if msgfmt (part of gettext) isn't found. Sets GETTEXT_ENABLED
+# to ON if we can compile .mo files, otherwise sets to OFF. This variable can
+# be used to disable functionality (such as testing) that requires gettext
+# translation files.
 macro(gettext_compile dir inst)
     # Don't even try to find gettext on AIX or Solaris, we don't want it.
-    if (LEATHERMAN_ENABLE_LOCALE)
+    if (LEATHERMAN_USE_LOCALES)
         find_program(MSGFMT_EXE msgfmt)
     endif()
 
@@ -250,8 +255,10 @@ macro(gettext_compile dir inst)
             add_dependencies(translations ${lang}-${PROJECT_NAME})
             install(FILES ${mo} DESTINATION "${inst}/${lang}/LC_MESSAGES")
         endforeach()
+        set(GETTEXT_ENABLED ON)
     else()
         message(STATUS "Could not find gettext executables, skipping gettext_compile.")
+        set(GETTEXT_ENABLED OFF)
     endif()
 endmacro()
 

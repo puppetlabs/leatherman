@@ -11,7 +11,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "AIX" OR CMAKE_SYSTEM_NAME MATCHES "SunOS")
 else()
     set(USE_BOOST_LOCALE TRUE)
 endif()
-defoption(LEATHERMAN_ENABLE_LOCALE "Use locales for internationalization" ${USE_BOOST_LOCALE})
+defoption(LEATHERMAN_USE_LOCALES "Use locales for internationalization" ${USE_BOOST_LOCALE})
 
 # Map our boost option to the for-realsies one
 set(Boost_USE_STATIC_LIBS ${BOOST_STATIC})
