@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.4.1] - 2016-03-02
+
+### Fixed
+- Install `generate_translations.cmake` for internationalization
+- Fix builds on Mac OS X against static boost
+
 ## [0.4.0] - 2016-02-23
 
 ### Fixed
