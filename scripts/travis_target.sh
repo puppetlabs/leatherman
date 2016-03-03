@@ -34,7 +34,7 @@ function travis_make()
         exit 1
     fi
 
-    # Run tests if not doing cpplint/cppcheck
+    # Run tests and install if not doing cpplint/cppcheck
     if [ $1 != "cppcheck" -a $1 != "cpplint" ]; then
         LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so ctest -V 2>&1 | c++filt
         if [ ${PIPESTATUS[0]} -ne 0 ]; then
@@ -46,10 +46,10 @@ function travis_make()
             # Ignore coveralls results, keep service success uncoupled
             coveralls --gcov gcov-4.8 --gcov-options '\-lp' -r .. >/dev/null || true
         fi
-    fi
 
-    mkdir dest
-    make install DESTDIR=`pwd`/dest
+        mkdir dest
+        make install DESTDIR=`pwd`/dest
+    fi
 
     # If this is a release build, prepare an artifact for github
     if [ $1 == "release" ]; then
