@@ -8,6 +8,12 @@ get_filename_component(LEATHERMAN_PREFIX "${current_directory}/../../../" ABSOLU
 
 @LEATHERMAN_COMPONENTS@
 
+set(LEATHERMAN_HAVE_LOCALES @LEATHERMAN_USE_LOCALES@)
+
+if (LEATHERMAN_USE_LOCALES AND NOT LEATHERMAN_HAVE_LOCALES)
+    message(SEND_ERROR "You requested locale support, but leatherman was built without it")
+endif()
+
 debug("Selected components: ${Leatherman_FIND_COMPONENTS}")
 foreach(component ${Leatherman_FIND_COMPONENTS})
     string(TOUPPER "${component}" id_upper)
