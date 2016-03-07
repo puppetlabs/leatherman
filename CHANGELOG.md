@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.4.2] - 2016-03-07
+
+### Fixed
+- `find_package(Leatherman)` will now raise a CMake error if a consuming application requests locale support when leatherman was built without it.
+
+### Added
+- A preprocessor definition `LEATHERMAN_USE_LOCALES` for consuming projects to know whether locale support is enabled.
+
 ## [0.4.1] - 2016-03-02
 
 ### Fixed
