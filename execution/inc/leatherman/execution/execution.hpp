@@ -57,6 +57,10 @@ namespace leatherman { namespace execution {
          */
         preserve_arguments = (1 << 7),
         /**
+         * On Windows, create a new process group for the child process, but not a Job Object.
+         */
+        create_new_process_group = (1 << 8),
+        /**
          * A combination of all throw options.
          */
         throw_on_failure = throw_on_nonzero_exit | throw_on_signal,
