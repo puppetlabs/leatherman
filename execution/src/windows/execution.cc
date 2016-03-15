@@ -410,7 +410,7 @@ namespace leatherman { namespace execution {
         BOOL in_job;
         bool use_job_object = true;
         if (!IsProcessInJob(GetCurrentProcess(), nullptr, &in_job)) {
-            throw execution_exception("could not determine if facter is running in a job object");
+            throw execution_exception("could not determine if the parent process is running in a job object");
         }
         if (in_job) {
             JOBOBJECT_BASIC_LIMIT_INFORMATION limits;
@@ -533,13 +533,24 @@ namespace leatherman { namespace execution {
 
         PROCESS_INFORMATION procInfo = {};
 
+        // Set up flags for CreateProcess based on whether the create_new_process_group
+        // option was set and the parent process is running in a Job object.
+        auto creation_flags = CREATE_NO_WINDOW;
+
+        if (use_job_object) {
+            creation_flags |= CREATE_BREAKAWAY_FROM_JOB;
+        }
+        if (options[execution_options::create_new_process_group]) {
+            creation_flags |= CREATE_NEW_PROCESS_GROUP;
+        }
+
         if (!CreateProcessW(
             boost::nowide::widen(executable).c_str(),
             &commandLine[0], /* Pass a modifiable string buffer; the contents may be modified */
             NULL,           /* Don't allow child process to inherit process handle */
             NULL,           /* Don't allow child process to inherit thread handle */
             TRUE,           /* Inherit handles from the calling process for communication */
-            use_job_object ? CREATE_NO_WINDOW | CREATE_BREAKAWAY_FROM_JOB : CREATE_NO_WINDOW,
+            creation_flags,
             options[execution_options::merge_environment] ? NULL : modified_environ.data(),
             NULL,           /* Use existing current directory */
             &startupInfo,   /* STARTUPINFO for child process */
@@ -561,8 +572,9 @@ namespace leatherman { namespace execution {
 
         // Use a Job Object to group any child processes spawned by the CreateProcess invocation, so we can
         // easily stop them in case of a timeout.
+        bool create_job_object = use_job_object && !options[execution_options::create_new_process_group];
         scoped_handle hJob;
-        if (use_job_object) {
+        if (create_job_object) {
             hJob = scoped_handle(CreateJobObjectW(nullptr, nullptr));
             if (hJob == NULL) {
                 LOG_ERROR("failed to create job object: {1}.", windows::system_error());
@@ -577,7 +589,7 @@ namespace leatherman { namespace execution {
         scope_exit reaper([&]() {
             if (terminate) {
                 // Terminate the process on an exception
-                if (use_job_object) {
+                if (create_job_object) {
                     if (!TerminateJobObject(hJob, -1)) {
                         LOG_ERROR("failed to terminate process: {1}.", windows::system_error());
                     }
