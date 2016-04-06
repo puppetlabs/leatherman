@@ -93,7 +93,7 @@ macro(add_leatherman_library)
 
     if(LEATHERMAN_SHARED)
         add_library(${libname} SHARED ${LIBRARY_ARGS})
-        target_link_libraries(${libname} ${${deps_var}})
+        target_link_libraries(${libname} PRIVATE ${${deps_var}})
     else()
         add_library(${libname} STATIC ${LIBRARY_ARGS})
     endif()

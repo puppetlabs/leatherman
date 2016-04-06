@@ -14,6 +14,8 @@ if (LEATHERMAN_USE_LOCALES AND NOT LEATHERMAN_HAVE_LOCALES)
     message(SEND_ERROR "You requested locale support, but leatherman was built without it")
 endif()
 
+set(LEATHERMAN_SHARED @LEATHERMAN_SHARED@)
+
 debug("Selected components: ${Leatherman_FIND_COMPONENTS}")
 foreach(component ${Leatherman_FIND_COMPONENTS})
     string(TOUPPER "${component}" id_upper)
@@ -36,7 +38,12 @@ foreach(component ${Leatherman_FIND_COMPONENTS})
             # Prepend leatherman libraries, as later libs may depend on earlier libs.
             list(INSERT LEATHERMAN_LIBS 0 ${${lib_var}})
         endif()
-        list(APPEND LEATHERMAN_DEPS ${${deps_var}})
+        if (${LEATHERMAN_SHARED})
+            # Created with shared libraries, ignore dependencies as they're compiled-in.
+            set(${libs_var} ${${lib_var}})
+        else()
+            list(APPEND LEATHERMAN_DEPS ${${deps_var}})
+        endif()
     endif()
 endforeach()
 
