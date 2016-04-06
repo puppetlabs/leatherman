@@ -70,7 +70,7 @@ if (WIN32)
     # See http://msdn.microsoft.com/en-us/library/windows/desktop/aa383745(v=vs.85).aspx for version strings.
     # When Server 2003 support is discontinued, the networking facts implementation can be cleaned up, and
     # we can statically link symbols that are currently being looked up at runtime.
-    # add_definitions(-DWINVER=0x0600 -D_WIN32_WINNT=0x0600)
+    add_definitions(-DWINVER=0x0600 -D_WIN32_WINNT=0x0600)
 
     # The GetUserNameEx function requires the application have a defined security level.
     # We define security sufficient to get the current user's info.
