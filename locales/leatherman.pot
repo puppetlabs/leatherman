@@ -6,7 +6,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: leatherman 0.4.1\n"
+"Project-Id-Version: leatherman 0.4.2\n"
 "Report-Msgid-Bugs-To: docs@puppetlabs.com\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -131,7 +131,7 @@ msgstr ""
 #: execution/src/posix/execution.cc:269
 #: execution/src/windows/execution.cc:277
 #: execution/src/windows/execution.cc:352
-#: execution/src/windows/execution.cc:633
+#: execution/src/windows/execution.cc:645
 msgid "command timed out after {1} seconds."
 msgstr ""
 
@@ -199,47 +199,47 @@ msgid "child environment {1}={2}"
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:547
+#: execution/src/windows/execution.cc:558
 msgid "failed to create process: {1}."
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:568
+#: execution/src/windows/execution.cc:580
 msgid "failed to create job object: {1}."
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:571
+#: execution/src/windows/execution.cc:583
 msgid "failed to associate process with job object: {1}."
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:582
+#: execution/src/windows/execution.cc:594
 msgid "failed to terminate process: {1}."
 msgstr ""
 
 #. warning
-#: execution/src/windows/execution.cc:585
+#: execution/src/windows/execution.cc:597
 msgid "could not terminate process {1} because a job object could not be used."
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:595
+#: execution/src/windows/execution.cc:607
 msgid "failed to create waitable timer: {1}."
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:604
+#: execution/src/windows/execution.cc:616
 msgid "failed to set waitable timer: {1}."
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:635
+#: execution/src/windows/execution.cc:647
 msgid "failed to wait for child process to terminate: {1}."
 msgstr ""
 
 #. debug
-#: execution/src/windows/execution.cc:645
+#: execution/src/windows/execution.cc:657
 msgid "process exited with exit code {1}."
 msgstr ""
 
@@ -280,32 +280,32 @@ msgid "using ruby version {1}"
 msgstr ""
 
 #. warning
-#: ruby/src/api.cc:459
+#: ruby/src/api.cc:461
 msgid "preferred ruby library \"{1}\" could not be loaded."
 msgstr ""
 
 #. warning
-#: ruby/src/api.cc:469
+#: ruby/src/api.cc:471
 msgid "ruby library \"{1}\" could not be loaded."
 msgstr ""
 
 #. debug
-#: ruby/src/api.cc:476
+#: ruby/src/api.cc:478
 msgid "ruby could not be found on the PATH."
 msgstr ""
 
 #. debug
-#: ruby/src/api.cc:479
+#: ruby/src/api.cc:481
 msgid "ruby was found at \"{1}\"."
 msgstr ""
 
 #. warning
-#: ruby/src/api.cc:488
+#: ruby/src/api.cc:490
 msgid "ruby failed to run: {1}"
 msgstr ""
 
 #. debug
-#: ruby/src/api.cc:494
+#: ruby/src/api.cc:496
 msgid ""
 "ruby library \"{1}\" was not found: ensure ruby was built with the --enable-"
 "shared configuration option."

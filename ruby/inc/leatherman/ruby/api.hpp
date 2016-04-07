@@ -44,6 +44,11 @@ namespace leatherman {  namespace ruby {
     /**
      * See MRI documentation.
      */
+    using LONG_LONG = int64_t;
+    using ULONG_LONG = uint64_t;
+    /**
+     * See MRI documentation.
+     */
     typedef uintptr_t ID;
 
     /**
@@ -209,11 +214,11 @@ namespace leatherman {  namespace ruby {
         /**
          * See MRI documentation.
          */
-        VALUE (* const rb_num2ulong)(VALUE);
+        ULONG_LONG (* const rb_num2ull)(VALUE);
         /**
          * See MRI documentation.
          */
-        SIGNED_VALUE (* const rb_num2long)(VALUE);
+        LONG_LONG (* const rb_num2ll)(VALUE);
         /**
          * See MRI documentation.
          */
