@@ -48,8 +48,8 @@ namespace leatherman { namespace ruby {
         LOAD_SYMBOL(rb_proc_new),
         LOAD_SYMBOL(rb_block_call),
         LOAD_SYMBOL(rb_funcall_passing_block),
-        LOAD_SYMBOL(rb_num2ulong),
-        LOAD_SYMBOL(rb_num2long),
+        LOAD_SYMBOL(rb_num2ull),
+        LOAD_SYMBOL(rb_num2ll),
         LOAD_SYMBOL(rb_num2dbl),
         LOAD_SYMBOL(rb_string_value_ptr),
         LOAD_SYMBOL(rb_rescue2),
@@ -238,7 +238,7 @@ namespace leatherman { namespace ruby {
     {
         v = rb_funcall(v, rb_intern("to_s"), 0);
         v = rb_str_encode(v, utf8_value("UTF-8"), 0, _nil);
-        size_t size = static_cast<size_t>(rb_num2ulong(rb_funcall(v, rb_intern("bytesize"), 0)));
+        auto size = rb_num2ull(rb_funcall(v, rb_intern("bytesize"), 0));
         return string(rb_string_value_ptr(&v), size);
     }
 
@@ -402,7 +402,9 @@ namespace leatherman { namespace ruby {
 
     long api::array_len(VALUE array) const
     {
-        return rb_num2ulong(rb_funcall(array, rb_intern("size"), 0));
+        // This is used for rb_ary_entry, which only accepts a 'long'. So we only expect to
+        // encounter long values here.
+        return static_cast<long>(rb_num2ull(rb_funcall(array, rb_intern("size"), 0)));
     }
 
     VALUE api::lookup(std::initializer_list<std::string> const& names) const
