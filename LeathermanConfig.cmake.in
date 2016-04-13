@@ -42,7 +42,7 @@ foreach(component ${Leatherman_FIND_COMPONENTS})
             # Created with shared libraries, ignore dependencies as they're compiled-in.
             set(${libs_var} ${${lib_var}})
         else()
-            list(APPEND LEATHERMAN_DEPS ${${deps_var}})
+            append_new(LEATHERMAN_DEPS ${${deps_var}})
         endif()
     endif()
 endforeach()
