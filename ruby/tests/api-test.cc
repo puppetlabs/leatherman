@@ -176,3 +176,30 @@ TEST_CASE("api::to_string", "[ruby-api]") {
         REQUIRE(ruby.to_string(encoded) == john);
     }
 }
+
+TEST_CASE("api::num2size_t", "[ruby-api]") {
+    auto& ruby = api::instance();
+    ruby.initialize();
+    REQUIRE(ruby.initialized());
+
+    SECTION("can convert Ruby number to size_t") {
+        auto fixednum = ruby.eval("1");
+        auto num = ruby.num2size_t(fixednum);
+        REQUIRE(1u == num);
+    }
+
+    SECTION("can convert large Ruby number to size_t") {
+        auto expected = numeric_limits<size_t>::max();
+        auto largenum = ruby.eval(to_string(expected));
+        auto num = ruby.num2size_t(largenum);
+        REQUIRE(expected == num);
+    }
+
+#if 0
+    // Can't use this test yet, because Ruby SIGSEGVs on calling rb_num2ull.
+    SECTION("throws exception on Ruby numbers exceeding size_t") {
+        auto largenum = ruby.eval("184467440737095516150");
+        REQUIRE_THROWS_AS(ruby.num2size_t(largenum), runtime_error);
+    }
+#endif
+}

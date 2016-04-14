@@ -73,6 +73,17 @@ namespace leatherman {  namespace ruby {
     };
 
     /**
+     * Exception thrown when Ruby to C type conversions fail.
+     */
+    struct invalid_conversion : std::runtime_error {
+        /**
+         * Constructs an invalid_conversion exception.
+         * @param message The exception message.
+         */
+        explicit invalid_conversion(std::string const& message);
+    };
+
+    /**
      * Contains utility functions and the pointers to the Ruby API.
      */
     struct api
@@ -103,7 +114,7 @@ namespace leatherman {  namespace ruby {
 
         /**
          * Gets the Ruby API instance.
-         * Throws a runtime_error if the API instance can't be created.
+         * Throws a library_not_loaded_exception if the API instance can't be created.
          * @return Returns the Ruby API instance.
          */
         static api& instance();
@@ -429,6 +440,14 @@ namespace leatherman {  namespace ruby {
         std::vector<std::string> get_load_path() const;
 
         /**
+         * Converts a Ruby number into a size_t integer, with checking for overflow.
+         * Throws an invalid_conversion if overflow is detected.
+         * @param v The Ruby value to convert.
+         * @return Returns the Ruby value as a size_t integer.
+         */
+        size_t num2size_t(VALUE v) const;
+
+        /**
          * Converts a Ruby value into a C++ string.
          * @param v The Ruby value to convert.
          * @return Returns the Ruby value as a string.
@@ -593,6 +612,7 @@ namespace leatherman {  namespace ruby {
 
         /**
          * Get the length of a ruby array.
+         * Throws an invalid_conversion if teh array length can not be represented by a long.
          * @return Returns the length of the array.
          */
         long array_len(VALUE array) const;

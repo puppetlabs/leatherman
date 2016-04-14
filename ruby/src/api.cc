@@ -25,6 +25,11 @@ namespace leatherman { namespace ruby {
     {
     }
 
+    invalid_conversion::invalid_conversion(string const& message) :
+        runtime_error(message)
+    {
+    }
+
 #define LOAD_SYMBOL(x) x(reinterpret_cast<decltype(x)>(library.find_symbol(#x, true)))
 #define LOAD_ALIASED_SYMBOL(x, y) x(reinterpret_cast<decltype(x)>(library.find_symbol(#x, true, #y)))
 #define LOAD_OPTIONAL_SYMBOL(x) x(reinterpret_cast<decltype(x)>(library.find_symbol(#x)))
@@ -234,12 +239,20 @@ namespace leatherman { namespace ruby {
         return directories;
     }
 
+    size_t api::num2size_t(VALUE v) const
+    {
+        auto size = rb_num2ull(v);
+        if (size > numeric_limits<size_t>::max()) {
+            throw invalid_conversion("size_t maximum exceeded, requested size was " + to_string(size));
+        }
+        return static_cast<size_t>(size);
+    }
+
     string api::to_string(VALUE v) const
     {
         v = rb_funcall(v, rb_intern("to_s"), 0);
         v = rb_str_encode(v, utf8_value("UTF-8"), 0, _nil);
-        auto size = rb_num2ull(rb_funcall(v, rb_intern("bytesize"), 0));
-        return string(rb_string_value_ptr(&v), size);
+        return string(rb_string_value_ptr(&v), num2size_t(rb_funcall(v, rb_intern("bytesize"), 0)));
     }
 
     VALUE api::to_symbol(string const& s) const
@@ -404,7 +417,11 @@ namespace leatherman { namespace ruby {
     {
         // This is used for rb_ary_entry, which only accepts a 'long'. So we only expect to
         // encounter long values here.
-        return static_cast<long>(rb_num2ull(rb_funcall(array, rb_intern("size"), 0)));
+        auto size = rb_num2ull(rb_funcall(array, rb_intern("size"), 0));
+        if (size > numeric_limits<long>::max()) {
+            throw invalid_conversion("maximum array size exceeded, reported size was " + to_string(size));
+        }
+        return static_cast<long>(size);
     }
 
     VALUE api::lookup(std::initializer_list<std::string> const& names) const
