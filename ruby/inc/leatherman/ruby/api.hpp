@@ -585,6 +585,13 @@ namespace leatherman {  namespace ruby {
          */
         bool is_fixednum(VALUE value) const;
 
+         /**
+         * Determines if the given value is a big number (Bignum).
+         * @param value The value to check.
+         * @return Returns true if the given value is a fixed number (Fixnum) or false if it is not.
+         */
+        bool is_bignum(VALUE value) const;
+
         /**
          * Determines if the given value is a float.
          * @param value The value to check.
