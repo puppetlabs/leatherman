@@ -393,6 +393,11 @@ namespace leatherman { namespace ruby {
         return is_a(value, *rb_cFixnum);
     }
 
+    bool api::is_bignum(VALUE value) const
+    {
+        return is_a(value, *rb_cBignum);
+    }
+
     bool api::is_float(VALUE value) const
     {
         return is_a(value, *rb_cFloat);
