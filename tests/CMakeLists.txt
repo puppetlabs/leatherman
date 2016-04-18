@@ -1,4 +1,4 @@
-include_directories(${LEATHERMAN_CATCH_INCLUDE} ${LEATHERMAN_INCLUDE_DIRS})
+include_directories(BEFORE ${LEATHERMAN_CATCH_INCLUDE} ${LEATHERMAN_INCLUDE_DIRS})
 add_executable(leatherman_test main.cc ${LEATHERMAN_TEST_SRCS})
 
 if (LEATHERMAN_SHARED)

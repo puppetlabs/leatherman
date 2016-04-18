@@ -1,6 +1,6 @@
 find_package(CURL REQUIRED)
 
-include_directories(${CURL_INCLUDE_DIRS})
+include_directories(BEFORE ${CURL_INCLUDE_DIRS})
 
 if (CURL_STATIC)
     set(CURL_LINK STATIC)
