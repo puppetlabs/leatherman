@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.5.1] - 2016-04-18
+
+0.5.0 was incorrectly tagged, causing Travis and Appveyor to skip creating build artifacts.
+
 ## [0.5.0] - 2016-04-18
 
 ### Fixed
