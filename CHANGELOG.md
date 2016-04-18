@@ -2,6 +2,21 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.5.0] - 2016-04-18
+
+### Fixed
+- Static dependency libraries will no longer be linked to Leatherman consumers when using a shared leatherman library
+- Interfacing with ruby APIs for 64-bit integers on Windows (See Added and Removed below for details)
+
+### Added
+- Ability to spawn child processes in a new group on Windows
+- Ruby bindings for `is_bignum`
+- Ruby `num2size_t` help for consistent access to array/string sizes
+
+### Removed
+- Windows 2003 / XP Support. This allows us to better take advantage of modern Windows APIs and features
+- Bindings to ruby `rb_num2long` and `rb_num2ulong`, as they were inconsistent across platforms
+
 ## [0.4.2] - 2016-03-07
 
 ### Fixed
