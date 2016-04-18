@@ -66,6 +66,13 @@ if (COVERALLS)
 endif()
 
 if (WIN32)
+    # Update standard link libraries to explicitly exclude kernel32. It isn't necessary, and when compiling with
+    # MinGW makes the executable unusable on Microsoft Nano Server due to including __C_specific_handler.
+    SET(CMAKE_C_STANDARD_LIBRARIES "-luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32"
+        CACHE STRING "Standard C link libraries." FORCE)
+    SET(CMAKE_CXX_STANDARD_LIBRARIES "-luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32"
+        CACHE STRING "Standard C++ link libraries." FORCE)
+
     # We currently support Windows Server 2003, which requires using deprecated APIs.
     # See http://msdn.microsoft.com/en-us/library/windows/desktop/aa383745(v=vs.85).aspx for version strings.
     # When Server 2003 support is discontinued, the networking facts implementation can be cleaned up, and
