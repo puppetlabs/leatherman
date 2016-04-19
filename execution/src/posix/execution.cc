@@ -414,7 +414,7 @@ namespace leatherman { namespace execution {
             if (options[execution_options::throw_on_nonzero_exit]) {
                 throw child_exit_exception("child process returned non-zero exit status.", 127, {}, {});
             }
-            return {false, "", "", 127};
+            return {false, "", "", 127, 0};
         }
 
         // Create the pipes for stdin/stdout redirection
@@ -564,7 +564,7 @@ namespace leatherman { namespace execution {
                 throw child_signal_exception(lth_locale::format("child process was terminated by signal ({1}).", status), status, move(output), move(error));
             }
         }
-        return {success, move(output), move(error), status};
+        return {success, move(output), move(error), status, static_cast<size_t>(child)};
     }
 
 }}  // namespace leatherman::execution

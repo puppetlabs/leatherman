@@ -198,8 +198,8 @@ namespace leatherman { namespace execution {
         /**
          * Constructor.
          */
-        result(bool s, std::string o, std::string e, int ec)
-            : success(s), output(move(o)), error(move(e)), exit_code(ec) {}
+        result(bool s, std::string o, std::string e, int ec, size_t p)
+            : success(s), output(move(o)), error(move(e)), exit_code(ec), pid(p) {}
         /**
          * Whether or not the command succeeded, defaults to true.
          */
@@ -216,6 +216,10 @@ namespace leatherman { namespace execution {
          * The process exit code, defaults to 0.
          */
         int exit_code = 0;
+        /**
+         * The process ID
+         */
+        size_t pid = 0;
     };
 
     /**
