@@ -28,7 +28,7 @@ add_leatherman_test(tests/log_capture.cc ${PLATFORM_TESTS})
 
 if (BUILDING_LEATHERMAN)
     # Dumb implementation of cat.exe for testing stdin/stdout/stderr handling.
-    include_directories(${LEATHERMAN_NOWIDE_INCLUDE})
+    include_directories(BEFORE ${LEATHERMAN_NOWIDE_INCLUDE})
     add_executable(lth_cat tests/lth_cat.cc)
     target_link_libraries(lth_cat ${LEATHERMAN_NOWIDE_LIBS})
     if (COVERALLS)
