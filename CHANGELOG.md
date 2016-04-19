@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.6.0] - 2016-04-19
+
+### Fixed
+- Outputting WMI errors when l10n is disabled
+- Leatherman will no longer use installed leatherman headers when building itself
+
+### Added
+- Leatherman now builds on Windows Nano Server
+- Ruby binding for `rb_last_status_set`, needed for Facter's execution API
+- The `result` struct in `execution` now contains the PID of the executed processes
+
 ## [0.5.1] - 2016-04-18
 
 0.5.0 was incorrectly tagged, causing Travis and Appveyor to skip creating build artifacts.
