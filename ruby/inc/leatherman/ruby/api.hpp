@@ -56,6 +56,12 @@ namespace leatherman {  namespace ruby {
      */
     typedef void * rb_encoding_p;
 
+    #ifdef _WIN32
+        typedef int rb_pid_t;
+    #else
+        typedef pid_t rb_pid_t;
+    #endif
+
     /**
      * Macro to cast function pointers to a Ruby method.
      */
@@ -374,6 +380,11 @@ namespace leatherman {  namespace ruby {
          * See MRI documentation.
          */
         VALUE (* const rb_require)(char const*);
+
+        /**
+         * Intern MRI method. We're being naughty
+         */
+        VALUE(* const rb_last_status_set)(int, rb_pid_t);
 
         /**
          * See MRI documentation.
