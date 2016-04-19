@@ -90,6 +90,7 @@ namespace leatherman { namespace ruby {
         LOAD_SYMBOL(rb_gc_mark),
         LOAD_SYMBOL(rb_yield_values),
         LOAD_SYMBOL(rb_require),
+        LOAD_SYMBOL(rb_last_status_set),
         LOAD_SYMBOL(rb_cObject),
         LOAD_SYMBOL(rb_cArray),
         LOAD_SYMBOL(rb_cHash),

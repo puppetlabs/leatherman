@@ -6,7 +6,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: leatherman 0.4.2\n"
+"Project-Id-Version: leatherman 0.5.1\n"
 "Report-Msgid-Bugs-To: docs@puppetlabs.com\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -265,47 +265,47 @@ msgid ""
 msgstr ""
 
 #. info
-#: ruby/src/api.cc:127
+#: ruby/src/api.cc:133
 msgid "ruby loaded from \"{1}\"."
 msgstr ""
 
 #. info
-#: ruby/src/api.cc:129
+#: ruby/src/api.cc:135
 msgid "ruby was already loaded."
 msgstr ""
 
 #. info
-#: ruby/src/api.cc:176
+#: ruby/src/api.cc:182
 msgid "using ruby version {1}"
 msgstr ""
 
 #. warning
-#: ruby/src/api.cc:461
+#: ruby/src/api.cc:484
 msgid "preferred ruby library \"{1}\" could not be loaded."
 msgstr ""
 
 #. warning
-#: ruby/src/api.cc:471
+#: ruby/src/api.cc:494
 msgid "ruby library \"{1}\" could not be loaded."
 msgstr ""
 
 #. debug
-#: ruby/src/api.cc:478
+#: ruby/src/api.cc:501
 msgid "ruby could not be found on the PATH."
 msgstr ""
 
 #. debug
-#: ruby/src/api.cc:481
+#: ruby/src/api.cc:504
 msgid "ruby was found at \"{1}\"."
 msgstr ""
 
 #. warning
-#: ruby/src/api.cc:490
+#: ruby/src/api.cc:513
 msgid "ruby failed to run: {1}"
 msgstr ""
 
 #. debug
-#: ruby/src/api.cc:496
+#: ruby/src/api.cc:519
 msgid ""
 "ruby library \"{1}\" was not found: ensure ruby was built with the --enable-"
 "shared configuration option."

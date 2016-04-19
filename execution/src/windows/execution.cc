@@ -428,7 +428,7 @@ namespace leatherman { namespace execution {
             if (options[execution_options::throw_on_nonzero_exit]) {
                 throw child_exit_exception("child process returned non-zero exit status.", 127, {}, {});
             }
-            return {false, "", "", 127};
+            return {false, "", "", 127, 0};
         }
 
         // Setup the execution environment
@@ -659,7 +659,7 @@ namespace leatherman { namespace execution {
         if (exit_code != 0 && options[execution_options::throw_on_nonzero_exit]) {
             throw child_exit_exception("child process returned non-zero exit status.", exit_code, output, error);
         }
-        return {exit_code == 0, move(output), move(error), static_cast<int>(exit_code)};
+        return {exit_code == 0, move(output), move(error), static_cast<int>(exit_code), static_cast<size_t>(procInfo.dwProcessId)};
     }
 
 }}  // namespace leatherman::execution
