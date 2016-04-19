@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.6.1] - 2016-04-19
+
+### Fixed
+- Missing include header in leatherman/ruby/api.h, needed on Mac OS X
+
 ## [0.6.0] - 2016-04-19
 
 ### Fixed
