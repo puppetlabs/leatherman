@@ -13,6 +13,9 @@
 #include <initializer_list>
 
 #include <leatherman/dynamic_library/dynamic_library.hpp>
+#ifndef _WIN32
+    #include <sys/types.h>
+#endif
 
 namespace leatherman {  namespace ruby {
 
