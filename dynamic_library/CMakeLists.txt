@@ -1,3 +1,8 @@
+find_package(Boost 1.54 REQUIRED COMPONENTS regex)
+
+add_leatherman_deps("${Boost_LIBRARIES}")
+add_leatherman_includes("${Boost_INCLUDE_DIRS}")
+
 leatherman_dependency(logging)
 leatherman_dependency(util)
 if(WIN32)
