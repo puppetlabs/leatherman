@@ -324,7 +324,9 @@ the `nowide` and `catch` CMake files are both solid examples.
 1. Update [CHANGELOG.md](CHANGELOG.md) with release notes based on
 ``git log `git describe --abbrev=0 --tags`..HEAD``
 1. Update the version in the project declaration of [CMakeLists.txt](CMakeLists.txt)
+1. Build with gettext to ensure translations are up-to-date
 1. `git tag -s <version> -m '<version>' && git push <puppetlabs> refs/tags/<version>`
+1. Send out an announcement e-mail
 
 [1]: https://github.com/philsquared/Catch
 [2]: https://github.com/miloyip/rapidjson
