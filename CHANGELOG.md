@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.6.2] - 2016-04-20
+
+### Fixed
+- Runtime shared library load errors on AIX.
+
 ## [0.6.1] - 2016-04-19
 
 ### Fixed
