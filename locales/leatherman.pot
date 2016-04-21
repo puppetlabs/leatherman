@@ -6,7 +6,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: leatherman 0.5.1\n"
+"Project-Id-Version: leatherman 0.6.2\n"
 "Report-Msgid-Bugs-To: docs@puppetlabs.com\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -358,72 +358,76 @@ msgid "GetUserProfileDirectoryW call failed: {1}"
 msgstr ""
 
 #. LOCALE: format a pointer as hex for printing an error message.
-#: windows/src/wmi.cc:27
+#: windows/src/wmi.cc:28
 msgid "{1} (0x{2,num=hex})"
 msgstr ""
 
-#. debug
-#: windows/src/wmi.cc:36
-msgid "initializing WMI"
+#: windows/src/wmi.cc:30
+msgid "%1% (0x%2$#x)"
 msgstr ""
 
 #. debug
 #: windows/src/wmi.cc:40
+msgid "initializing WMI"
+msgstr ""
+
+#. debug
+#: windows/src/wmi.cc:44
 msgid "using prior COM concurrency model"
 msgstr ""
 
-#: windows/src/wmi.cc:42
+#: windows/src/wmi.cc:46
 msgid "failed to initialize COM library"
 msgstr ""
 
-#: windows/src/wmi.cc:52
+#: windows/src/wmi.cc:56
 msgid "failed to create IWbemLocator object"
 msgstr ""
 
-#: windows/src/wmi.cc:60
+#: windows/src/wmi.cc:64
 msgid "could not connect to WMI server"
 msgstr ""
 
-#: windows/src/wmi.cc:68
+#: windows/src/wmi.cc:72
 msgid "could not set proxy blanket"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:79
+#: windows/src/wmi.cc:83
 msgid "ignoring {1}-dimensional array in query {2}.{3}"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:95
+#: windows/src/wmi.cc:99
 msgid ""
 "WMI query {1}.{2} result could not be converted from type {3} to a string"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:113
+#: windows/src/wmi.cc:117
 msgid "query {1} failed"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:136
+#: windows/src/wmi.cc:140
 msgid "query {1}.{2} could not be found"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:159
+#: windows/src/wmi.cc:163
 msgid "only single value requested from array for key {1}"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:174
-#: windows/src/wmi.cc:186
+#: windows/src/wmi.cc:178
+#: windows/src/wmi.cc:190
 msgid "only single entry requested from array of entries for key {1}"
 msgstr ""
 
-#: windows/src/wmi.cc:178
+#: windows/src/wmi.cc:182
 msgid "unable to get from empty array of objects"
 msgstr ""
 
-#: windows/src/wmi.cc:190
+#: windows/src/wmi.cc:194
 msgid "unable to get_range from empty array of objects"
 msgstr ""
