@@ -331,6 +331,7 @@ the `nowide` and `catch` CMake files are both solid examples.
 ## Maintenance
 
 Maintainers: Michael Smith <michael.smith@puppet.com>, Branan Riley <branan@puppet.com>
+
 Tickets: https://tickets.puppetlabs.com/browse/LTH.
 
 [1]: https://github.com/philsquared/Catch
