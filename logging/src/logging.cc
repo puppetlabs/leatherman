@@ -35,11 +35,12 @@ namespace leatherman { namespace logging {
 
     namespace lth_locale = leatherman::locale;
 
-    class color_writer : public sinks::basic_sink_backend<sinks::synchronized_feeding>
+    class color_writer : public sinks::basic_sink_backend<sinks::combine_requirements<sinks::synchronized_feeding, sinks::flushing>::type>
     {
      public:
         color_writer(ostream *dst);
         void consume(boost::log::record_view const& rec);
+        void flush();
      private:
         ostream &_dst;
     };
@@ -64,7 +65,12 @@ namespace leatherman { namespace logging {
         colorize(_dst, *level);
         _dst << *message;
         colorize(_dst);
-        _dst << endl;
+        _dst << "\n";
+    }
+
+    void color_writer::flush()
+    {
+        _dst.flush();
     }
 
     void setup_logging(ostream &dst, string locale, string domain)
