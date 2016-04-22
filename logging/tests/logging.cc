@@ -23,7 +23,23 @@ namespace leatherman { namespace test {
         return stringbuf::xsputn(s, count);
     }
 
+    logging_context::logging_context(log_level lvl)
+    {
+        set_level(lvl);
+        REQUIRE(get_level() == lvl);
+        clear_error_logged_flag();
+    }
+
+    logging_context::~logging_context()
+    {
+        set_level(log_level::none);
+        REQUIRE(get_level() == log_level::none);
+        on_message(nullptr);
+        clear_error_logged_flag();
+    }
+
     logging_format_context::logging_format_context(log_level lvl, string ns, int line_num)
+        : logging_context(lvl)
     {
         _strm_buf = boost::nowide::cout.rdbuf();
         boost::nowide::cout.rdbuf(&_buf);
@@ -32,7 +48,6 @@ namespace leatherman { namespace test {
         set_level(lvl);
         REQUIRE(get_level() == lvl);
         set_colorization(true);
-        clear_error_logged_flag();
 
         static const boost::regex rdate("\\d{4}-\\d{2}-\\d{2}");
         static const boost::regex rtime("[0-2]\\d:[0-5]\\d:\\d{2}\\.\\d{6}");
@@ -58,11 +73,6 @@ namespace leatherman { namespace test {
     logging_format_context::~logging_format_context()
     {
         boost::nowide::cout.rdbuf(_strm_buf);
-
-        set_level(log_level::none);
-        REQUIRE(get_level() == log_level::none);
-        on_message(nullptr);
-        clear_error_logged_flag();
 
         auto core = boost::log::core::get();
         core->reset_filter();

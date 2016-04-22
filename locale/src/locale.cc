@@ -10,9 +10,10 @@
 
 namespace leatherman { namespace locale {
 
-    static std::map<std::string, std::locale> g_locales;
+    using namespace std;
+    static map<string, std::locale> g_locales;
 
-    const std::locale get_locale(std::string const& id, std::string const& domain, std::vector<std::string> const& paths)
+    const std::locale get_locale(string const& id, string const& domain, vector<string> const& paths)
     {
         auto it = g_locales.find(domain);
         if (it != g_locales.end()) {
@@ -43,12 +44,12 @@ namespace leatherman { namespace locale {
         }
     }
 
-    void clear_domain(std::string const& domain)
+    void clear_domain(string const& domain)
     {
         g_locales.erase(domain);
     }
 
-    std::string translate(std::string const& s, std::string const& domain)
+    string translate(string const& s, string const& domain)
     {
         return boost::locale::translate(s).str(get_locale("", domain));
     }
