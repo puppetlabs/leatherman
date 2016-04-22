@@ -244,6 +244,15 @@ macro(gettext_compile dir inst)
             add_custom_target(translations ALL)
         endif()
 
+        # Add LEATHERMAN_LOCALES, as they may not have been generated yet.
+        foreach(locale ${LEATHERMAN_LOCALES})
+            set(fpath ${dir}/${locale}.po)
+            list(FIND TRANSLATIONS ${fpath} FOUND)
+            if (${FOUND} EQUAL -1)
+                list(APPEND TRANSLATIONS ${fpath})
+            endif()
+        endforeach()
+
         foreach(fpath ${TRANSLATIONS})
             get_filename_component(lang ${fpath} NAME_WE)
             set(mo ${CMAKE_BINARY_DIR}/${lang}/LC_MESSAGES/${PROJECT_NAME}.mo)
