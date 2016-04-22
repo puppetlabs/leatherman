@@ -4,7 +4,6 @@
 
 #include <catch.hpp>
 #include <leatherman/locale/locale.hpp>
-#include <boost/locale.hpp>
 
 using namespace std;
 using namespace leatherman::locale;
@@ -16,15 +15,6 @@ static auto proj = "leatherman_test";
 SCENARIO("a default locale") {
     auto loc = get_locale("", proj);
     formatter fmt(proj);
-
-    GIVEN("std::ostream") {
-        stringstream ss;
-        ss.imbue(loc);
-        THEN("messages should not be translated") {
-            ss << boost::locale::translate(literal);
-            REQUIRE(ss.str() == literal);
-        }
-    }
 
     GIVEN("leatherman::locale::translate") {
         THEN("messages should not be translated") {
@@ -45,15 +35,6 @@ SCENARIO("a french locale") {
     auto loc = get_locale("fr.UTF-8", proj);
     formatter fmt(proj);
 
-    GIVEN("std::ostream") {
-        stringstream ss;
-        ss.imbue(loc);
-        THEN("messages should be translated") {
-            ss << boost::locale::translate(literal);
-            REQUIRE(ss.str() == "demande {1,number}.");
-        }
-    }
-
     GIVEN("leatherman::locale::translate") {
         THEN("messages should be translated") {
             REQUIRE(translate(literal, proj) == "demande {1,number}.");
@@ -65,6 +46,7 @@ SCENARIO("a french locale") {
             auto formatted = fmt(literal, 1.25);
             // This doesn't seem to be treated consistently anywhere. Leave it as
             // flexible until we can resolve why.
+            CAPTURE(formatted);
             REQUIRE((formatted == "demande 1.25." || formatted == "demande 1,25."));
         }
     }

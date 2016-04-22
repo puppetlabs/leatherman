@@ -182,7 +182,7 @@ add_definitions(-DLEATHERMAN_I18N)
 To translate strings outside of logging, use the
 `leatherman::locale::translate` and `leatherman::locale::format`
 helpers. Strings passed to the helpers will be extracted to .po files.
-`leatherman::locale::format` is a drop-in replacement for
+`leatherman::locale::format` is a replacement for
 [`boost::locale::format`](http://www.boost.org/doc/libs/1_58_0/libs/locale/doc/html/localized_text_formatting.html),
 which adds locale-aware formatting to `boost::format`, but requires
 different substitution tokens. To support transparently enabling
@@ -190,7 +190,9 @@ different substitution tokens. To support transparently enabling
 `leatherman::locale::format` falls-back to using `boost::format`, and
 will convert substitution tokens using the regex `{(\d+)}` to `%\1%`.
 To be safe, assume both formats are special when using `format`, and
-use `{N}` in as the substitution token for your strings.
+use `{N}` in as the substitution token for your strings. If you need to
+support both modes and use advanced substitution strings, you'll have
+to use an `#ifdef LEATHERMAN_I18N` block to use the correct string.
 
 Translation isn't supported on AIX or Solaris, as GCC on those platforms
 doesn't support `std::locale`. In fact std::locale is buggy, so avoid
@@ -212,6 +214,11 @@ by following this example:
 std::cout << leatherman::locale::translate("This is translated") << std::endl;
 std::cout << leatherman::locale::format("This is {1} translated message", 1) << std::endl;
 ```
+
+Note that on Windows when building Leatherman.Locale as a DLL and
+Boost.Locale statically, you can get some weird behavior from Boost.Locale.
+Avoid using it directly, and ensure all translation operations happen
+as part of the Leatherman.Locale DLL memory space (i.e. in source files).
 
 ### Using Logging
 

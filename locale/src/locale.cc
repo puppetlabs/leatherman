@@ -50,7 +50,7 @@ namespace leatherman { namespace locale {
 
     std::string translate(std::string const& s, std::string const& domain)
     {
-        return boost::locale::translate(s).str(g_locales[domain]);
+        return boost::locale::translate(s).str(get_locale("", domain));
     }
 
 }}  // namespace leatherman::locale
