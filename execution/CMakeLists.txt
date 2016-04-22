@@ -5,6 +5,7 @@ add_leatherman_includes("${Boost_INCLUDE_DIRS}")
 
 leatherman_dependency(util)
 leatherman_dependency(nowide)
+leatherman_dependency(locale)
 leatherman_dependency(logging)
 leatherman_dependency(file_util)
 if (BUILDING_LEATHERMAN)

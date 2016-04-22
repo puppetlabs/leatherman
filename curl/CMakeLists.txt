@@ -23,6 +23,7 @@ endif()
 
 add_leatherman_includes("${CURL_INCLUDE_DIRS}")
 
+leatherman_dependency(locale)
 leatherman_dependency(logging)
 leatherman_dependency(util)
 add_leatherman_deps(${CURL_LIBRARIES} ${CURL_DEPS})
