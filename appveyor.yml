@@ -23,7 +23,7 @@ build_script:
   - ps: 7z.exe a -t7z leatherman.7z C:\tools\leatherman\
 
 test_script:
-  - ps: if ($env:shared -eq "OFF") { ctest -V 2>&1 | %{ if ($_ -is [System.Management.Automation.ErrorRecord]) { $_ | c++filt } else { $_ } } }
+  - ps: ctest -V 2>&1 | %{ if ($_ -is [System.Management.Automation.ErrorRecord]) { $_ | c++filt } else { $_ } }
 
 environment:
   matrix:
