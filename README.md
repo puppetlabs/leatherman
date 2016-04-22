@@ -179,6 +179,10 @@ add_definitions(${LEATHERMAN_DEFINITIONS})
 add_definitions(-DLEATHERMAN_I18N)
 ```
 
+The format strings in logging (the first argument) will automatically be
+extracted for the translation template file and translated. Substitution
+arguments will not, and must be explicitly translated.
+
 To translate strings outside of logging, use the
 `leatherman::locale::translate` and `leatherman::locale::format`
 helpers. Strings passed to the helpers will be extracted to .po files.

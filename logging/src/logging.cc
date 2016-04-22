@@ -134,7 +134,7 @@ namespace leatherman { namespace logging {
         g_callback = callback;
     }
 
-    void log(const string &logger, log_level level, int line_num, string const& message)
+    void log_helper(const string &logger, log_level level, int line_num, string const& message)
     {
         if (level >= log_level::error) {
             g_error_logged = true;

@@ -207,15 +207,17 @@ namespace leatherman { namespace logging {
 
     /**
      * Logs a given message to the given logger with the specified line number (if > 0).
+     * Does no translation on the message.
      * @param logger The logger to log the message to.
      * @param level The logging level to log with.
      * @param line_num The source line number of the logging call.
      * @param message The message to log.
      */
-    void log(const std::string &logger, log_level level, int line_num, std::string const& message);
+    void log_helper(const std::string &logger, log_level level, int line_num, std::string const& message);
 
     /**
      * Logs a given format message to the given logger with the specified line number (if > 0).
+     * If LEATHERMAN_I18N is specified, does translation on the format string, but not following arguments.
      * @tparam TArgs The types of the arguments to format the message with.
      * @param logger The logger to log to.
      * @param level The logging level to log with.
@@ -226,7 +228,7 @@ namespace leatherman { namespace logging {
     template <typename... TArgs>
     void log(const std::string &logger, log_level level, int line_num, std::string const& fmt, TArgs... args)
     {
-        log(logger, level, line_num, leatherman::locale::format(fmt, std::forward<TArgs>(args)...));
+        log_helper(logger, level, line_num, leatherman::locale::format(fmt, std::forward<TArgs>(args)...));
     }
 
     /**
