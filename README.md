@@ -328,6 +328,11 @@ the `nowide` and `catch` CMake files are both solid examples.
 1. `git tag -s <version> -m '<version>' && git push <puppetlabs> refs/tags/<version>`
 1. Send out an announcement e-mail
 
+## Maintenance
+
+Maintainers: Michael Smith <michael.smith@puppet.com>, Branan Riley <branan@puppet.com>
+Tickets: https://tickets.puppetlabs.com/browse/LTH.
+
 [1]: https://github.com/philsquared/Catch
 [2]: https://github.com/miloyip/rapidjson
 [3]: json_container/README.md
