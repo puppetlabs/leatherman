@@ -157,7 +157,9 @@ generating message catalogs:
   source files. If the project is configured with `LEATHERMAN_LOCALES`
   containing a list of language codes, it will add a target
   `${PROJECT_NAME}-${LANG}.po` to create or update translation (.po)
-  files matching those codes. Files are put in `dir`.
+  files matching those codes. Files are put in `dir`. To avoid `make
+  clean` deleting these files, look at how the `locales` directory is
+  structured.
 * `gettext_compile <dir> <inst>`: creates a `translation` target (also
   used by `all`) to generate the binary message catalogs (.mo files) and
   configure installing them to the specified install location (`inst`).

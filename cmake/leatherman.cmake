@@ -195,7 +195,7 @@ macro(gettext_templates dir)
                 ${ALL_PROJECT_SOURCES}
             COMMAND ${CMAKE_COMMAND}
                 -DPOT_FILE=${lang_template}
-                -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+                -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
                 -P ${LEATHERMAN_CMAKE_DIR}/normalize_pot.cmake
             DEPENDS ${ALL_PROJECT_SOURCES})
 
