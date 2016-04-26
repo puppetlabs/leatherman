@@ -86,7 +86,7 @@ namespace leatherman { namespace locale {
             // Create and apply formatter here, as we want to guarantee the lifetime of the arguments.
             // boost::locale::format doesn't make copies, and a common gotcha is using temporary arguments
             // to build up the formatter.
-            boost::locale::format form(boost::locale::translate(s));
+            boost::locale::format form(translate(s, domain_));
             // Technique for the one-liner explained at http://florianjw.de/en/variadic_templates.html.
             (void) std::initializer_list<int>{ ((void)(form % args), 0)... };
             return form.str(get_locale("", domain_));
