@@ -47,6 +47,7 @@ TEST_CASE("logging with on_message") {
         REQUIRE(level == log_level::fatal);
         REQUIRE(message == "fatal message");
     }
+#if defined(__clang__) || __GNUC__ >= 5
     SECTION("a unicode characters to log") {
         const wstring symbols[] = {L"\u2122", L"\u2744", L"\u039b"};
         for (auto const& s : symbols) {
@@ -56,4 +57,5 @@ TEST_CASE("logging with on_message") {
             REQUIRE(message == utf8);
         }
     }
+#endif
 }
