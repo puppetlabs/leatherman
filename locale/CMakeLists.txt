@@ -31,8 +31,7 @@ endif()
 
 add_leatherman_test(tests/format.cc)
 
-if (BUILDING_LEATHERMAN)
+if (LEATHERMAN_USE_LOCALES AND BUILDING_LEATHERMAN)
     project(leatherman_test)
-    gettext_templates(${CMAKE_CURRENT_SOURCE_DIR}/locales ${CMAKE_CURRENT_SOURCE_DIR}/tests/locale.cc)
-    gettext_compile(${CMAKE_CURRENT_SOURCE_DIR}/locales share/locale)
+    add_subdirectory(locales)
 endif()

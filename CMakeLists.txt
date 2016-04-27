@@ -37,8 +37,7 @@ add_definitions(${LEATHERMAN_DEFINITIONS})
 add_definitions(-DLEATHERMAN_LOCALE_INSTALL="${CMAKE_INSTALL_PREFIX}/share/locale")
 
 file(GLOB_RECURSE ALL_LEATHERMAN_SOURCES */src/*.cc */inc/*.hpp)
-gettext_templates(${CMAKE_CURRENT_SOURCE_DIR}/locales ${ALL_LEATHERMAN_SOURCES})
-gettext_compile(${CMAKE_CURRENT_SOURCE_DIR}/locales share/locale)
+add_subdirectory(locales)
 
 add_leatherman_dir(catch EXCLUDE_FROM_VARS)
 add_leatherman_dir(nowide)

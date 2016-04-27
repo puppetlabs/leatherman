@@ -1,0 +1,6 @@
+if (LEATHERMAN_TOPLEVEL)
+    gettext_templates(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../tests/logging_i18n.cc)
+endif()
+gettext_compile(${CMAKE_CURRENT_SOURCE_DIR} share/locale)
+SET_DIRECTORY_PROPERTIES(PROPERTIES CLEAN_NO_CUSTOM TRUE)
+

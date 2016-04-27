@@ -13,6 +13,11 @@
   - [Variables Set by Leatherman](#variables-set-by-leatherman)
   - [CMake Helpers Provided by Leatherman](#cmake-helpers-provided-by-leatherman)
   - [Internationalization (i18n)](#internationalization-i18n)
+    - [Helper Functions](#helper-functions)
+    - [Enabling i18n](#enabling-i18n)
+    - [Extracting and Translating Text](#extracting-and-translating-text)
+    - [Limitations](#limitations)
+    - [Debugging](#debugging)
   - [Using Logging](#using-logging)
   - [Using Catch](#using-catch)
   - [Using Windows](#using-windows)
@@ -23,6 +28,7 @@
   - [Sample Library CMakeLists.txt file](#sample-library-cmakeliststxt-file)
   - [Vendoring Other Libraries](#vendoring-other-libraries)
 - [How To Release](#how-to-release)
+- [Maintenance](#maintenance)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -149,15 +155,20 @@ CMake helpers. These will be automatically added to your
 ### Internationalization (i18n)
 
 Leatherman and its components provide support for generating and using
-`gettext`-based message catalogs. Two helpers are provided for
-generating message catalogs:
+`gettext`-based message catalogs.
+
+#### Helper Functions
+
+Two helpers are provided for generating message catalogs:
 
 * `gettext_templates <dir> <sources>`: creates a `${PROJECT_NAME}.pot`
   target (used by `all`) that (re)generates the .pot file from specified
   source files. If the project is configured with `LEATHERMAN_LOCALES`
   containing a list of language codes, it will add a target
   `${PROJECT_NAME}-${LANG}.po` to create or update translation (.po)
-  files matching those codes. Files are put in `dir`.
+  files matching those codes. Files are put in `dir`. To avoid `make
+  clean` deleting these files, look at how the `locales` directory is
+  structured.
 * `gettext_compile <dir> <inst>`: creates a `translation` target (also
   used by `all`) to generate the binary message catalogs (.mo files) and
   configure installing them to the specified install location (`inst`).
@@ -169,6 +180,8 @@ Normal use of cmake/make should ensure the translation files are up-to-
 date. Translations can be tested by setting the `LC_CTYPE` environment
 variable.
 
+#### Enabling i18n
+
 By default i18n support is disabled. To enable it, define `LEATHERMAN_I18N`
 when compiling your project. To do so, add these two lines to your projects
 CMakeLists.txt file below where you have `find_package(LEATHERMAN ...)` and
@@ -178,6 +191,12 @@ also below where you do `include(cflags)`.
 add_definitions(${LEATHERMAN_DEFINITIONS})
 add_definitions(-DLEATHERMAN_I18N)
 ```
+
+#### Extracting and Translating Text
+
+The format strings in logging (the first argument) will automatically be
+extracted for the translation template file and translated. Substitution
+arguments will not, and must be explicitly translated.
 
 To translate strings outside of logging, use the
 `leatherman::locale::translate` and `leatherman::locale::format`
@@ -194,12 +213,6 @@ use `{N}` in as the substitution token for your strings. If you need to
 support both modes and use advanced substitution strings, you'll have
 to use an `#ifdef LEATHERMAN_I18N` block to use the correct string.
 
-Translation isn't supported on AIX or Solaris, as GCC on those platforms
-doesn't support `std::locale`. In fact std::locale is buggy, so avoid
-using `get_locale` as well. The CMake option `LEATHERMAN_USE_LOCALES`
-can be used to enable or disable building with Boost.Locale and using
-`std::locale`.
-
 To use `leatherman::locale::translate` or `leatherman::locale::format`
 in your project, add an include to the top of your cpp file:
 
@@ -215,10 +228,24 @@ std::cout << leatherman::locale::translate("This is translated") << std::endl;
 std::cout << leatherman::locale::format("This is {1} translated message", 1) << std::endl;
 ```
 
+#### Limitations
+
 Note that on Windows when building Leatherman.Locale as a DLL and
 Boost.Locale statically, you can get some weird behavior from Boost.Locale.
 Avoid using it directly, and ensure all translation operations happen
 as part of the Leatherman.Locale DLL memory space (i.e. in source files).
+
+Translation isn't supported on AIX or Solaris, as GCC on those platforms
+doesn't support `std::locale`. In fact std::locale is buggy, so avoid
+using `get_locale` as well. The CMake option `LEATHERMAN_USE_LOCALES`
+can be used to enable or disable building with Boost.Locale and using
+`std::locale`.
+
+#### Debugging
+
+If output strings are not being translated, [gettext's FAQ](https://www.gnu.org/software/gettext/FAQ.html#integrating_noop)
+has some suggestions for debugging.
+>>>>>>> (maint) Add debugging i18n to README
 
 ### Using Logging
 

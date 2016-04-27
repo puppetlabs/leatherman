@@ -1,12 +1,14 @@
 #include <catch.hpp>
 #include <leatherman/logging/logging.hpp>
 #include <boost/nowide/convert.hpp>
+#include "logging.hpp"
 
 using namespace std;
 using namespace leatherman::logging;
 
-SCENARIO("logging with on_message") {
-    logging_test_context context;
+TEST_CASE("logging with on_message") {
+    leatherman::test::logging_context ctx(log_level::trace);
+
     string message;
     log_level level;
     on_message([&](log_level lvl, string const& msg) {
@@ -14,49 +16,39 @@ SCENARIO("logging with on_message") {
         message = msg;
         return false;
     });
-    GIVEN("a TRACE message to log") {
+
+    SECTION("a TRACE message is logged to on_message") {
         LOG_TRACE("trace message");
-        THEN("on_message is called with the message") {
-            REQUIRE(level == log_level::trace);
-            REQUIRE(message == "trace message");
-        }
+        REQUIRE(level == log_level::trace);
+        REQUIRE(message == "trace message");
     }
-    GIVEN("a DEBUG message to log") {
+    SECTION("a DEBUG message is logged to on_message") {
         LOG_DEBUG("debug message");
-        THEN("on_message is called with the message") {
-            REQUIRE(level == log_level::debug);
-            REQUIRE(message == "debug message");
-        }
+        REQUIRE(level == log_level::debug);
+        REQUIRE(message == "debug message");
     }
-    GIVEN("a INFO message to log") {
+    SECTION("an INFO message is logged to on_message") {
         LOG_INFO("info message");
-        THEN("on_message is called with the message") {
-            REQUIRE(level == log_level::info);
-            REQUIRE(message == "info message");
-        }
+        REQUIRE(level == log_level::info);
+        REQUIRE(message == "info message");
     }
-    GIVEN("a WARNING message to log") {
+    SECTION("a WARNING message is logged to on_message") {
         LOG_WARNING("warning message");
-        THEN("on_message is called with the message") {
-            REQUIRE(level == log_level::warning);
-            REQUIRE(message == "warning message");
-        }
+        REQUIRE(level == log_level::warning);
+        REQUIRE(message == "warning message");
     }
-    GIVEN("a ERROR message to log") {
+    SECTION("an ERROR message is logged to on_message") {
         LOG_ERROR("error message");
-        THEN("on_message is called with the message") {
-            REQUIRE(level == log_level::error);
-            REQUIRE(message == "error message");
-        }
+        REQUIRE(level == log_level::error);
+        REQUIRE(message == "error message");
     }
-    GIVEN("a FATAL message to log") {
+    SECTION("a FATAL message is logged to on_message") {
         LOG_FATAL("fatal message");
-        THEN("on_message is called with the message") {
-            REQUIRE(level == log_level::fatal);
-            REQUIRE(message == "fatal message");
-        }
+        REQUIRE(level == log_level::fatal);
+        REQUIRE(message == "fatal message");
     }
-    GIVEN("a unicode characters to log") {
+#if defined(__clang__) || __GNUC__ >= 5
+    SECTION("a unicode characters to log") {
         const wstring symbols[] = {L"\u2122", L"\u2744", L"\u039b"};
         for (auto const& s : symbols) {
             auto utf8 = boost::nowide::narrow(s);
@@ -65,4 +57,5 @@ SCENARIO("logging with on_message") {
             REQUIRE(message == utf8);
         }
     }
+#endif
 }

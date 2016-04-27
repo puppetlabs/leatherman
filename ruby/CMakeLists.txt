@@ -7,6 +7,7 @@ leatherman_dependency(dynamic_library)
 leatherman_dependency(util)
 leatherman_dependency(execution)
 
+leatherman_dependency(locale)
 leatherman_dependency(logging)
 if (BUILDING_LEATHERMAN)
     leatherman_logging_namespace("leatherman.ruby")

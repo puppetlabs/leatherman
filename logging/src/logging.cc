@@ -82,7 +82,10 @@ namespace leatherman { namespace logging {
         // Locale in GCC is busted on Solaris, so skip it.
         // TODO: Imbue may not be useful, as setup_logging can be called multiple times
         // with different domains for the same ostream.
-        dst.imbue(lth_locale::get_locale(locale, domain));
+        // Note that this creates a locale that's not usable for testing, as it
+        // only includes paths for install locations. This is intentional, to avoid leaving
+        // searching paths that have unknown permissions.
+        dst.imbue(lth_locale::get_locale(locale, domain, {}));
 #endif
 
         boost::log::add_common_attributes();
@@ -134,7 +137,7 @@ namespace leatherman { namespace logging {
         g_callback = callback;
     }
 
-    void log(const string &logger, log_level level, int line_num, string const& message)
+    void log_helper(const string &logger, log_level level, int line_num, string const& message)
     {
         if (level >= log_level::error) {
             g_error_logged = true;

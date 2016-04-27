@@ -50,12 +50,21 @@ namespace leatherman { namespace test {
     };
 
     /**
+     * Context for simple logging tests.
+     */
+    struct logging_context
+    {
+        logging_context(log_level lvl = log_level::trace);
+        virtual ~logging_context();
+    };
+
+    /**
      * Context for capturing the format of log messages as they would appear on cout/cerr.
      */
-    struct logging_format_context
+    struct logging_format_context : logging_context
     {
-        logging_format_context(log_level lvl, string ns, int line_num = 0);
-        ~logging_format_context();
+        logging_format_context(log_level lvl = log_level::trace, string ns = LOG_NAMESPACE, int line_num = 0);
+        ~logging_format_context() final;
 
         vector<string> const& tokens() const;
         string message() const;

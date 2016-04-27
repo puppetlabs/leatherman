@@ -195,7 +195,7 @@ macro(gettext_templates dir)
                 ${ALL_PROJECT_SOURCES}
             COMMAND ${CMAKE_COMMAND}
                 -DPOT_FILE=${lang_template}
-                -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+                -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
                 -P ${LEATHERMAN_CMAKE_DIR}/normalize_pot.cmake
             DEPENDS ${ALL_PROJECT_SOURCES})
 
@@ -243,6 +243,15 @@ macro(gettext_compile dir inst)
         if (NOT TARGET translations)
             add_custom_target(translations ALL)
         endif()
+
+        # Add LEATHERMAN_LOCALES, as they may not have been generated yet.
+        foreach(locale ${LEATHERMAN_LOCALES})
+            set(fpath ${dir}/${locale}.po)
+            list(FIND TRANSLATIONS ${fpath} FOUND)
+            if (${FOUND} EQUAL -1)
+                list(APPEND TRANSLATIONS ${fpath})
+            endif()
+        endforeach()
 
         foreach(fpath ${TRANSLATIONS})
             get_filename_component(lang ${fpath} NAME_WE)

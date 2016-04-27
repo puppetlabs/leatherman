@@ -17,6 +17,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: tests/locale.cc:12
+#: locale/locales/../tests/locale.cc:13
 msgid "requesting {1,number}."
 msgstr "demande {1,number}."
