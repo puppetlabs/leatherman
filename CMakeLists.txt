@@ -33,6 +33,13 @@ if (LEATHERMAN_TOPLEVEL)
     include(cflags)
 endif()
 
+if (${LEATHERMAN_SHARED} AND (WIN32 OR ${CURL_STATIC}))
+    set(MOCK_CURL FALSE)
+else()
+    set(MOCK_CURL TRUE)
+endif()
+defoption(LEATHERMAN_MOCK_CURL "Use mock curl library for testing Leatherman.curl" ${MOCK_CURL})
+
 add_definitions(${LEATHERMAN_DEFINITIONS})
 add_definitions(-DLEATHERMAN_LOCALE_INSTALL="${CMAKE_INSTALL_PREFIX}/share/locale")
 

@@ -3,7 +3,7 @@ find_package(Boost 1.54 REQUIRED COMPONENTS regex)
 add_leatherman_deps("${Boost_LIBRARIES}")
 add_leatherman_includes("${Boost_INCLUDE_DIRS}")
 
-if (BUILDING_LEATHERMAN AND NOT CURL_STATIC)
+if (BUILDING_LEATHERMAN AND LEATHERMAN_MOCK_CURL)
     # Create a mock curl library; it needs to be separate to allow for dllimport in the client source
     # Do it first to avoid symbol_exports defined later.
     add_subdirectory(tests)
@@ -36,6 +36,6 @@ endif()
 add_leatherman_library(src/client.cc src/request.cc src/response.cc EXPORTS "${CMAKE_CURRENT_LIST_DIR}/inc/leatherman/curl/export.h")
 add_leatherman_headers(inc/leatherman)
 
-if (NOT CURL_STATIC)
+if (BUILDING_LEATHERMAN AND LEATHERMAN_MOCK_CURL)
     add_leatherman_test(tests/client_test.cc tests/request_test.cc tests/response_test.cc)
 endif()
