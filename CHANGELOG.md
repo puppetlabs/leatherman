@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.6.3]
+
+### Fixed
+- (LTH-96) Translate log message without substitutions
+- (LTH-95) Fix unit tests using shared libraries on Windows
+- Minor updates to tests and documentation
+
 ## [0.6.2] - 2016-04-20
 
 ### Fixed
