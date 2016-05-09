@@ -376,58 +376,63 @@ msgstr ""
 msgid "using prior COM concurrency model"
 msgstr ""
 
-#: windows/src/wmi.cc:46
+#: windows/src/wmi.cc:49
 msgid "failed to initialize COM library"
 msgstr ""
 
-#: windows/src/wmi.cc:56
-msgid "failed to create IWbemLocator object"
+#. debug
+#: windows/src/wmi.cc:51
+msgid "COM single-threaded apartment not supported, using multi-threaded"
 msgstr ""
 
 #: windows/src/wmi.cc:64
-msgid "could not connect to WMI server"
+msgid "failed to create IWbemLocator object"
 msgstr ""
 
 #: windows/src/wmi.cc:72
+msgid "could not connect to WMI server"
+msgstr ""
+
+#: windows/src/wmi.cc:80
 msgid "could not set proxy blanket"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:83
+#: windows/src/wmi.cc:91
 msgid "ignoring {1}-dimensional array in query {2}.{3}"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:99
+#: windows/src/wmi.cc:107
 msgid ""
 "WMI query {1}.{2} result could not be converted from type {3} to a string"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:117
+#: windows/src/wmi.cc:125
 msgid "query {1} failed"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:140
+#: windows/src/wmi.cc:148
 msgid "query {1}.{2} could not be found"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:163
+#: windows/src/wmi.cc:171
 msgid "only single value requested from array for key {1}"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:178
-#: windows/src/wmi.cc:190
+#: windows/src/wmi.cc:186
+#: windows/src/wmi.cc:198
 msgid "only single entry requested from array of entries for key {1}"
 msgstr ""
 
-#: windows/src/wmi.cc:182
+#: windows/src/wmi.cc:190
 msgid "unable to get from empty array of objects"
 msgstr ""
 
-#: windows/src/wmi.cc:194
+#: windows/src/wmi.cc:202
 msgid "unable to get_range from empty array of objects"
 msgstr ""
