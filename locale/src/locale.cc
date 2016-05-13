@@ -51,7 +51,11 @@ namespace leatherman { namespace locale {
 
     string translate(string const& s, string const& domain)
     {
-        return boost::locale::translate(s).str(get_locale("", domain));
+        try {
+            return boost::locale::translate(s).str(get_locale("", domain));
+        } catch (exception const&) {
+            return s;
+        }
     }
 
 }}  // namespace leatherman::locale

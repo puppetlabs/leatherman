@@ -151,8 +151,9 @@ namespace leatherman { namespace logging {
      * @param dst Destination stream for logging output.
      * @param locale The locale identifier to use for logging.
      * @param domain The catalog domain to use for i18n via gettext.
+     * @param use_locale Whether to use locales in logging setup. If locales are disabled this parameter is ignored.
      */
-    void setup_logging(std::ostream &dst, std::string locale = "", std::string domain = PROJECT_NAME);
+    void setup_logging(std::ostream &dst, std::string locale = "", std::string domain = PROJECT_NAME, bool use_locale = true);
 
     /**
      * Sets the current log level.
