@@ -67,7 +67,7 @@ namespace leatherman { namespace logging {
         _dst << endl;
     }
 
-    void setup_logging(ostream &dst, string locale, string domain)
+    void setup_logging(ostream &dst, string locale, string domain, bool use_locale)
     {
         // Remove existing sinks before adding a new one
         auto core = boost::log::core::get();
@@ -77,6 +77,7 @@ namespace leatherman { namespace logging {
         boost::shared_ptr<sink_t> sink(new sink_t(&dst));
         core->add_sink(sink);
 
+
 #ifdef LEATHERMAN_USE_LOCALES
         // Imbue the logging sink with the requested locale.
         // Locale in GCC is busted on Solaris, so skip it.
@@ -85,7 +86,9 @@ namespace leatherman { namespace logging {
         // Note that this creates a locale that's not usable for testing, as it
         // only includes paths for install locations. This is intentional, to avoid leaving
         // searching paths that have unknown permissions.
-        dst.imbue(lth_locale::get_locale(locale, domain, {}));
+        if (use_locale) {
+            dst.imbue(lth_locale::get_locale(locale, domain, {}));
+        }
 #endif
 
         boost::log::add_common_attributes();

@@ -258,7 +258,7 @@ msgstr ""
 msgid "{1} has not been set"
 msgstr ""
 
-#: logging/src/logging.cc:192
+#: logging/src/logging.cc:195
 msgid ""
 "invalid log level '%1%': expected none, trace, debug, info, warn, error, or "
 "fatal."
