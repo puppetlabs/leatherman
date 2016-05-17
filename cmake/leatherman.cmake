@@ -189,7 +189,10 @@ macro(gettext_templates dir)
                 --keyword=LOG_ERROR:1,\\"error\\"
                 --keyword=LOG_FATAL:1,\\"fatal\\"
                 --keyword=_
-                --keyword=translate
+                --keyword=translate:1
+                --keyword=translate:1,2
+                --keyword=translate_c:1c,2
+                --keyword=translate_c:1c,2,3
                 --keyword=format
                 --add-comments=LOCALE
                 ${ALL_PROJECT_SOURCES}
