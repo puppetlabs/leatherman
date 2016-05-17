@@ -295,16 +295,18 @@ macro(symbol_exports target header)
     generate_export_header(${target} EXPORT_FILE_NAME "${header}")
     # Export on Apple resulted in issues finding symbols from library dependencies
     # that we haven't solved. For now avoid the problem.
-    if (NOT APPLE)
-        add_compiler_export_flags()
+    # AIX doesn't support inline headers, and CMake warns if you try to apply the
+    # option on static libraries.
+    get_target_property(target_type ${target} TYPE)
+    if ((NOT APPLE) AND (NOT CMAKE_SYSTEM_NAME MATCHES "AIX") AND
+        (${target_type} STREQUAL SHARED_LIBRARY))
+        set_target_properties(${target} PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
     endif()
-    if (WIN32)
-        # If the target name is not a C identifier, generate_export_header will
-        # convert it to one. Fix the define to do the same.
-        string(MAKE_C_IDENTIFIER ${target} target_c_name)
-        string(TOLOWER ${target_c_name} target_name_lower)
-        add_definitions("-D${target_name_lower}_EXPORTS")
-    endif()
+    # If the target name is not a C identifier, generate_export_header will
+    # convert it to one. Fix the define to do the same.
+    string(MAKE_C_IDENTIFIER ${target} target_c_name)
+    string(TOLOWER ${target_c_name} target_name_lower)
+    target_compile_definitions(${target} PRIVATE "-D${target_name_lower}_EXPORTS")
 endmacro()
 
 # Usage: append_new(VARNAME VAR1 VAR2 ...)
