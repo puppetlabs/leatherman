@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.0]
+
+### Fixed
+- `symbol_exports` helper no longer applies its macros to all targets
+
+### Added
+- (LTH-97) Applications can now disable locale support in logging
+
 ## [0.6.3]
 
 ### Fixed
