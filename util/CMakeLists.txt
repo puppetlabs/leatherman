@@ -29,5 +29,6 @@ add_leatherman_test(
     tests/strings_test.cc
     tests/option_set.cc
     tests/environment.cc
+    tests/timer.cc
     ${PLATFORM_TESTS}
     )
