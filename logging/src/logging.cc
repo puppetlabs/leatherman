@@ -100,6 +100,12 @@ namespace leatherman { namespace logging {
         g_colorize = color_supported(dst);
     }
 
+    // This version exists for binary compatibility only.
+    void setup_logging(ostream &dst, string locale, string domain)
+    {
+        setup_logging(dst, move(locale), move(domain), true);
+    }
+
     void set_level(log_level level)
     {
         auto core = boost::log::core::get();
