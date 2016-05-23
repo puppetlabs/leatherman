@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.1]
+
+### Fixed
+- Binary compatibility with 0.6.x has been restored
+
 ## [0.7.0]
 
 ### Fixed
