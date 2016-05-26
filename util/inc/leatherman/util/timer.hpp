@@ -19,10 +19,16 @@ class Timer {
         reset();
     }
 
-    /** @return Returns the time that has passed since last reset in seconds */
+    /** @return Returns the time that has passed since last reset in seconds. */
     double elapsed_seconds() {
         auto now = std::chrono::steady_clock::now();
         return std::chrono::duration<double>(now - start_).count();
+    }
+
+    /** @return Returns the time that has passed since last reset in milliseconds. */
+    int elapsed_milliseconds() {
+        auto now = std::chrono::steady_clock::now();
+        return std::chrono::duration_cast<std::chrono::milliseconds>(now - start_).count();
     }
 
     /** Resets the clock. */
