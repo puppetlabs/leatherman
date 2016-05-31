@@ -43,9 +43,17 @@ namespace leatherman { namespace windows {
             if (hres == RPC_E_CHANGED_MODE) {
                 LOG_DEBUG("using prior COM concurrency model");
             } else {
-                throw wmi_exception(format_hresult(_("failed to initialize COM library"), hres));
+                // Retry with multi-threaded, in case we're on Nano Server
+                hres = CoInitializeEx(0, COINIT_MULTITHREADED);
+                if (FAILED(hres)) {
+                    throw wmi_exception(format_hresult(_("failed to initialize COM library"), hres));
+                } else {
+                    LOG_DEBUG("COM single-threaded apartment not supported, using multi-threaded");
+                }
             }
-        } else {
+        }
+
+        if (SUCCEEDED(hres)) {
             _coInit = util::scoped_resource<bool>(true, [](bool b) { CoUninitialize(); });
         }
 
