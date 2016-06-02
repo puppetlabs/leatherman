@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.2]
+
+### Fixed
+- Fallback to multi-threaded apartments for COM on Microsoft Nano Server.
+
+### Added
+- Add `Util::Timer::elapsed_milliseconds`.
+- Add context and plural support in Leatherman.Locale `translate` (and new `translate_c`) methods.
+
 ## [0.7.1]
 
 ### Fixed
