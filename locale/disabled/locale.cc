@@ -13,9 +13,24 @@ namespace leatherman { namespace locale {
         throw std::runtime_error("leatherman::locale::clear_domain is not supported on this platform");
     }
 
-    std::string translate(std::string const& s, std::string const& domain)
+    std::string translate(std::string const& msg, std::string const& domain)
     {
-        return s;
+        return msg;
+    }
+
+    string translate_c(string const& context, string const& msg, string const& domain)
+    {
+        return msg;
+    }
+
+    string translate(string const& single, string const& plural, int n, string const& domain)
+    {
+        return n == 1 ? single : plural;
+    }
+
+    string translate_c(string const& context, string const& single, string const& plural, int n, string const& domain)
+    {
+        return n == 1 ? single : plural;
     }
 
 }}  // namespace leatherman::locale

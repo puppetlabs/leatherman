@@ -32,6 +32,6 @@ endif()
 add_leatherman_test(tests/format.cc)
 
 if (LEATHERMAN_USE_LOCALES AND BUILDING_LEATHERMAN)
-    project(leatherman_test)
+    project(leatherman_locale)
     add_subdirectory(locales)
 endif()

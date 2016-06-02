@@ -53,11 +53,49 @@ namespace leatherman { namespace locale {
 
     /**
      * Translate text using the locale initialized by this library.
-     * @param s The string to translate.
+     * If localization encounters an error, the original message will be returned.
+     * @param msg The string to translate.
      * @param domain The catalog domain to use for i18n via gettext.
      * @return The translated string.
      */
-    std::string translate(std::string const& s, std::string const& domain = PROJECT_NAME);
+    std::string translate(std::string const& msg, std::string const& domain = PROJECT_NAME);
+
+    /**
+     * Translate text in a given context using the locale initialized by this library.
+     * Context can be used to disambiguate the same word used multiple different ways.
+     * If localization encounters an error, the original message will be returned.
+     * @param context The context string.
+     * @param msg The string to translate.
+     * @param domain The catalog domain to use for i18n via gettext.
+     * @return The translated string.
+     */
+    std::string translate_c(std::string const& context, std::string const& msg, std::string const& domain = PROJECT_NAME);
+
+    /**
+     * Translate plural text using the locale initialized by this library.
+     * If localization encounters an error, the `single` message will be returned for n == 1,
+     * and the `plural` message will be returned for all other values of n.
+     * @param single The singuar form to translate.
+     * @param plural The plural form to translate.
+     * @param n Number of items, used to choose singular or plural.
+     * @param domain The catalog domain to use for i18n via gettext.
+     * @return The translated string.
+     */
+    std::string translate(std::string const& single, std::string const& plural, int n, std::string const& domain = PROJECT_NAME);
+
+    /**
+     * Translate plural text in a given context using the locale initialized by this library.
+     * Context can be used to disambiguate the same word used multiple different ways.
+     * If localization encounters an error, the `single` message will be returned for n == 1,
+     * and the `plural` message will be returned for all other values of n.
+     * @param context The context string.
+     * @param single The singuar form to translate.
+     * @param plural The plural form to translate.
+     * @param n Number of items, used to choose singular or plural.
+     * @param domain The catalog domain to use for i18n via gettext.
+     * @return The translated string.
+     */
+    std::string translate_c(std::string const& context, std::string const& single, std::string const& plural, int n, std::string const& domain = PROJECT_NAME);
 
 #ifdef LEATHERMAN_I18N
     /**
