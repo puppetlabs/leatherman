@@ -14,5 +14,8 @@ else()
 endif()
 defoption(LEATHERMAN_USE_LOCALES "Use locales for internationalization" ${USE_BOOST_LOCALE})
 
+# Provided so it can be disabled temporarily when we don't have gettext built.
+defoption(LEATHERMAN_GETTEXT "Support localization with gettext" ON)
+
 # Map our boost option to the for-realsies one
 set(Boost_USE_STATIC_LIBS ${BOOST_STATIC})

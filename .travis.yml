@@ -54,6 +54,7 @@ env:
     - TRAVIS_TARGET=DEBUG
     - TRAVIS_TARGET=SHARED_RELEASE
     - TRAVIS_TARGET=LOCALE_DISABLED
+    - TRAVIS_TARGET=GETTEXT_DISABLED
 deploy:
   provider: releases
   api_key:
