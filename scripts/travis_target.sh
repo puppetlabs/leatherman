@@ -15,6 +15,7 @@ function travis_make()
     [ $1 == "debug" ] && export CMAKE_VARS="-DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON"
     [ $1 == "shared_release" ] && export CMAKE_VARS="-DLEATHERMAN_SHARED=ON"
     [ $1 == "locale_disabled" ] && export CMAKE_VARS="-DLEATHERMAN_USE_LOCALES=OFF"
+    [ $1 == "gettext_disabled" ] && export CMAKE_VARS="-DLEATHERMAN_GETTEXT=OFF"
     cmake $CMAKE_VARS -DCMAKE_INSTALL_PREFIX=$USERDIR ..
     if [ $? -ne 0 ]; then
         echo "cmake failed."
@@ -66,5 +67,6 @@ case $TRAVIS_TARGET in
   "DEBUG" )    travis_make debug ;;
   "SHARED_RELEASE" ) travis_make shared_release ;;
   "LOCALE_DISABLED" ) travis_make locale_disabled ;;
+  "GETTEXT_DISABLED" ) travis_make gettext_disabled ;;
   *)           echo "Nothing to do!"
 esac
