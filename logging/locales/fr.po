@@ -18,55 +18,44 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. debug
-#: logging/locales/../tests/logging_i18n.cc:43
 msgid "debug logging"
 msgstr "l'enregistrement de débogage"
 
 #. debug
-#: logging/locales/../tests/logging_i18n.cc:48
 msgid "debug logging is {1}"
 msgstr "l'enregistrement de débogage est {1}"
 
 #. info
-#: logging/locales/../tests/logging_i18n.cc:53
 msgid "info logging"
 msgstr "info exploitation forestière"
 
 #. info
-#: logging/locales/../tests/logging_i18n.cc:58
 msgid "info logging is {1}"
 msgstr "info exploitation forestière est {1}"
 
 #. warning
-#: logging/locales/../tests/logging_i18n.cc:63
 msgid "warning logging"
 msgstr "journalisation d'avertissement"
 
 #. warning
-#: logging/locales/../tests/logging_i18n.cc:68
 msgid "warning logging is {1}"
 msgstr "journalisation d'avertissement est {1}"
 
 #. error
-#: logging/locales/../tests/logging_i18n.cc:73
 msgid "error message"
 msgstr "message d'erreur"
 
 #. error
-#: logging/locales/../tests/logging_i18n.cc:78
 msgid "error message is {1}"
 msgstr "un message d'erreur est {1}"
 
 #. fatal
-#: logging/locales/../tests/logging_i18n.cc:83
 msgid "fatal message"
 msgstr "un message fatal"
 
 #. fatal
-#: logging/locales/../tests/logging_i18n.cc:88
 msgid "fatal message is {1}"
 msgstr "un message fatal est {1}"
 
-#: logging/locales/../tests/logging_i18n.cc:93
 msgid "™❄Λ"
 msgstr "Λ❄™"
