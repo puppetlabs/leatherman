@@ -195,6 +195,7 @@ macro(gettext_templates dir)
                 --keyword=translate_c:1c,2,3
                 --keyword=format
                 --add-comments=LOCALE
+                --no-location
                 ${ALL_PROJECT_SOURCES}
             COMMAND ${CMAKE_COMMAND}
                 -DPOT_FILE=${lang_template}

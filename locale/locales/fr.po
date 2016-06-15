@@ -17,26 +17,18 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: locale/locales/../tests/locale.cc:17 locale/locales/../tests/locale.cc:49
-#: locale/locales/../tests/locale.cc:61 locale/locales/../tests/locale.cc:94
 msgid "requesting {1,number}."
 msgstr "demande {1,number}."
 
-#: locale/locales/../tests/locale.cc:21 locale/locales/../tests/locale.cc:65
 msgctxt "foo"
 msgid "requesting {1,number}."
 msgstr "demandé {1,number}."
 
-#: locale/locales/../tests/locale.cc:27 locale/locales/../tests/locale.cc:31
-#: locale/locales/../tests/locale.cc:35 locale/locales/../tests/locale.cc:72
-#: locale/locales/../tests/locale.cc:76 locale/locales/../tests/locale.cc:80
 msgid "requesting {1,number} item."
 msgid_plural "requesting {1,number} items."
 msgstr[0] "demande {1,number} objet."
 msgstr[1] "demande {1,number} objets."
 
-#: locale/locales/../tests/locale.cc:39 locale/locales/../tests/locale.cc:43
-#: locale/locales/../tests/locale.cc:84 locale/locales/../tests/locale.cc:88
 msgctxt "foo"
 msgid "requesting {1,number} item."
 msgid_plural "requesting {1,number} items."
