@@ -1,12 +1,12 @@
 # French translations for leatherman_logging package.
-# Copyright (C) 2016 Puppet Labs <docs@puppetlabs.com>
+# Copyright (C) 2016 Puppet <docs@puppet.com>
 # This file is distributed under the same license as the leatherman_logging package.
 # Automatically generated, 2016.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: leatherman_logging \n"
-"Report-Msgid-Bugs-To: docs@puppetlabs.com\n"
+"Report-Msgid-Bugs-To: docs@puppet.com\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
 "Last-Translator: Automatically generated\n"
@@ -18,55 +18,55 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. debug
-#: logging/locales/../tests/logging_i18n.cc:43
+#: logging/locales/../tests/logging_i18n.cc
 msgid "debug logging"
 msgstr "l'enregistrement de débogage"
 
 #. debug
-#: logging/locales/../tests/logging_i18n.cc:48
+#: logging/locales/../tests/logging_i18n.cc
 msgid "debug logging is {1}"
 msgstr "l'enregistrement de débogage est {1}"
 
 #. info
-#: logging/locales/../tests/logging_i18n.cc:53
+#: logging/locales/../tests/logging_i18n.cc
 msgid "info logging"
 msgstr "info exploitation forestière"
 
 #. info
-#: logging/locales/../tests/logging_i18n.cc:58
+#: logging/locales/../tests/logging_i18n.cc
 msgid "info logging is {1}"
 msgstr "info exploitation forestière est {1}"
 
 #. warning
-#: logging/locales/../tests/logging_i18n.cc:63
+#: logging/locales/../tests/logging_i18n.cc
 msgid "warning logging"
 msgstr "journalisation d'avertissement"
 
 #. warning
-#: logging/locales/../tests/logging_i18n.cc:68
+#: logging/locales/../tests/logging_i18n.cc
 msgid "warning logging is {1}"
 msgstr "journalisation d'avertissement est {1}"
 
 #. error
-#: logging/locales/../tests/logging_i18n.cc:73
+#: logging/locales/../tests/logging_i18n.cc
 msgid "error message"
 msgstr "message d'erreur"
 
 #. error
-#: logging/locales/../tests/logging_i18n.cc:78
+#: logging/locales/../tests/logging_i18n.cc
 msgid "error message is {1}"
 msgstr "un message d'erreur est {1}"
 
 #. fatal
-#: logging/locales/../tests/logging_i18n.cc:83
+#: logging/locales/../tests/logging_i18n.cc
 msgid "fatal message"
 msgstr "un message fatal"
 
 #. fatal
-#: logging/locales/../tests/logging_i18n.cc:88
+#: logging/locales/../tests/logging_i18n.cc
 msgid "fatal message is {1}"
 msgstr "un message fatal est {1}"
 
-#: logging/locales/../tests/logging_i18n.cc:93
+#: logging/locales/../tests/logging_i18n.cc
 msgid "™❄Λ"
 msgstr "Λ❄™"

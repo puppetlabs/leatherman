@@ -1,12 +1,12 @@
 # French translations for leatherman_locale package.
-# Copyright (C) 2015 Puppet Labs <docs@puppetlabs.com>
+# Copyright (C) 2016 Puppet <docs@puppet.com>
 # This file is distributed under the same license as the leatherman_locale package.
-# Automatically generated, 2015.
+# Automatically generated, 2016.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: leatherman_locale \n"
-"Report-Msgid-Bugs-To: docs@puppetlabs.com\n"
+"Report-Msgid-Bugs-To: docs@puppet.com\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
 "Last-Translator: Automatically generated\n"
@@ -17,26 +17,22 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: locale/locales/../tests/locale.cc:17 locale/locales/../tests/locale.cc:49
-#: locale/locales/../tests/locale.cc:61 locale/locales/../tests/locale.cc:94
+#: locale/locales/../tests/locale.cc
 msgid "requesting {1,number}."
 msgstr "demande {1,number}."
 
-#: locale/locales/../tests/locale.cc:21 locale/locales/../tests/locale.cc:65
+#: locale/locales/../tests/locale.cc
 msgctxt "foo"
 msgid "requesting {1,number}."
 msgstr "demandé {1,number}."
 
-#: locale/locales/../tests/locale.cc:27 locale/locales/../tests/locale.cc:31
-#: locale/locales/../tests/locale.cc:35 locale/locales/../tests/locale.cc:72
-#: locale/locales/../tests/locale.cc:76 locale/locales/../tests/locale.cc:80
+#: locale/locales/../tests/locale.cc
 msgid "requesting {1,number} item."
 msgid_plural "requesting {1,number} items."
 msgstr[0] "demande {1,number} objet."
 msgstr[1] "demande {1,number} objets."
 
-#: locale/locales/../tests/locale.cc:39 locale/locales/../tests/locale.cc:43
-#: locale/locales/../tests/locale.cc:84 locale/locales/../tests/locale.cc:88
+#: locale/locales/../tests/locale.cc
 msgctxt "foo"
 msgid "requesting {1,number} item."
 msgid_plural "requesting {1,number} items."

@@ -1,5 +1,5 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR Puppet Labs <docs@puppetlabs.com>
+# Copyright (C) YEAR Puppet <docs@puppet.com>
 # This file is distributed under the same license as the leatherman package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: leatherman 0.7.2\n"
-"Report-Msgid-Bugs-To: docs@puppetlabs.com\n"
+"Report-Msgid-Bugs-To: docs@puppet.com\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
@@ -18,421 +18,414 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #. debug
-#: curl/src/client.cc:165
+#: curl/src/client.cc
 msgid "request completed (status {1})."
 msgstr ""
 
 #. debug
-#: curl/src/client.cc:223
+#: curl/src/client.cc
 msgid "requesting {1}."
 msgstr ""
 
 #. warning
-#: curl/src/client.cc:417
+#: curl/src/client.cc
 msgid "unexpected HTTP response header: {1}."
 msgstr ""
 
 #. debug
-#: dynamic_library/src/posix/dynamic_library.cc:47
+#: dynamic_library/src/posix/dynamic_library.cc
 msgid "library {1} not found {2} ({3})."
 msgstr ""
 
 #. debug
-#: dynamic_library/src/posix/dynamic_library.cc:71
-#: dynamic_library/src/windows/dynamic_library.cc:105
+#: dynamic_library/src/posix/dynamic_library.cc
+#: dynamic_library/src/windows/dynamic_library.cc
 msgid "library {1} is not loaded when attempting to load symbol {2}."
 msgstr ""
 
 #. debug
-#: dynamic_library/src/posix/dynamic_library.cc:77
-#: dynamic_library/src/windows/dynamic_library.cc:111
+#: dynamic_library/src/posix/dynamic_library.cc
+#: dynamic_library/src/windows/dynamic_library.cc
 msgid "symbol {1} not found in library {2}, trying alias {3}."
 msgstr ""
 
-#: dynamic_library/src/posix/dynamic_library.cc:82
-#: dynamic_library/src/windows/dynamic_library.cc:116
+#: dynamic_library/src/posix/dynamic_library.cc
+#: dynamic_library/src/windows/dynamic_library.cc
 msgid "symbol {1} was not found in {2}."
 msgstr ""
 
 #. debug
-#: dynamic_library/src/posix/dynamic_library.cc:84
-#: dynamic_library/src/windows/dynamic_library.cc:118
+#: dynamic_library/src/posix/dynamic_library.cc
+#: dynamic_library/src/windows/dynamic_library.cc
 msgid "symbol {1} not found in library {2}."
 msgstr ""
 
 #. debug
-#: dynamic_library/src/windows/dynamic_library.cc:26
+#: dynamic_library/src/windows/dynamic_library.cc
 msgid ""
 "library matching pattern {1} not found, CreateToolhelp32Snapshot failed: {2}."
 msgstr ""
 
 #. debug
-#: dynamic_library/src/windows/dynamic_library.cc:34
+#: dynamic_library/src/windows/dynamic_library.cc
 msgid "library matching pattern {1} not found, Module32First failed: {2}."
 msgstr ""
 
 #. debug
-#: dynamic_library/src/windows/dynamic_library.cc:48
+#: dynamic_library/src/windows/dynamic_library.cc
 msgid "library {1} found from pattern {2}"
 msgstr ""
 
 #. debug
-#: dynamic_library/src/windows/dynamic_library.cc:50
+#: dynamic_library/src/windows/dynamic_library.cc
 msgid ""
 "library {1} found from pattern {2}, but unloaded before handle was acquired"
 msgstr ""
 
 #. debug
-#: dynamic_library/src/windows/dynamic_library.cc:58
+#: dynamic_library/src/windows/dynamic_library.cc
 msgid "no loaded libraries found matching pattern {1}"
 msgstr ""
 
 #. debug
-#: dynamic_library/src/windows/dynamic_library.cc:79
+#: dynamic_library/src/windows/dynamic_library.cc
 msgid "library {1} not found {2}."
 msgstr ""
 
 #. debug
-#: execution/src/execution.cc:88
+#: execution/src/execution.cc
 msgid "executing command: {1}"
 msgstr ""
 
 #. debug
-#: execution/src/execution.cc:425
-#: execution/src/execution.cc:432
+#: execution/src/execution.cc
 msgid "completed processing output: closing child pipes."
 msgstr ""
 
-#: execution/src/posix/execution.cc:75
-#: windows/src/system_error.cc:23
+#: execution/src/posix/execution.cc
+#: windows/src/system_error.cc
 msgid "{1} ({2})"
 msgstr ""
 
-#: execution/src/posix/execution.cc:77
+#: execution/src/posix/execution.cc
 msgid "{1}: {2} ({3})."
 msgstr ""
 
 #. debug
-#: execution/src/posix/execution.cc:223
+#: execution/src/posix/execution.cc
 msgid "select call was interrupted and will be retried."
 msgstr ""
 
 #. error
-#: execution/src/posix/execution.cc:241
-#: execution/src/windows/execution.cc:300
+#: execution/src/posix/execution.cc
+#: execution/src/windows/execution.cc
 msgid "{1} pipe i/o failed: {2}."
 msgstr ""
 
 #. debug
-#: execution/src/posix/execution.cc:245
+#: execution/src/posix/execution.cc
 msgid "{1} pipe i/o was interrupted and will be retried."
 msgstr ""
 
-#: execution/src/posix/execution.cc:269
-#: execution/src/windows/execution.cc:277
-#: execution/src/windows/execution.cc:352
-#: execution/src/windows/execution.cc:645
+#: execution/src/posix/execution.cc
+#: execution/src/windows/execution.cc
 msgid "command timed out after {1} seconds."
 msgstr ""
 
-#: execution/src/posix/execution.cc:362
+#: execution/src/posix/execution.cc
 msgid "{1}={2}"
 msgstr ""
 
 #. debug
-#: execution/src/posix/execution.cc:413
-#: execution/src/windows/execution.cc:427
+#: execution/src/posix/execution.cc
+#: execution/src/windows/execution.cc
 msgid "{1} was not found on the PATH."
 msgstr ""
 
 #. debug
-#: execution/src/posix/execution.cc:553
+#: execution/src/posix/execution.cc
 msgid "process was signaled with signal {1}."
 msgstr ""
 
 #. debug
-#: execution/src/posix/execution.cc:555
+#: execution/src/posix/execution.cc
 msgid "process exited with status code {1}."
 msgstr ""
 
-#: execution/src/posix/execution.cc:561
+#: execution/src/posix/execution.cc
 msgid "child process returned non-zero exit status ({1})."
 msgstr ""
 
-#: execution/src/posix/execution.cc:564
+#: execution/src/posix/execution.cc
 msgid "child process was terminated by signal ({1})."
 msgstr ""
 
-#: execution/src/windows/execution.cc:127
+#: execution/src/windows/execution.cc
 msgid "\\\\.\\Pipe\\leatherman.{1}.{2}.{3}.{4}"
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:145
+#: execution/src/windows/execution.cc
 msgid "failed to create read pipe: {1}."
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:160
+#: execution/src/windows/execution.cc
 msgid "failed to create write pipe: {1}."
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:252
+#: execution/src/windows/execution.cc
 msgid "failed to create {1} read event: {2}."
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:345
+#: execution/src/windows/execution.cc
 msgid "failed to wait for child process i/o: {1}."
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:368
+#: execution/src/windows/execution.cc
 msgid "asynchronous i/o on {1} failed: {2}."
 msgstr ""
 
 #. debug
-#: execution/src/windows/execution.cc:451
-#: execution/src/windows/execution.cc:472
+#: execution/src/windows/execution.cc
 msgid "child environment {1}={2}"
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:558
+#: execution/src/windows/execution.cc
 msgid "failed to create process: {1}."
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:580
+#: execution/src/windows/execution.cc
 msgid "failed to create job object: {1}."
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:583
+#: execution/src/windows/execution.cc
 msgid "failed to associate process with job object: {1}."
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:594
+#: execution/src/windows/execution.cc
 msgid "failed to terminate process: {1}."
 msgstr ""
 
 #. warning
-#: execution/src/windows/execution.cc:597
+#: execution/src/windows/execution.cc
 msgid "could not terminate process {1} because a job object could not be used."
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:607
+#: execution/src/windows/execution.cc
 msgid "failed to create waitable timer: {1}."
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:616
+#: execution/src/windows/execution.cc
 msgid "failed to set waitable timer: {1}."
 msgstr ""
 
 #. error
-#: execution/src/windows/execution.cc:647
+#: execution/src/windows/execution.cc
 msgid "failed to wait for child process to terminate: {1}."
 msgstr ""
 
 #. debug
-#: execution/src/windows/execution.cc:657
+#: execution/src/windows/execution.cc
 msgid "process exited with exit code {1}."
 msgstr ""
 
 #. warning
-#: file_util/src/file.cc:52
+#: file_util/src/file.cc
 msgid "file path is an empty string"
 msgstr ""
 
 #. debug
-#: file_util/src/file.cc:61
+#: file_util/src/file.cc
 msgid "Error reading file: {1}"
 msgstr ""
 
 #. warning
-#: file_util/src/file.cc:110
+#: file_util/src/file.cc
 msgid "{1} has not been set"
 msgstr ""
 
-#: logging/src/logging.cc:201
+#: logging/src/logging.cc
 msgid ""
 "invalid log level '%1%': expected none, trace, debug, info, warn, error, or "
 "fatal."
 msgstr ""
 
 #. info
-#: ruby/src/api.cc:133
+#: ruby/src/api.cc
 msgid "ruby loaded from \"{1}\"."
 msgstr ""
 
 #. info
-#: ruby/src/api.cc:135
+#: ruby/src/api.cc
 msgid "ruby was already loaded."
 msgstr ""
 
 #. info
-#: ruby/src/api.cc:182
+#: ruby/src/api.cc
 msgid "using ruby version {1}"
 msgstr ""
 
 #. warning
-#: ruby/src/api.cc:484
+#: ruby/src/api.cc
 msgid "preferred ruby library \"{1}\" could not be loaded."
 msgstr ""
 
 #. warning
-#: ruby/src/api.cc:494
+#: ruby/src/api.cc
 msgid "ruby library \"{1}\" could not be loaded."
 msgstr ""
 
 #. debug
-#: ruby/src/api.cc:501
+#: ruby/src/api.cc
 msgid "ruby could not be found on the PATH."
 msgstr ""
 
 #. debug
-#: ruby/src/api.cc:504
+#: ruby/src/api.cc
 msgid "ruby was found at \"{1}\"."
 msgstr ""
 
 #. warning
-#: ruby/src/api.cc:513
+#: ruby/src/api.cc
 msgid "ruby failed to run: {1}"
 msgstr ""
 
 #. debug
-#: ruby/src/api.cc:519
+#: ruby/src/api.cc
 msgid ""
 "ruby library \"{1}\" was not found: ensure ruby was built with the --enable-"
 "shared configuration option."
 msgstr ""
 
 #. debug
-#: windows/src/process.cc:27
-#: windows/src/user.cc:50
+#: windows/src/process.cc
+#: windows/src/user.cc
 msgid "OpenProcessToken call failed: {1}"
 msgstr ""
 
 #. debug
-#: windows/src/process.cc:35
+#: windows/src/process.cc
 msgid "GetTokenInformation call failed: {1}"
 msgstr ""
 
-#: windows/src/registry.cc:45
-#: windows/src/registry.cc:53
+#: windows/src/registry.cc
 msgid "error reading registry key {1} {2}: {3}"
 msgstr ""
 
-#: windows/src/system_error.cc:18
+#: windows/src/system_error.cc
 msgid "unknown error ({1})"
 msgstr ""
 
 #. debug
-#: windows/src/user.cc:29
+#: windows/src/user.cc
 msgid "Failed to create administrators SID: {1}"
 msgstr ""
 
 #. debug
-#: windows/src/user.cc:34
+#: windows/src/user.cc
 msgid "Invalid SID"
 msgstr ""
 
 #. debug
-#: windows/src/user.cc:40
+#: windows/src/user.cc
 msgid "Failed to check membership: {1}"
 msgstr ""
 
 #. debug
-#: windows/src/user.cc:57
+#: windows/src/user.cc
 msgid "GetUserProfileDirectoryW call returned unexpectedly"
 msgstr ""
 
 #. debug
-#: windows/src/user.cc:60
-#: windows/src/user.cc:66
+#: windows/src/user.cc
 msgid "GetUserProfileDirectoryW call failed: {1}"
 msgstr ""
 
 #. LOCALE: format a pointer as hex for printing an error message.
-#: windows/src/wmi.cc:28
+#: windows/src/wmi.cc
 msgid "{1} (0x{2,num=hex})"
 msgstr ""
 
-#: windows/src/wmi.cc:30
+#: windows/src/wmi.cc
 msgid "%1% (0x%2$#x)"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:40
+#: windows/src/wmi.cc
 msgid "initializing WMI"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:44
+#: windows/src/wmi.cc
 msgid "using prior COM concurrency model"
 msgstr ""
 
-#: windows/src/wmi.cc:49
+#: windows/src/wmi.cc
 msgid "failed to initialize COM library"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:51
+#: windows/src/wmi.cc
 msgid "COM single-threaded apartment not supported, using multi-threaded"
 msgstr ""
 
-#: windows/src/wmi.cc:64
+#: windows/src/wmi.cc
 msgid "failed to create IWbemLocator object"
 msgstr ""
 
-#: windows/src/wmi.cc:72
+#: windows/src/wmi.cc
 msgid "could not connect to WMI server"
 msgstr ""
 
-#: windows/src/wmi.cc:80
+#: windows/src/wmi.cc
 msgid "could not set proxy blanket"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:91
+#: windows/src/wmi.cc
 msgid "ignoring {1}-dimensional array in query {2}.{3}"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:107
+#: windows/src/wmi.cc
 msgid ""
 "WMI query {1}.{2} result could not be converted from type {3} to a string"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:125
+#: windows/src/wmi.cc
 msgid "query {1} failed"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:148
+#: windows/src/wmi.cc
 msgid "query {1}.{2} could not be found"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:171
+#: windows/src/wmi.cc
 msgid "only single value requested from array for key {1}"
 msgstr ""
 
 #. debug
-#: windows/src/wmi.cc:186
-#: windows/src/wmi.cc:198
+#: windows/src/wmi.cc
 msgid "only single entry requested from array of entries for key {1}"
 msgstr ""
 
-#: windows/src/wmi.cc:190
+#: windows/src/wmi.cc
 msgid "unable to get from empty array of objects"
 msgstr ""
 
-#: windows/src/wmi.cc:202
+#: windows/src/wmi.cc
 msgid "unable to get_range from empty array of objects"
 msgstr ""

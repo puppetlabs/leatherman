@@ -179,9 +179,9 @@ macro(gettext_templates dir)
         add_custom_command(OUTPUT ${lang_template}
             COMMAND ${XGETTEXT_EXE}
                 --sort-by-file
-                --copyright-holder "Puppet Labs \\<docs@puppetlabs.com\\>"
+                --copyright-holder "Puppet \\<docs@puppet.com\\>"
                 --package-name=${PROJECT_NAME} --package-version=${PROJECT_VERSION}
-                --msgid-bugs-address "docs@puppetlabs.com"
+                --msgid-bugs-address "docs@puppet.com"
                 -d ${PROJECT_NAME} -o ${lang_template}
                 --keyword=LOG_DEBUG:1,\\"debug\\"
                 --keyword=LOG_INFO:1,\\"info\\"
@@ -194,6 +194,7 @@ macro(gettext_templates dir)
                 --keyword=translate_c:1c,2
                 --keyword=translate_c:1c,2,3
                 --keyword=format
+                --add-location=file
                 --add-comments=LOCALE
                 ${ALL_PROJECT_SOURCES}
             COMMAND ${CMAKE_COMMAND}

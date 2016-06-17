@@ -1,5 +1,5 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR Puppet Labs <docs@puppetlabs.com>
+# Copyright (C) YEAR Puppet <docs@puppet.com>
 # This file is distributed under the same license as the leatherman_locale package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: leatherman_locale \n"
-"Report-Msgid-Bugs-To: docs@puppetlabs.com\n"
+"Report-Msgid-Bugs-To: docs@puppet.com\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
@@ -18,34 +18,22 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: locale/locales/../tests/locale.cc:17
-#: locale/locales/../tests/locale.cc:49
-#: locale/locales/../tests/locale.cc:61
-#: locale/locales/../tests/locale.cc:94
+#: locale/locales/../tests/locale.cc
 msgid "requesting {1,number}."
 msgstr ""
 
-#: locale/locales/../tests/locale.cc:21
-#: locale/locales/../tests/locale.cc:65
+#: locale/locales/../tests/locale.cc
 msgctxt "foo"
 msgid "requesting {1,number}."
 msgstr ""
 
-#: locale/locales/../tests/locale.cc:27
-#: locale/locales/../tests/locale.cc:31
-#: locale/locales/../tests/locale.cc:35
-#: locale/locales/../tests/locale.cc:72
-#: locale/locales/../tests/locale.cc:76
-#: locale/locales/../tests/locale.cc:80
+#: locale/locales/../tests/locale.cc
 msgid "requesting {1,number} item."
 msgid_plural "requesting {1,number} items."
 msgstr[0] ""
 msgstr[1] ""
 
-#: locale/locales/../tests/locale.cc:39
-#: locale/locales/../tests/locale.cc:43
-#: locale/locales/../tests/locale.cc:84
-#: locale/locales/../tests/locale.cc:88
+#: locale/locales/../tests/locale.cc
 msgctxt "foo"
 msgid "requesting {1,number} item."
 msgid_plural "requesting {1,number} items."
