@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.3]
+
+### Fixed
+- Fixed compilation with LEATHERMAN_USE_LOCALES=OFF.
+- Remove line numbers from .pot files generated via gettext.
+
+### Added
+- Added LEATHERMAN_GETTEXT option to disable use of gettext.
+
 ## [0.7.2]
 
 ### Fixed
