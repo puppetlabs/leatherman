@@ -5,9 +5,8 @@ install:
 
   - choco install -y mingw-w64 -Version 4.8.3 -source https://www.myget.org/F/puppetlabs
   - choco install -y cmake -Version 3.2.2 -source https://www.myget.org/F/puppetlabs
-  - ps: wget 'https://s3.amazonaws.com/kylo-pl-bucket/gettext-tools-static-0.18.1.1.zip' -OutFile "$pwd\gettext.zip"
-  - ps: 7z.exe x gettext.zip -oC:\tools | FIND /V "ing  "
-  - SET PATH=C:\Ruby21-x64\bin;C:\tools\mingw64\bin;C:\tools\gettext-tools-static-0.18.1.1;%PATH%
+  - choco install -y gettext -Version 0.19.6 -source https://www.myget.org/F/puppetlabs
+  - SET PATH=C:\Ruby21-x64\bin;C:\tools\mingw64\bin;C:\Program Files\gettext-iconv;%PATH%
   - ps: $env:PATH = $env:PATH.Replace("Git\bin", "Git\cmd")
   - ps: $env:PATH = $env:PATH.Replace("Git\usr\bin", "Git\cmd")
 

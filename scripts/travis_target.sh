@@ -11,6 +11,21 @@ function travis_make()
 
     # Set compiler to GCC 4.8 here, as Travis overrides the global variables.
     export CC=gcc-4.8 CXX=g++-4.8
+
+    # Build project
+    if [ $1 == "cpplint" ]; then
+        export MAKE_TARGET="cpplint"
+    elif [ $1 == "cppcheck" ]; then
+        export MAKE_TARGET="cppcheck"
+    else
+        # Prepare for generating leatherman.pot, and ensure it happens every time.
+        # Ensure this happens before calling CMake.
+        wget https://s3.amazonaws.com/kylo-pl-bucket/gettext-0.19.6_install.tar.bz2
+        tar xjvf gettext-0.19.6_install.tar.bz2 --strip 1 -C $USERDIR
+        rm ../locales/leatherman.pot
+        export MAKE_TARGET="all"
+    fi
+
     # Generate build files
     [ $1 == "debug" ] && export CMAKE_VARS="-DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON"
     [ $1 == "shared_release" ] && export CMAKE_VARS="-DLEATHERMAN_SHARED=ON"
@@ -22,14 +37,6 @@ function travis_make()
         exit 1
     fi
 
-    # Build project
-    if [ $1 == "cpplint" ]; then
-        export MAKE_TARGET="cpplint"
-    elif [ $1 == "cppcheck" ]; then
-        export MAKE_TARGET="cppcheck"
-    else
-        export MAKE_TARGET="all"
-    fi
     make $MAKE_TARGET -j2
     if [ $? -ne 0 ]; then
         echo "build failed."
