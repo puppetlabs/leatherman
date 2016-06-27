@@ -86,7 +86,7 @@ namespace leatherman { namespace ruby {
         LOAD_SYMBOL(rb_to_id),
         LOAD_SYMBOL(rb_id2name),
         LOAD_SYMBOL(rb_define_alloc_func),
-        LOAD_SYMBOL(rb_data_object_alloc),
+        LOAD_ALIASED_SYMBOL(rb_data_object_alloc, rb_data_object_wrap),
         LOAD_SYMBOL(rb_gc_mark),
         LOAD_SYMBOL(rb_yield_values),
         LOAD_SYMBOL(rb_require),
