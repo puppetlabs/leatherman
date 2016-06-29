@@ -14,6 +14,7 @@ if (BUILDING_LEATHERMAN)
 endif()
 
 set(WINDOWS_UTIL_SOURCES
+  "src/file_util.cc"
   "src/registry.cc"
   "src/process.cc"
   "src/user.cc"
