@@ -1,6 +1,6 @@
-find_package(Boost 1.54 REQUIRED)
+find_package(Boost 1.54 REQUIRED COMPONENTS filesystem)
 
-add_leatherman_deps(Wbemuuid.lib userenv.lib)
+add_leatherman_deps(Wbemuuid.lib userenv.lib "${Boost_LIBRARIES}")
 add_leatherman_includes("${Boost_INCLUDE_DIRS}")
 
 leatherman_dependency(nowide)
