@@ -16,6 +16,7 @@ namespace leatherman { namespace windows { namespace file_util {
     /**
      * Finds the ProgramData directory in a Windows-friendly way.
      * @return The ProgramData directory, using the Windows function
+     * Throws unknown_folder_exception if SHGetKnownFolderPath fails.
      */
     std::string get_programdata_dir();
 

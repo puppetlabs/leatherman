@@ -24,3 +24,4 @@ set(WINDOWS_UTIL_SOURCES
 
 add_leatherman_library(${WINDOWS_UTIL_SOURCES})
 add_leatherman_headers(inc/leatherman)
+add_leatherman_test(tests/file_utils_test.cc)
