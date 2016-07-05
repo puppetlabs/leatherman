@@ -307,6 +307,10 @@ msgid ""
 "shared configuration option."
 msgstr ""
 
+#: windows/src/file_util.cc
+msgid "error finding FOLDERID_ProgramData: {1}"
+msgstr ""
+
 #. debug
 #: windows/src/process.cc
 #: windows/src/user.cc
