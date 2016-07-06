@@ -9,7 +9,7 @@ leatherman_dependency(logging)
 leatherman_dependency(util)
 
 if (BUILDING_LEATHERMAN)
-    leatherman_logging_namespace("leatherman.logging")
+    leatherman_logging_namespace("leatherman.windows")
     leatherman_logging_line_numbers()
 endif()
 
