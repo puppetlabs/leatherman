@@ -5,8 +5,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.7.5]
 
 ### Added
-- Added leatherman::windows::file_util::get_programdata_dir to properly get the
-  ProgramData dir on Windows.
+- Added `leatherman::windows::file_util::get_programdata_dir` to properly get
+  the ProgramData directory on Windows.
 
 ### Fixed
 - Changed the windows logging namespace to logging.windows.
