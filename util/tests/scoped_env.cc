@@ -18,6 +18,12 @@ SCENARIO("scoping an environment variable") {
                 REQUIRE(value == "FOO");
             }
         }
+        AND_WHEN("the variable is scoped as unset") {
+            scoped_env foo("LEATH_ENV_TEST");
+            THEN("the variable is not set") {
+                REQUIRE_FALSE(environment::get("LEATH_ENV_TEST", value));
+            }
+        }
     }
     WHEN("the variable exists")
     {
@@ -28,6 +34,12 @@ SCENARIO("scoping an environment variable") {
             THEN("the new value is set") {
                 REQUIRE(environment::get("LEATH_ENV_TEST", value));
                 REQUIRE(value == "FOO");
+            }
+        }
+        AND_WHEN("the variable is scoped as unset") {
+            scoped_env foo("LEATH_ENV_TEST");
+            THEN("the variable is not set") {
+                REQUIRE_FALSE(environment::get("LEATH_ENV_TEST", value));
             }
         }
         THEN("the variable should be restored") {

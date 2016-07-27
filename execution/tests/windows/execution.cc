@@ -2,6 +2,7 @@
 #include <leatherman/execution/execution.hpp>
 #include <leatherman/util/strings.hpp>
 #include <leatherman/util/scope_exit.hpp>
+#include <leatherman/util/scoped_env.hpp>
 #include <leatherman/windows/windows.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
@@ -17,6 +18,7 @@ using namespace leatherman::util;
 using namespace leatherman::execution;
 using namespace leatherman::logging;
 using namespace leatherman::execution::testing;
+using leatherman::util::scoped_env;
 using namespace boost::filesystem;
 
 // Ruby doesn't appear to normalize commands passed to cmd.exe, so neither do we. A utility is provided
@@ -259,9 +261,8 @@ SCENARIO("executing commands with execution::execute") {
             }
         }
         WHEN("requested to merge the environment") {
-            SetEnvironmentVariableW(L"TEST_INHERITED_VARIABLE", L"TEST_INHERITED_VALUE");
+            scoped_env test_var("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE");
             auto exec = execute("cmd.exe", { "/c", "set" }, { { "TEST_VARIABLE1", "TEST_VALUE1" }, { "TEST_VARIABLE2", "TEST_VALUE2" } });
-            SetEnvironmentVariableW(L"TEST_INHERITED_VARIABLE", nullptr);
             REQUIRE(exec.success);
             REQUIRE(exec.error == "");
             auto variables = get_variables(exec.output);
@@ -280,9 +281,8 @@ SCENARIO("executing commands with execution::execute") {
             }
         }
         WHEN("requested to override the environment") {
-            SetEnvironmentVariableW(L"TEST_INHERITED_VARIABLE", L"TEST_INHERITED_VALUE");
+            scoped_env test_var("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE");
             auto exec = execute("cmd.exe", { "/c", "set" }, { { "TEST_VARIABLE1", "TEST_VALUE1" }, { "TEST_VARIABLE2", "TEST_VALUE2" } }, 0, { execution_options::trim_output });
-            SetEnvironmentVariableW(L"TEST_INHERITED_VARIABLE", nullptr);
             REQUIRE(exec.success);
             REQUIRE(exec.error == "");
             auto variables = get_variables(exec.output);
@@ -417,7 +417,7 @@ SCENARIO("executing commands with leatherman::execution::each_line") {
             REQUIRE(lines[0] == "line1");
         }
         WHEN("requested to merge the environment") {
-            SetEnvironmentVariableW(L"TEST_INHERITED_VARIABLE", L"TEST_INHERITED_VALUE");
+            scoped_env test_var("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE");
             map<string, string> variables;
             bool success = each_line(
                 "cmd.exe",
@@ -438,7 +438,6 @@ SCENARIO("executing commands with leatherman::execution::each_line") {
                     variables.emplace(make_pair(move(parts[0]), move(parts[1])));
                     return true;
                 });
-            SetEnvironmentVariableW(L"TEST_INHERITED_VARIABLE", nullptr);
             REQUIRE(success);
             THEN("the child environment should contain the given variables") {
                 REQUIRE(variables.size() > 4u);
@@ -455,7 +454,7 @@ SCENARIO("executing commands with leatherman::execution::each_line") {
             }
         }
         WHEN("requested to override the environment") {
-            SetEnvironmentVariableW(L"TEST_INHERITED_VARIABLE", L"TEST_INHERITED_VALUE");
+            scoped_env test_var("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE");
             map<string, string> variables;
             bool success = each_line(
                 "cmd.exe",
@@ -481,13 +480,17 @@ SCENARIO("executing commands with leatherman::execution::each_line") {
                 {
                     execution_options::trim_output
                 });
-            SetEnvironmentVariableW(L"TEST_INHERITED_VARIABLE", nullptr);
             REQUIRE(success);
             THEN("the child environment should only contain the given variables") {
+                // Windows adds several extra variables, such as COMSPEC, PATHEXT, and PROMPT.
+                // Leave some buffer room for future additions, while ensuring we don't include
+                // everything.
+                REQUIRE(variables.size() < 10u);
                 REQUIRE(variables.count("TEST_VARIABLE1") == 1u);
                 REQUIRE(variables["TEST_VARIABLE1"] == "TEST_VALUE1");
                 REQUIRE(variables.count("TEST_VARIABLE1") == 1u);
                 REQUIRE(variables["TEST_VARIABLE1"] == "TEST_VALUE1");
+                REQUIRE(variables.count("TEST_INHERITED_VARIABLE") == 0u);
             }
             THEN("the child environment should have LC_ALL and LANG set to C") {
                 REQUIRE(variables.count("LC_ALL") == 1u);
@@ -523,6 +526,122 @@ SCENARIO("executing commands with leatherman::execution::each_line") {
                 REQUIRE(variables["LC_ALL"] == "BAR");
                 REQUIRE(variables.count("LANG") == 1u);
                 REQUIRE(variables["LANG"] == "FOO");
+            }
+        }
+        WHEN("requested to inherit locale") {
+            scoped_env test_var("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE");
+            scoped_env lc_all("LC_ALL", "en_US.UTF-8");
+            scoped_env lang("LANG", "en_US.UTF-8");
+            map<string, string> variables;
+            bool success = each_line(
+                "cmd.exe",
+                {
+                    "/c",
+                    "set"
+                },
+                [&](string& line) {
+                    vector<string> parts;
+                    boost::split(parts, line, boost::is_any_of("="), boost::token_compress_off);
+                    if (parts.size() != 2u) {
+                        return true;
+                    }
+                    variables.emplace(make_pair(move(parts[0]), move(parts[1])));
+                    return true;
+                },
+                nullptr,
+                0,
+                {
+                    execution_options::trim_output,
+                    execution_options::inherit_locale
+                });
+            REQUIRE(success);
+            THEN("the child environment should only have LC_ALL and LANG set to en_US.UTF-8") {
+                // Windows adds several extra variables, such as COMSPEC, PATHEXT, and PROMPT.
+                // Leave some buffer room for future additions, while ensuring we don't include
+                // everything.
+                REQUIRE(variables.size() < 10u);
+                REQUIRE(variables.count("LC_ALL") == 1u);
+                REQUIRE(variables["LC_ALL"] == "en_US.UTF-8");
+                REQUIRE(variables.count("LANG") == 1u);
+                REQUIRE(variables["LANG"] == "en_US.UTF-8");
+                REQUIRE(variables.count("TEST_INHERITED_VARIABLE") == 0u);
+            }
+        }
+        WHEN("requested to inherit locale with no locale set") {
+            scoped_env test_var("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE");
+            scoped_env lc_all("LC_ALL");
+            scoped_env lang("LANG");
+            map<string, string> variables;
+            bool success = each_line(
+                "cmd.exe",
+                {
+                    "/c",
+                    "set"
+                },
+                [&](string& line) {
+                    vector<string> parts;
+                    boost::split(parts, line, boost::is_any_of("="), boost::token_compress_off);
+                    if (parts.size() != 2u) {
+                        return true;
+                    }
+                    variables.emplace(make_pair(move(parts[0]), move(parts[1])));
+                    return true;
+                },
+                nullptr,
+                0,
+                {
+                    execution_options::trim_output,
+                    execution_options::inherit_locale
+                });
+            REQUIRE(success);
+            THEN("the child environment should only have LC_ALL and LANG set to en_US.UTF-8") {
+                // Windows adds several extra variables, such as COMSPEC, PATHEXT, and PROMPT.
+                // Leave some buffer room for future additions, while ensuring we don't include
+                // everything.
+                REQUIRE(variables.size() < 8u);
+                REQUIRE(variables.count("LC_ALL") == 0u);
+                REQUIRE(variables.count("LANG") == 0u);
+                REQUIRE(variables.count("TEST_INHERITED_VARIABLE") == 0u);
+            }
+        }
+        WHEN("requested to inherit locale with parent environment") {
+            scoped_env test_var("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE");
+            scoped_env lc_all("LC_ALL", "en_US.UTF-8");
+            scoped_env lang("LANG", "en_US.UTF-8");
+            map<string, string> variables;
+            bool success = each_line(
+                "cmd.exe",
+                {
+                    "/c",
+                    "set"
+                },
+                [&](string& line) {
+                    vector<string> parts;
+                    boost::split(parts, line, boost::is_any_of("="), boost::token_compress_off);
+                    if (parts.size() != 2u) {
+                        return true;
+                    }
+                    variables.emplace(make_pair(move(parts[0]), move(parts[1])));
+                    return true;
+                },
+                nullptr,
+                0,
+                {
+                    execution_options::trim_output,
+                    execution_options::merge_environment,
+                    execution_options::inherit_locale
+                });
+            REQUIRE(success);
+            THEN("the child environment should contain the merged variables") {
+                REQUIRE(variables.size() > 3u);
+                REQUIRE(variables.count("TEST_INHERITED_VARIABLE") == 1);
+                REQUIRE(variables["TEST_INHERITED_VARIABLE"] == "TEST_INHERITED_VALUE");
+            }
+            THEN("the child environment should have LC_ALL and LANG set to en_US.UTF-8") {
+                REQUIRE(variables.count("LC_ALL") == 1u);
+                REQUIRE(variables["LC_ALL"] == "en_US.UTF-8");
+                REQUIRE(variables.count("LANG") == 1u);
+                REQUIRE(variables["LANG"] == "en_US.UTF-8");
             }
         }
     }

@@ -341,15 +341,15 @@ namespace leatherman { namespace execution {
 
     // Helper function that creates a vector of environment variables in the format of key=value
     // Also handles merging of environment and defaulting LC_ALL and LANG to C
-    static vector<string> create_environment(map<string, string> const* environment, bool merge)
+    static vector<string> create_environment(map<string, string> const* environment, bool merge, bool inherit)
     {
         vector<string> result;
 
         // Merge in our current environment, if requested
         if (merge && environ) {
             for (auto var = environ; *var; ++var) {
-                // Don't respect LC_ALL or LANG from the parent process
-                if (boost::starts_with(*var, "LC_ALL=") || boost::starts_with(*var, "LANG=")) {
+                // Don't respect LC_ALL or LANG from the parent process, unless inherit_locale specified
+                if (!inherit && (boost::starts_with(*var, "LC_ALL=") || boost::starts_with(*var, "LANG="))) {
                     continue;
                 }
                 result.emplace_back(*var);
@@ -364,11 +364,20 @@ namespace leatherman { namespace execution {
         }
 
         // Set the locale to C unless specified in the given environment
+        string locale_env;
         if (!environment || environment->count("LC_ALL") == 0) {
-            result.emplace_back("LC_ALL=C");
+            if (inherit && environment::get("LC_ALL", locale_env)) {
+                result.emplace_back("LC_ALL=" + locale_env);
+            } else if (!inherit) {
+                result.emplace_back("LC_ALL=C");
+            }
         }
         if (!environment || environment->count("LANG") == 0) {
-            result.emplace_back("LANG=C");
+            if (inherit && environment::get("LANG", locale_env)) {
+                result.emplace_back("LANG=" + locale_env);
+            } else if (!inherit) {
+                result.emplace_back("LANG=C");
+            }
         }
         return result;
     }
@@ -452,7 +461,9 @@ namespace leatherman { namespace execution {
 
         // Allocate the child process arguments and envp *before* creating the child
         auto args = to_exec_arg(arguments, &file);
-        auto variables = create_environment(environment, options[execution_options::merge_environment]);
+        auto variables = create_environment(environment,
+                                            options[execution_options::merge_environment],
+                                            options[execution_options::inherit_locale]);
         auto envp = to_exec_arg(&variables);
 
         // Create the child

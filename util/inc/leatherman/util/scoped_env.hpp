@@ -17,11 +17,16 @@ namespace leatherman { namespace util {
     struct scoped_env : scoped_resource<std::tuple<std::string, boost::optional<std::string>>>
     {
         /**
-         * Constructs a scoped_env from the specified error code.
+         * Temporarily overrides the value of an environment variable.
          * @param var    The environment variable to update.
          * @param newval The value to set it to during existence of this object.
          */
         explicit scoped_env(std::string var, std::string const& newval);
+
+        /**
+         * Temporarily unsets an environment variable.
+         */
+        explicit scoped_env(std::string var);
 
      private:
         static void restore(std::tuple<std::string, boost::optional<std::string>> &);
