@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.8.0]
+- Added proect version number to libraries
+- Fix Leatherman cleanup of Ruby objects (FACT-1454)
+- Add inherit_locale option to execute (LTH-107)
+
 ## [0.7.5]
 
 ### Added
