@@ -61,6 +61,12 @@ namespace leatherman { namespace execution {
          */
         create_new_process_group = (1 << 8),
         /**
+         * Inherit locale environment variables from the current process. Limited to LC_ALL and
+         * LOCALE, which are specifically overridden to "C" with merge_environment.
+         * Will not override those variables if explicitly passed in an environment map.
+         */
+        inherit_locale = (1 << 9),
+        /**
          * A combination of all throw options.
          */
         throw_on_failure = throw_on_nonzero_exit | throw_on_signal,

@@ -15,6 +15,16 @@ namespace leatherman { namespace util {
         _deleter = scoped_env::restore;
     }
 
+    scoped_env::scoped_env(string var) : scoped_resource()
+    {
+        string oldval;
+        bool was_set = environment::get(var, oldval);
+        environment::clear(var);
+
+        _resource = make_tuple(move(var), was_set ? boost::optional<std::string>(move(oldval)) : boost::none);
+        _deleter = scoped_env::restore;
+    }
+
     void scoped_env::restore(tuple<string, boost::optional<std::string>> & old)
     {
         if (get<1>(old)) {

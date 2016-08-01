@@ -432,18 +432,22 @@ namespace leatherman { namespace execution {
         }
 
         // Setup the execution environment
-        vector<char> modified_environ;
+        vector<wchar_t> modified_environ;
         vector<scoped_env> scoped_environ;
         if (options[execution_options::merge_environment]) {
             // Modify the existing environment, then restore it after. There's no way to modify environment variables
             // after the child has started. An alternative would be to use GetEnvironmentStrings and add/modify the block,
             // but searching for and modifying existing environment strings to update would be cumbersome in that form.
             // See http://msdn.microsoft.com/en-us/library/windows/desktop/ms682009(v=vs.85).aspx
-            if (!environment || environment->count("LC_ALL") == 0) {
-                scoped_environ.emplace_back("LC_ALL", "C");
-            }
-            if (!environment || environment->count("LANG") == 0) {
-                scoped_environ.emplace_back("LANG", "C");
+            if (!options[execution_options::inherit_locale]) {
+                // Unless inherit_locale is specified, override with a C locale to ensure consistent behavior from
+                // command-line tools.
+                if (!environment || environment->count("LC_ALL") == 0) {
+                    scoped_environ.emplace_back("LC_ALL", "C");
+                }
+                if (!environment || environment->count("LANG") == 0) {
+                    scoped_environ.emplace_back("LANG", "C");
+                }
             }
             if (environment) {
                 for (auto const& kv : *environment) {
@@ -464,19 +468,33 @@ namespace leatherman { namespace execution {
             }
 
             // Insert LANG and LC_ALL if they aren't already present. Emplace ensures this behavior.
-            sortedEnvironment.emplace("LANG", "C");
-            sortedEnvironment.emplace("LC_ALL", "C");
+            string locale_env;
+            if (options[execution_options::inherit_locale] && environment::get("LC_ALL", locale_env)) {
+                sortedEnvironment.emplace("LC_ALL", locale_env);
+            } else if (!options[execution_options::inherit_locale]) {
+                sortedEnvironment.emplace("LC_ALL", "C");
+            }
+            if (options[execution_options::inherit_locale] && environment::get("LANG", locale_env)) {
+                sortedEnvironment.emplace("LANG", locale_env);
+            } else if (!options[execution_options::inherit_locale]) {
+                sortedEnvironment.emplace("LANG", "C");
+            }
 
             // An environment block is a NULL-terminated list of NULL-terminated strings.
             for (auto const& variable : sortedEnvironment) {
                 LOG_DEBUG("child environment {1}={2}", variable.first, variable.second);
                 string var = variable.first + "=" + variable.second;
-                for (auto c : var) {
+                for (auto c : boost::nowide::widen(var)) {
                     modified_environ.push_back(c);
                 }
-                modified_environ.push_back('\0');
+                modified_environ.push_back(L'\0');
             }
-            modified_environ.push_back('\0');
+            modified_environ.push_back(L'\0');
+            if (sortedEnvironment.empty()) {
+                // The environment block is terminated by two nulls, so if the environment is
+                // empty add a second one.
+                modified_environ.push_back(L'\0');
+            }
         }
 
         // Execute the command, reading the results into a buffer until there's no more to read.
@@ -535,7 +553,7 @@ namespace leatherman { namespace execution {
 
         // Set up flags for CreateProcess based on whether the create_new_process_group
         // option was set and the parent process is running in a Job object.
-        auto creation_flags = CREATE_NO_WINDOW;
+        auto creation_flags = CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT;
 
         if (use_job_object) {
             creation_flags |= CREATE_BREAKAWAY_FROM_JOB;

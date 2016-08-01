@@ -6,6 +6,7 @@
 #include <boost/nowide/fstream.hpp>
 #include <leatherman/util/regex.hpp>
 #include <leatherman/util/strings.hpp>
+#include <leatherman/util/scoped_env.hpp>
 #include "../fixtures.hpp"
 #include "../log_capture.hpp"
 #include "../lth_cat.hpp"
@@ -151,9 +152,8 @@ SCENARIO("executing commands with execution::execute") {
             REQUIRE(exec.exit_code == 0);
         }
         WHEN("requested to merge the environment") {
-            setenv("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE", 1);
+            scoped_env test_var("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE");
             auto exec = execute("env", {}, { {"TEST_VARIABLE1", "TEST_VALUE1" }, {"TEST_VARIABLE2", "TEST_VALUE2" } });
-            unsetenv("TEST_INHERITED_VARIABLE");
             REQUIRE(exec.success);
             REQUIRE(exec.exit_code == 0);
             auto variables = get_variables(exec.output);
@@ -172,9 +172,8 @@ SCENARIO("executing commands with execution::execute") {
             }
         }
         WHEN("requested to override the environment") {
-            setenv("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE", 1);
+            scoped_env test_var("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE");
             auto exec = execute("env", {}, { {"TEST_VARIABLE1", "TEST_VALUE1" }, {"TEST_VARIABLE2", "TEST_VALUE2" }}, 0, { execution_options::trim_output });
-            unsetenv("TEST_INHERITED_VARIABLE");
             REQUIRE(exec.success);
             REQUIRE(exec.exit_code == 0);
             auto variables = get_variables(exec.output);
@@ -202,6 +201,56 @@ SCENARIO("executing commands with execution::execute") {
                 REQUIRE(variables["LC_ALL"] == "BAR");
                 REQUIRE(variables.count("LANG") == 1);
                 REQUIRE(variables["LANG"] == "FOO");
+            }
+        }
+        WHEN("requested to inherit locale") {
+            scoped_env test_var("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE");
+            scoped_env lc_all("LC_ALL", "en_US.UTF-8");
+            scoped_env lang("LANG", "en_US.UTF-8");
+            auto exec = execute("env", 0, { execution_options::inherit_locale, execution_options::trim_output });
+            REQUIRE(exec.success);
+            REQUIRE(exec.exit_code == 0);
+            auto variables = get_variables(exec.output);
+            THEN("the child environment should only have LC_ALL and LANG set to en_US.UTF-8") {
+                REQUIRE(variables.size() == 2u);
+                REQUIRE(variables.count("LC_ALL") == 1);
+                REQUIRE(variables["LC_ALL"] == "en_US.UTF-8");
+                REQUIRE(variables.count("LANG") == 1);
+                REQUIRE(variables["LANG"] == "en_US.UTF-8");
+            }
+        }
+        WHEN("requested to inherit locale with no locale set") {
+            scoped_env test_var("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE");
+            scoped_env lc_all("LC_ALL");
+            scoped_env lang("LANG");
+            auto exec = execute("env", 0, { execution_options::inherit_locale, execution_options::trim_output });
+            REQUIRE(exec.success);
+            REQUIRE(exec.exit_code == 0);
+            auto variables = get_variables(exec.output);
+            CAPTURE(exec.output);
+            THEN("the child environment should not have LC_ALL and LANG set") {
+                REQUIRE(variables.empty());
+            }
+        }
+        WHEN("requested to inherit locale with parent environment") {
+            scoped_env test_var("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE");
+            scoped_env lc_all("LC_ALL", "en_US.UTF-8");
+            scoped_env lang("LANG", "en_US.UTF-8");
+            auto exec = execute("env", 0, { execution_options::inherit_locale,
+                execution_options::trim_output, execution_options::merge_environment });
+            REQUIRE(exec.success);
+            REQUIRE(exec.exit_code == 0);
+            auto variables = get_variables(exec.output);
+            THEN("the child environment should contain the merged variables") {
+                REQUIRE(variables.size() > 3u);
+                REQUIRE(variables.count("TEST_INHERITED_VARIABLE") == 1);
+                REQUIRE(variables["TEST_INHERITED_VARIABLE"] == "TEST_INHERITED_VALUE");
+            }
+            THEN("the child environment should have LC_ALL and LANG set to en_US.UTF-8") {
+                REQUIRE(variables.count("LC_ALL") == 1);
+                REQUIRE(variables["LC_ALL"] == "en_US.UTF-8");
+                REQUIRE(variables.count("LANG") == 1);
+                REQUIRE(variables["LANG"] == "en_US.UTF-8");
             }
         }
         WHEN("expecting input") {
@@ -427,7 +476,7 @@ SCENARIO("executing commands with execution::each_line") {
             REQUIRE(lines[0] == "line1");
         }
         WHEN("requested to merge the environment") {
-            setenv("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE", 1);
+            scoped_env test_var("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE");
             map<string, string> variables;
             bool success = each_line("env", {}, { {"TEST_VARIABLE1", "TEST_VALUE1" }, {"TEST_VARIABLE2", "TEST_VALUE2" } }, [&](string& line) {
                 vector<string> parts;
@@ -438,7 +487,6 @@ SCENARIO("executing commands with execution::each_line") {
                 variables.emplace(make_pair(move(parts[0]), move(parts[1])));
                 return true;
             });
-            unsetenv("TEST_INHERITED_VARIABLE");
             REQUIRE(success);
             THEN("the child environment should contain the given variables") {
                 REQUIRE(variables.size() > 4);
@@ -455,7 +503,7 @@ SCENARIO("executing commands with execution::each_line") {
             }
         }
         WHEN("requested to override the environment") {
-            setenv("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE", 1);
+            scoped_env test_var("TEST_INHERITED_VARIABLE", "TEST_INHERITED_VALUE");
             map<string, string> variables;
             bool success = each_line(
                 "env",
@@ -478,7 +526,6 @@ SCENARIO("executing commands with execution::each_line") {
                 {
                     execution_options::trim_output
                 });
-            unsetenv("TEST_INHERITED_VARIABLE");
             REQUIRE(success);
             THEN("the child environment should only contain the given variables") {
                 REQUIRE(variables.size() == 4u);
