@@ -58,7 +58,7 @@ namespace leatherman { namespace locale {
         }
     }
 
-    string translate_c(string const& context, string const& msg, string const& domain)
+    string translate_p(string const& context, string const& msg, string const& domain)
     {
         try {
             return boost::locale::translate(context, msg).str(get_locale("", domain));
@@ -67,7 +67,7 @@ namespace leatherman { namespace locale {
         }
     }
 
-    string translate(string const& single, string const& plural, int n, string const& domain)
+    string translate_n(string const& single, string const& plural, int n, string const& domain)
     {
         try {
             return boost::locale::translate(single, plural, n).str(get_locale("", domain));
@@ -76,7 +76,7 @@ namespace leatherman { namespace locale {
         }
     }
 
-    string translate_c(string const& context, string const& single, string const& plural, int n, string const& domain)
+    string translate_np(string const& context, string const& single, string const& plural, int n, string const& domain)
     {
         try {
             return boost::locale::translate(context, single, plural, n).str(get_locale("", domain));

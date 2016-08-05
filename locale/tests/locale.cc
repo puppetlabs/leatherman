@@ -18,29 +18,29 @@ SCENARIO("a default locale", "[locale]") {
         }
 
         THEN("messages with context should not be translated") {
-            REQUIRE(translate_c("foo", "requesting {1,number}.") == "requesting {1,number}.");
+            REQUIRE(translate_p("foo", "requesting {1,number}.") == "requesting {1,number}.");
         }
     }
 
     GIVEN("plural leatherman::locale::translate") {
         THEN("1 item should be singular") {
-            REQUIRE(translate("requesting {1,number} item.", "requesting {1,number} items.", 1) == "requesting {1,number} item.");
+            REQUIRE(translate_n("requesting {1,number} item.", "requesting {1,number} items.", 1) == "requesting {1,number} item.");
         }
 
         THEN("0 items should be plural") {
-            REQUIRE(translate("requesting {1,number} item.", "requesting {1,number} items.", 0) == "requesting {1,number} items.");
+            REQUIRE(translate_n("requesting {1,number} item.", "requesting {1,number} items.", 0) == "requesting {1,number} items.");
         }
 
         THEN("2 items should be plural") {
-            REQUIRE(translate("requesting {1,number} item.", "requesting {1,number} items.", 2) == "requesting {1,number} items.");
+            REQUIRE(translate_n("requesting {1,number} item.", "requesting {1,number} items.", 2) == "requesting {1,number} items.");
         }
 
         THEN("1 item with context should be singular") {
-            REQUIRE(translate_c("foo", "requesting {1,number} item.", "requesting {1,number} items.", 1) == "requesting {1,number} item.");
+            REQUIRE(translate_np("foo", "requesting {1,number} item.", "requesting {1,number} items.", 1) == "requesting {1,number} item.");
         }
 
         THEN("2 items with context should be plural") {
-            REQUIRE(translate_c("foo", "requesting {1,number} item.", "requesting {1,number} items.", 2) == "requesting {1,number} items.");
+            REQUIRE(translate_np("foo", "requesting {1,number} item.", "requesting {1,number} items.", 2) == "requesting {1,number} items.");
         }
     }
 
@@ -62,30 +62,29 @@ SCENARIO("a french locale", "[locale]") {
         }
 
         THEN("messages with context should be translated") {
-            REQUIRE(translate_c("foo", "requesting {1,number}.") == "demandé {1,number}.");
+            REQUIRE(translate_p("foo", "requesting {1,number}.") == "demandé {1,number}.");
         }
     }
 
-
     GIVEN("plural leatherman::locale::translate") {
         THEN("1 item should be singular") {
-            REQUIRE(translate("requesting {1,number} item.", "requesting {1,number} items.", 1) == "demande {1,number} objet.");
+            REQUIRE(translate_n("requesting {1,number} item.", "requesting {1,number} items.", 1) == "demande {1,number} objet.");
         }
 
         THEN("0 items should be singular") {
-            REQUIRE(translate("requesting {1,number} item.", "requesting {1,number} items.", 0) == "demande {1,number} objet.");
+            REQUIRE(translate_n("requesting {1,number} item.", "requesting {1,number} items.", 0) == "demande {1,number} objet.");
         }
 
         THEN("2 items should be plural") {
-            REQUIRE(translate("requesting {1,number} item.", "requesting {1,number} items.", 2) == "demande {1,number} objets.");
+            REQUIRE(translate_n("requesting {1,number} item.", "requesting {1,number} items.", 2) == "demande {1,number} objets.");
         }
 
         THEN("1 item with context should be singular") {
-            REQUIRE(translate_c("foo", "requesting {1,number} item.", "requesting {1,number} items.", 1) == "demandé {1,number} objet.");
+            REQUIRE(translate_np("foo", "requesting {1,number} item.", "requesting {1,number} items.", 1) == "demandé {1,number} objet.");
         }
 
         THEN("2 items with context should be plural") {
-            REQUIRE(translate_c("foo", "requesting {1,number} item.", "requesting {1,number} items.", 2) == "demandé {1,number} objets.");
+            REQUIRE(translate_np("foo", "requesting {1,number} item.", "requesting {1,number} items.", 2) == "demandé {1,number} objets.");
         }
     }
 
@@ -96,6 +95,94 @@ SCENARIO("a french locale", "[locale]") {
             // flexible until we can resolve why.
             CAPTURE(formatted);
             REQUIRE((formatted == "demande 1.25." || formatted == "demande 1,25."));
+        }
+
+        THEN("messages with context should be translated") {
+            auto formatted = format_p("foo", "requesting {1,number}.", 1.25);
+            CAPTURE(formatted);
+            REQUIRE((formatted == "demandé 1.25." || formatted == "demandé 1,25."));
+        }
+
+        /*
+         * Apply same tests with *_(...) convenience functions
+         */
+
+        THEN("messages should be translated") {
+            auto formatted = _("requesting {1,number}.", 1.25);
+            CAPTURE(formatted);
+            REQUIRE((formatted == "demande 1.25." || formatted == "demande 1,25."));
+        }
+
+        THEN("messages with context should be translated") {
+            auto formatted = p_("foo", "requesting {1,number}.", 1.25);
+            CAPTURE(formatted);
+            REQUIRE((formatted == "demandé 1.25." || formatted == "demandé 1,25."));
+        }
+    }
+
+    GIVEN("plural leatherman::locale::format") {
+        THEN("1 item should be singular") {
+            auto formatted = format_n("requesting {1,number} item.", "requesting {1,number} items.", 1, 3.7);
+            CAPTURE(formatted);
+            REQUIRE((formatted == "demande 3.7 objet." || formatted == "demande 3,7 objet."));
+        }
+
+        THEN("0 items should be singular") {
+            auto formatted = format_n("requesting {1,number} item.", "requesting {1,number} items.", 0, 3.7);
+            CAPTURE(formatted);
+            REQUIRE((formatted == "demande 3.7 objet." || formatted == "demande 3,7 objet."));
+        }
+
+        THEN("2 items should be plural") {
+            auto formatted = format_n("requesting {1,number} item.", "requesting {1,number} items.", 2, 3.7);
+            CAPTURE(formatted);
+            REQUIRE((formatted == "demande 3.7 objets." || formatted == "demande 3,7 objets."));
+        }
+
+        THEN("1 item with context should be singular") {
+            auto formatted = format_np("foo", "requesting {1,number} item.", "requesting {1,number} items.", 1, 3.7);
+            CAPTURE(formatted);
+            REQUIRE((formatted == "demandé 3.7 objet." || formatted == "demandé 3,7 objet."));
+        }
+
+        THEN("2 items with context should be plural") {
+            auto formatted = format_np("foo", "requesting {1,number} item.", "requesting {1,number} items.", 2, 3.7);
+            CAPTURE(formatted);
+            REQUIRE((formatted == "demandé 3.7 objets." || formatted == "demandé 3,7 objets."));
+        }
+
+        /*
+         * Apply same tests with *_(...) convenience functions
+         */
+
+        THEN("1 item should be singular") {
+            auto formatted = n_("requesting {1,number} item.", "requesting {1,number} items.", 1, 3.7);
+            CAPTURE(formatted);
+            REQUIRE((formatted == "demande 3.7 objet." || formatted == "demande 3,7 objet."));
+        }
+
+        THEN("0 items should be singular") {
+            auto formatted = n_("requesting {1,number} item.", "requesting {1,number} items.", 0, 3.7);
+            CAPTURE(formatted);
+            REQUIRE((formatted == "demande 3.7 objet." || formatted == "demande 3,7 objet."));
+        }
+
+        THEN("2 items should be plural") {
+            auto formatted = n_("requesting {1,number} item.", "requesting {1,number} items.", 2, 3.7);
+            CAPTURE(formatted);
+            REQUIRE((formatted == "demande 3.7 objets." || formatted == "demande 3,7 objets."));
+        }
+
+        THEN("1 item with context should be singular") {
+            auto formatted = np_("foo", "requesting {1,number} item.", "requesting {1,number} items.", 1, 3.7);
+            CAPTURE(formatted);
+            REQUIRE((formatted == "demandé 3.7 objet." || formatted == "demandé 3,7 objet."));
+        }
+
+        THEN("2 items with context should be plural") {
+            auto formatted = np_("foo", "requesting {1,number} item.", "requesting {1,number} items.", 2, 3.7);
+            CAPTURE(formatted);
+            REQUIRE((formatted == "demandé 3.7 objets." || formatted == "demandé 3,7 objets."));
         }
     }
 

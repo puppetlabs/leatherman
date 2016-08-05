@@ -20,17 +20,17 @@ namespace leatherman { namespace locale {
         return msg;
     }
 
-    string translate_c(string const& context, string const& msg, string const& domain)
+    string translate_p(string const& context, string const& msg, string const& domain)
     {
         return msg;
     }
 
-    string translate(string const& single, string const& plural, int n, string const& domain)
+    string translate_n(string const& single, string const& plural, int n, string const& domain)
     {
         return n == 1 ? single : plural;
     }
 
-    string translate_c(string const& context, string const& single, string const& plural, int n, string const& domain)
+    string translate_np(string const& context, string const& single, string const& plural, int n, string const& domain)
     {
         return n == 1 ? single : plural;
     }
