@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.0]
+- Add translation helper functions and plural format support (LTH-109)
+
 ## [0.8.1]
 
 ### Fixed
