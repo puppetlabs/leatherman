@@ -4,8 +4,10 @@
 #include <leatherman/locale/locale.hpp>
 #include <boost/nowide/convert.hpp>
 
+// Mark string for translation (alias for leatherman::locale::format)
+using leatherman::locale::_;
+
 using namespace std;
-namespace lth_locale = leatherman::locale;
 
 namespace leatherman { namespace windows {
 
@@ -15,12 +17,12 @@ namespace leatherman { namespace windows {
         if (FormatMessageW(
             FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS,
             nullptr, err, 0, reinterpret_cast<LPWSTR>(&buffer), 0, nullptr) == 0 || !buffer) {
-            return lth_locale::format("unknown error ({1})", err);
+            return _("unknown error ({1})", err);
         }
 
         // boost format could throw, so ensure the buffer is freed.
         util::scoped_resource<LPWSTR> guard(buffer, [](LPWSTR ptr) { if (ptr) LocalFree(ptr); });
-        return lth_locale::format("{1} ({2})", boost::nowide::narrow(buffer), err);
+        return _("{1} ({2})", boost::nowide::narrow(buffer), err);
     }
 
     string system_error()

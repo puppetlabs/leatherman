@@ -2,6 +2,9 @@
 #include <leatherman/locale/locale.hpp>
 #include <vector>
 
+// Mark string for translation (alias for leatherman::locale::format)
+using leatherman::locale::_;
+
 // boost includes are not always warning-clean. Disable warnings that
 // cause problems before including the headers, then re-enable the warnings.
 #pragma GCC diagnostic push
@@ -198,7 +201,7 @@ namespace leatherman { namespace logging {
                 return in;
             }
         }
-        throw runtime_error(lth_locale::format("invalid log level '%1%': expected none, trace, debug, info, warn, error, or fatal.", value));
+        throw runtime_error(_("invalid log level '{1}': expected none, trace, debug, info, warn, error, or fatal.", value));
     }
 
     ostream& operator<<(ostream& strm, log_level level)

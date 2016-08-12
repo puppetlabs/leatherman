@@ -4,6 +4,10 @@
 #include <boost/filesystem.hpp>
 #include <sstream>
 #include <leatherman/logging/logging.hpp>
+#include <leatherman/locale/locale.hpp>
+
+// Mark string for translation (alias for leatherman::locale::format)
+using leatherman::locale::_;
 
 using namespace std;
 
@@ -72,7 +76,7 @@ namespace boost_file = boost::filesystem;
         std::string tmp_name = file_path + "~";
         ofs.open(tmp_name.c_str(), mode);
         if (!ofs.is_open()) {
-            throw boost_file::filesystem_error { "failed to open " + file_path,
+            throw boost_file::filesystem_error { _("failed to open {1}", file_path),
                                                         boost_error::make_error_code(
                                                                 boost_error::io_error) };
         }

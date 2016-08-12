@@ -1,5 +1,6 @@
 #include <leatherman/execution/execution.hpp>
 #include <leatherman/logging/logging.hpp>
+#include <leatherman/locale/locale.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/nowide/fstream.hpp>
@@ -7,6 +8,9 @@
 #include <cstdio>
 #include <sstream>
 #include <cstring>
+
+// Mark string for translation (alias for leatherman::locale::format)
+using leatherman::locale::_;
 
 using namespace std;
 using namespace leatherman::logging;
@@ -257,7 +261,7 @@ namespace leatherman { namespace execution {
 
         out_stream.open(out_file.c_str(), std::ios::binary);
         if (!out_stream.is_open()) {
-            throw execution_exception("failed to open the output file.");
+            throw execution_exception(_("failed to open the output file."));
         }
 
         if (err_file.empty()) {
@@ -265,7 +269,7 @@ namespace leatherman { namespace execution {
         } else {
             err_stream.open(err_file.c_str(), std::ios::binary);
             if (!err_stream.is_open()) {
-                throw execution_exception("failed to open the error file.");
+                throw execution_exception(_("failed to open the error file."));
             }
 
             stderr_callback = ([&](string& line) {

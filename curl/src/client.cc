@@ -3,9 +3,13 @@
 #include <leatherman/curl/response.hpp>
 #include <leatherman/util/regex.hpp>
 #include <leatherman/logging/logging.hpp>
+#include <leatherman/locale/locale.hpp>
 #include <boost/utility/string_ref.hpp>
 #include <boost/algorithm/string.hpp>
 #include <sstream>
+
+// Mark string for translation (alias for leatherman::locale::format)
+using leatherman::locale::_;
 
 using namespace std;
 
@@ -76,7 +80,7 @@ namespace leatherman { namespace curl {
     {
         _resource = curl_easy_escape(handle, str.c_str(), str.size());
         if (!_resource) {
-            throw http_exception("curl_easy_escape failed to escape string.");
+            throw http_exception(_("curl_easy_escape failed to escape string."));
         }
     }
 
@@ -90,7 +94,7 @@ namespace leatherman { namespace curl {
     client::client()
     {
         if (!_handle) {
-            throw http_exception("failed to create cURL handle.");
+            throw http_exception(_("failed to create cURL handle."));
         }
     }
 
@@ -208,7 +212,7 @@ namespace leatherman { namespace curl {
             }
 
             default:
-                throw http_request_exception(ctx.req, "unexpected HTTP method specified.");
+                throw http_request_exception(ctx.req, _("unexpected HTTP method specified."));
         }
     }
 

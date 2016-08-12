@@ -4,8 +4,12 @@
 #include <leatherman/windows/system_error.hpp>
 #include <leatherman/windows/windows.hpp>
 #include <leatherman/logging/logging.hpp>
+#include <leatherman/locale/locale.hpp>
 #include <boost/nowide/convert.hpp>
 #include <tlhelp32.h>
+
+// Mark string for translation (alias for leatherman::locale::format)
+using leatherman::locale::_;
 
 using namespace std;
 using namespace leatherman::util;
@@ -100,7 +104,7 @@ namespace leatherman { namespace dynamic_library {
     {
         if (!_handle) {
             if (throw_if_missing) {
-                throw missing_import_exception("library is not loaded");
+                throw missing_import_exception(_("library is not loaded"));
             } else {
                 LOG_DEBUG("library {1} is not loaded when attempting to load symbol {2}.", _name.c_str(), name.c_str());
             }
@@ -113,7 +117,7 @@ namespace leatherman { namespace dynamic_library {
         }
         if (!symbol) {
             if (throw_if_missing) {
-                throw missing_import_exception(lth_locale::format("symbol {1} was not found in {2}.", name, _name));
+                throw missing_import_exception(_("symbol {1} was not found in {2}.", name, _name));
             } else {
                 LOG_DEBUG("symbol {1} not found in library {2}.", name.c_str(), _name.c_str());
             }
