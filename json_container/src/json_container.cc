@@ -1,10 +1,14 @@
 #include <leatherman/json_container/json_container.hpp>
+#include <leatherman/locale/locale.hpp>
 
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/allocators.h>
 #include <rapidjson/rapidjson.h>
+
+// Mark string for translation (alias for leatherman::locale::format)
+using leatherman::locale::_;
 
 namespace leatherman { namespace json_container {
 
@@ -34,7 +38,7 @@ namespace leatherman { namespace json_container {
         document_root_->Parse(json_text.data());
 
         if (document_root_->HasParseError()) {
-            throw data_parse_error { "invalid json" };
+            throw data_parse_error { _("invalid json") };
         }
     }
 
@@ -301,12 +305,11 @@ namespace leatherman { namespace json_container {
     json_value* JsonContainer::getValueInJson(const json_value& jval,
                                                     const char* key) const {
         if (!jval.IsObject()) {
-            throw data_type_error { "not an object" };
+            throw data_type_error { _("not an object") };
         }
 
         if (!jval.HasMember(key)) {
-            std::string err_msg { "unknown object entry with key: " };
-            throw data_key_error { err_msg + key };
+            throw data_key_error { _("unknown object entry with key: {1}", key) };
         }
 
         return const_cast<json_value*>(&jval[key]);
@@ -315,11 +318,11 @@ namespace leatherman { namespace json_container {
     json_value* JsonContainer::getValueInJson(const json_value& jval,
                                                     const size_t& idx) const {
         if (getValueType(jval) != DataType::Array) {
-            throw data_type_error { "not an array" };
+            throw data_type_error { _("not an array") };
         }
 
         if (idx >= jval.Size()) {
-            throw data_index_error { "array index out of bounds" };
+            throw data_index_error { _("array index out of bounds") };
         }
 
         return const_cast<json_value*>(&jval[idx]);
@@ -358,7 +361,7 @@ namespace leatherman { namespace json_container {
         }
 
         if (!value.IsInt()) {
-            throw data_type_error { "not an integer" };
+            throw data_type_error { _("not an integer") };
         }
 
         return value.GetInt();
@@ -371,7 +374,7 @@ namespace leatherman { namespace json_container {
         }
 
         if (!value.IsBool()) {
-            throw data_type_error { "not a boolean" };
+            throw data_type_error { _("not a boolean") };
         }
 
         return value.GetBool();
@@ -384,7 +387,7 @@ namespace leatherman { namespace json_container {
         }
 
         if (!value.IsString()) {
-            throw data_type_error { "not a string" };
+            throw data_type_error { _("not a string") };
         }
 
         return std::string(value.GetString());
@@ -397,7 +400,7 @@ namespace leatherman { namespace json_container {
         }
 
         if (!value.IsDouble()) {
-            throw data_type_error { "not a double" };
+            throw data_type_error { _("not a double") };
         }
 
         return value.GetDouble();
@@ -433,14 +436,14 @@ namespace leatherman { namespace json_container {
         }
 
         if (!value.IsArray()) {
-            throw data_type_error { "not an array" };
+            throw data_type_error { _("not an array") };
         }
 
         for (json_value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
             if (!itr->IsString()) {
-                throw data_type_error { "not a string" };
+                throw data_type_error { _("not a string") };
             }
 
             tmp.push_back(itr->GetString());
@@ -458,14 +461,14 @@ namespace leatherman { namespace json_container {
         }
 
         if (!value.IsArray()) {
-            throw data_type_error { "not an array" };
+            throw data_type_error { _("not an array") };
         }
 
         for (json_value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
             if (!itr->IsBool()) {
-                throw data_type_error { "not a boolean" };
+                throw data_type_error { _("not a boolean") };
             }
 
             tmp.push_back(itr->GetBool());
@@ -483,14 +486,14 @@ namespace leatherman { namespace json_container {
         }
 
         if (!value.IsArray()) {
-            throw data_type_error { "not an array" };
+            throw data_type_error { _("not an array") };
         }
 
         for (json_value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
             if (!itr->IsInt()) {
-                throw data_type_error { "not an integer" };
+                throw data_type_error { _("not an integer") };
             }
 
             tmp.push_back(itr->GetInt());
@@ -508,14 +511,14 @@ namespace leatherman { namespace json_container {
         }
 
         if (!value.IsArray()) {
-            throw data_type_error { "not an array" };
+            throw data_type_error { _("not an array") };
         }
 
         for (json_value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
             if (!itr->IsDouble()) {
-                throw data_type_error { "not a double" };
+                throw data_type_error { _("not a double") };
             }
 
             tmp.push_back(itr->GetDouble());
@@ -533,14 +536,14 @@ namespace leatherman { namespace json_container {
         }
 
         if (!value.IsArray()) {
-            throw data_type_error { "not an array" };
+            throw data_type_error { _("not an array") };
         }
 
         for (json_value::ConstValueIterator itr = value.Begin();
              itr != value.End();
              itr++) {
             if (!itr->IsObject()) {
-                throw data_type_error { "not an object" };
+                throw data_type_error { _("not an object") };
             }
 
             JsonContainer* tmp_this = const_cast<JsonContainer*>(this);

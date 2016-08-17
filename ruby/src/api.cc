@@ -2,10 +2,14 @@
 #include <leatherman/util/environment.hpp>
 #include <leatherman/execution/execution.hpp>
 #include <leatherman/logging/logging.hpp>
+#include <leatherman/locale/locale.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <sstream>
+
+// Mark string for translation (alias for leatherman::locale::format)
+using leatherman::locale::_;
 
 using namespace std;
 using namespace leatherman::util;
@@ -128,7 +132,7 @@ namespace leatherman { namespace ruby {
     {
         lth_lib::dynamic_library library = find_library();
         if (!library.loaded()) {
-            throw library_not_loaded_exception("could not locate a ruby library");
+            throw library_not_loaded_exception(_("could not locate a ruby library"));
         } else if (library.first_load()) {
             LOG_INFO("ruby loaded from \"{1}\".", library.name());
         } else {
@@ -245,7 +249,7 @@ namespace leatherman { namespace ruby {
     {
         auto size = rb_num2ull(v);
         if (size > numeric_limits<size_t>::max()) {
-            throw invalid_conversion("size_t maximum exceeded, requested size was " + to_string(size));
+            throw invalid_conversion(_("size_t maximum exceeded, requested size was {1}", to_string(size)));
         }
         return static_cast<size_t>(size);
     }
@@ -426,7 +430,7 @@ namespace leatherman { namespace ruby {
         // encounter long values here.
         auto size = rb_num2ull(rb_funcall(array, rb_intern("size"), 0));
         if (size > numeric_limits<long>::max()) {
-            throw invalid_conversion("maximum array size exceeded, reported size was " + to_string(size));
+            throw invalid_conversion(_("maximum array size exceeded, reported size was {1}", to_string(size)));
         }
         return static_cast<long>(size);
     }

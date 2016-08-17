@@ -6,9 +6,11 @@
 
 #include <shlobj.h>
 
+// Mark string for translation (alias for leatherman::locale::format)
+using leatherman::locale::_;
+
 using namespace std;
 using namespace boost::filesystem;
-namespace lth_locale = leatherman::locale;
 
 namespace leatherman { namespace windows { namespace file_util {
 
@@ -18,7 +20,7 @@ namespace leatherman { namespace windows { namespace file_util {
             auto p = path(pdir);
             return p.string();
         }
-        throw unknown_folder_exception(lth_locale::format("error finding FOLDERID_ProgramData: {1}",
+        throw unknown_folder_exception(_("error finding FOLDERID_ProgramData: {1}",
                     leatherman::windows::system_error()));
     }
 

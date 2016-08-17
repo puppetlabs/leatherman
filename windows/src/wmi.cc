@@ -1,18 +1,20 @@
 #include <leatherman/util/strings.hpp>
 #include <leatherman/windows/wmi.hpp>
 #include <leatherman/logging/logging.hpp>
+#include <leatherman/locale/locale.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/nowide/convert.hpp>
+
+// Mark string for translation (alias for leatherman::locale::format)
+using leatherman::locale::_;
 
 #define _WIN32_DCOM
 #include <comdef.h>
 #include <wbemidl.h>
 
 using namespace std;
-namespace lth_locale = leatherman::locale;
-#define _ lth_locale::translate
 
 namespace leatherman { namespace windows {
 
@@ -25,9 +27,9 @@ namespace leatherman { namespace windows {
     {
 #ifdef LEATHERMAN_I18N
         // LOCALE: format a pointer as hex for printing an error message.
-        return lth_locale::format("{1} (0x{2,num=hex})", s, hres);
+        return _("{1} (0x{2,num=hex})", s, hres);
 #else
-        return lth_locale::format("%1% (0x%2$#x)", s, hres);
+        return _("%1% (0x%2$#x)", s, hres);
 #endif
     }
 

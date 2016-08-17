@@ -3,6 +3,7 @@
 #include <leatherman/util/scope_exit.hpp>
 #include <leatherman/util/posix/scoped_descriptor.hpp>
 #include <leatherman/logging/logging.hpp>
+#include <leatherman/locale/locale.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <array>
@@ -14,6 +15,9 @@
 #include <fcntl.h>
 #include <signal.h>
 
+// Mark string for translation (alias for leatherman::locale::format)
+using leatherman::locale::_;
+
 using namespace std;
 using namespace leatherman::util;
 using namespace leatherman::util::posix;
@@ -21,7 +25,6 @@ using namespace leatherman::execution;
 using namespace leatherman::logging;
 using namespace leatherman::file_util;
 using namespace boost::filesystem;
-namespace lth_locale = leatherman::locale;
 
 // Declare environ for OSX
 extern char** environ;
@@ -72,9 +75,9 @@ namespace leatherman { namespace execution {
     static string format_error(string const& message = string(), int error = errno)
     {
         if (message.empty()) {
-            return lth_locale::format("{1} ({2})", strerror(error), error);
+            return _("{1} ({2})", strerror(error), error);
         }
-        return lth_locale::format("{1}: {2} ({3}).", message, strerror(error), error);
+        return _("{1}: {2} ({3}).", message, strerror(error), error);
     }
 
     static vector<gid_t> get_groups()
@@ -216,8 +219,8 @@ namespace leatherman { namespace execution {
             int result = select(max + 1, &read_set, &write_set, nullptr, timeout ? &read_timeout : nullptr);
             if (result == -1) {
                 if (errno != EINTR) {
-                    LOG_ERROR(format_error("select call failed"));
-                    throw execution_exception("child i/o failed.");
+                    LOG_ERROR(format_error(_("select call failed")));
+                    throw execution_exception(_("child i/o failed."));
                 }
                 // Interrupted by signal
                 LOG_DEBUG("select call was interrupted and will be retried.");
@@ -239,7 +242,7 @@ namespace leatherman { namespace execution {
                 if (count < 0) {
                     if (errno != EINTR) {
                         LOG_ERROR("{1} pipe i/o failed: {2}.", pipe.name, format_error());
-                        throw execution_exception("child i/o failed.");
+                        throw execution_exception(_("child i/o failed."));
                     }
                     // Interrupted by signal
                     LOG_DEBUG("{1} pipe i/o was interrupted and will be retried.", pipe.name);
@@ -266,7 +269,7 @@ namespace leatherman { namespace execution {
 
         // Should only reach here if the command timed out
         // cppcheck-suppress zerodivcond - http://trac.cppcheck.net/ticket/5402
-        throw timeout_exception(lth_locale::format("command timed out after {1} seconds.", timeout), static_cast<size_t>(child));
+        throw timeout_exception(_("command timed out after {1} seconds.", timeout), static_cast<size_t>(child));
     }
 
     static void exec_child(int in, int out, int err, char const* program, char const** argv, char const** envp)
@@ -279,8 +282,8 @@ namespace leatherman { namespace execution {
 
         // Set the process group; this will be used by the parent if we need to kill the process and its children
         if (setpgid(0, 0) == -1) {
-            char const* message = "failed to setpgid.";
-            if (write(err, message, strlen(message)) == -1) {
+            string message = _("failed to setpgid.");
+            if (write(err, message.c_str(), message.size()) == -1) {
                 // Do not care
             }
             return;
@@ -288,8 +291,8 @@ namespace leatherman { namespace execution {
 
         // Redirect stdin
         if (dup2(in, STDIN_FILENO) == -1) {
-            char const* message = "failed to redirect child stdin.";
-            if (write(err, message, strlen(message)) == -1) {
+            string message = _("failed to redirect child stdin.");
+            if (write(err, message.c_str(), message.size()) == -1) {
                 // Do not care
             }
             return;
@@ -297,8 +300,8 @@ namespace leatherman { namespace execution {
 
         // Redirect stdout
         if (dup2(out, STDOUT_FILENO) == -1) {
-            char const* message = "failed to redirect child stdout.";
-            if (write(err, message, strlen(message)) == -1) {
+            string message = _("failed to redirect child stdout.");
+            if (write(err, message.c_str(), message.size()) == -1) {
                 // Do not care
             }
             return;
@@ -306,8 +309,8 @@ namespace leatherman { namespace execution {
 
         // Redirect stderr
         if (dup2(err, STDERR_FILENO) == -1) {
-            char const* message = "failed to redirect child stderr.";
-            if (write(err, message, strlen(message)) == -1) {
+            string message = _("failed to redirect child stderr.");
+            if (write(err, message.c_str(), message.size()) == -1) {
                 // Do not care
             }
             return;
@@ -359,7 +362,7 @@ namespace leatherman { namespace execution {
         // Add the given environment
         if (environment) {
             for (auto const& kvp : *environment) {
-                result.emplace_back(lth_locale::format("{1}={2}", kvp.first, kvp.second));
+                result.emplace_back(_("{1}={2}", kvp.first, kvp.second));
             }
         }
 
@@ -388,7 +391,7 @@ namespace leatherman { namespace execution {
         // Note: this uses vfork, which is inherently unsafe (the parent's address space is shared with the child)
         pid_t child = vfork();
         if (child < 0) {
-            throw execution_exception(format_error("failed to fork child process"));
+            throw execution_exception(format_error(_("failed to fork child process")));
         }
 
         // If this is the parent process, return
@@ -421,7 +424,7 @@ namespace leatherman { namespace execution {
         if (executable.empty()) {
             LOG_DEBUG("{1} was not found on the PATH.", file);
             if (options[execution_options::throw_on_nonzero_exit]) {
-                throw child_exit_exception("child process returned non-zero exit status.", 127, {}, {});
+                throw child_exit_exception(_("child process returned non-zero exit status."), 127, {}, {});
             }
             return {false, "", "", 127, 0};
         }
@@ -429,13 +432,13 @@ namespace leatherman { namespace execution {
         // Create the pipes for stdin/stdout redirection
         int pipes[2];
         if (::pipe(pipes) < 0) {
-            throw execution_exception(format_error("failed to allocate pipe for stdin redirection"));
+            throw execution_exception(format_error(_("failed to allocate pipe for stdin redirection")));
         }
         scoped_descriptor stdin_read(pipes[0]);
         scoped_descriptor stdin_write(pipes[1]);
 
         if (::pipe(pipes) < 0) {
-            throw execution_exception(format_error("failed to allocate pipe for stdout redirection"));
+            throw execution_exception(format_error(_("failed to allocate pipe for stdout redirection")));
         }
         scoped_descriptor stdout_read(pipes[0]);
         scoped_descriptor stdout_write(pipes[1]);
@@ -452,7 +455,7 @@ namespace leatherman { namespace execution {
             child_stderr = dev_null;
         } else {
             if (::pipe(pipes) < 0) {
-                throw execution_exception(format_error("failed to allocate pipe for stderr redirection"));
+                throw execution_exception(format_error(_("failed to allocate pipe for stderr redirection")));
             }
             stderr_read = scoped_descriptor(pipes[0]);
             stderr_write = scoped_descriptor(pipes[1]);
@@ -489,7 +492,7 @@ namespace leatherman { namespace execution {
             }
             // Wait for the child to exit
             if (waitpid(child, &status, 0) == -1) {
-                LOG_DEBUG(format_error("waitpid failed"));
+                LOG_DEBUG(format_error(_("waitpid failed")));
                 return;
             }
             if (WIFEXITED(status)) {
@@ -511,15 +514,15 @@ namespace leatherman { namespace execution {
             struct sigaction sa = {};
             sa.sa_handler = timer_handler;
             if (sigaction(SIGALRM, &sa, nullptr) == -1) {
-                LOG_ERROR(format_error("sigaction failed"));
-                throw execution_exception(format_error("failed to setup timer"));
+                LOG_ERROR(format_error(_("sigaction failed")));
+                throw execution_exception(format_error(_("failed to setup timer")));
             }
 
             itimerval timer = {};
             timer.it_value.tv_sec = static_cast<decltype(timer.it_interval.tv_sec)>(timeout);
             if (setitimer(ITIMER_REAL, &timer, nullptr) == -1) {
-                LOG_ERROR(format_error("setitimer failed"));
-                throw execution_exception(format_error("failed to setup timer"));
+                LOG_ERROR(format_error(_("setitimer failed")));
+                throw execution_exception(format_error(_("failed to setup timer")));
             }
 
             // Set the resource to disable the timer
@@ -569,10 +572,10 @@ namespace leatherman { namespace execution {
         // Throw exception if needed
         if (!success) {
             if (!signaled && status != 0 && options[execution_options::throw_on_nonzero_exit]) {
-                throw child_exit_exception(lth_locale::format("child process returned non-zero exit status ({1}).", status), status, move(output), move(error));
+                throw child_exit_exception(_("child process returned non-zero exit status ({1}).", status), status, move(output), move(error));
             }
             if (signaled && options[execution_options::throw_on_signal]) {
-                throw child_signal_exception(lth_locale::format("child process was terminated by signal ({1}).", status), status, move(output), move(error));
+                throw child_signal_exception(_("child process was terminated by signal ({1}).", status), status, move(output), move(error));
             }
         }
         return {success, move(output), move(error), status, static_cast<size_t>(child)};

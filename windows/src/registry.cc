@@ -5,8 +5,10 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/nowide/convert.hpp>
 
+// Mark string for translation (alias for leatherman::locale::format)
+using leatherman::locale::_;
+
 using namespace std;
-namespace lth_locale = leatherman::locale;
 
 namespace leatherman { namespace windows {
 
@@ -27,7 +29,7 @@ namespace leatherman { namespace windows {
             case registry::HKEY::PERFORMANCE_TEXT:    return HKEY_PERFORMANCE_TEXT;
             case registry::HKEY::USERS:               return HKEY_USERS;
             default:
-                throw registry_exception("invalid HKEY specified");
+                throw registry_exception(_("invalid HKEY specified"));
         }
     }
 
@@ -42,7 +44,7 @@ namespace leatherman { namespace windows {
         DWORD size = 0u;
         auto err = RegGetValueW(hk, lpSubKeyW.c_str(), lpValueW.c_str(), flags, nullptr, nullptr, &size);
         if (err != ERROR_SUCCESS) {
-            throw registry_exception(lth_locale::format("error reading registry key {1} {2}: {3}",
+            throw registry_exception(_("error reading registry key {1} {2}: {3}",
                 lpSubKey, lpValue, windows::system_error(err)));
         }
 
@@ -50,7 +52,7 @@ namespace leatherman { namespace windows {
         wstring buffer((size*sizeof(char))/sizeof(wchar_t), '\0');
         err = RegGetValueW(hk, lpSubKeyW.c_str(), lpValueW.c_str(), flags, nullptr, &buffer[0], &size);
         if (err != ERROR_SUCCESS) {
-            throw registry_exception(lth_locale::format("error reading registry key {1} {2}: {3}",
+            throw registry_exception(_("error reading registry key {1} {2}: {3}",
                 lpSubKey, lpValue, windows::system_error(err)));
         }
 
