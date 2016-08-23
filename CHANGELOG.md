@@ -2,7 +2,19 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.10.0]
+
+### Added
+- `leatherman.util` wrappers for obscurring the thread/chrono library used; set to Boost
+- Added the valijson header-only library
+- `leatherman.json_container` adds schema validation helpers via valijson
+
+### Changed
+- Vendored libraries are now stored compressed, and unpacked at build-time
+
 ## [0.9.0]
+
+### Added
 - Add translation helper functions and plural format support (LTH-109)
 
 ## [0.8.1]
