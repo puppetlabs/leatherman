@@ -13,10 +13,6 @@ if (WIN32)
     symbol_exports(mock_curl "${CMAKE_CURRENT_LIST_DIR}/export.h")
 endif()
 
-if (COVERALLS)
-    target_link_libraries(mock_curl gcov)
-endif()
-
 # Namespacing curl libs so we don't pollute the global namespace
 # Needed to properly link libmock_curl in tests
 set(LEATHERMAN_INT_CURL_LIBS ${CURL_LIBRARIES})

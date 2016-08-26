@@ -37,9 +37,6 @@ if (BUILDING_LEATHERMAN)
     include_directories(BEFORE ${LEATHERMAN_NOWIDE_INCLUDE})
     add_executable(lth_cat tests/lth_cat.cc)
     target_link_libraries(lth_cat ${LEATHERMAN_NOWIDE_LIBS})
-    if (COVERALLS)
-        target_link_libraries(lth_cat gcov)
-    endif()
     set_target_properties(lth_cat PROPERTIES COMPILE_FLAGS "${LEATHERMAN_CXX_FLAGS}")
 
     configure_file (
