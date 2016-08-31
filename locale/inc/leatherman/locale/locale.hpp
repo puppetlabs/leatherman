@@ -24,6 +24,8 @@
 // Unset PROJECT_NAME so we only create a single locale.
 #undef PROJECT_NAME
 #define PROJECT_NAME ""
+#undef PROJECT_DIR
+#define PROJECT_DIR
 #endif
 
 namespace leatherman { namespace locale {
