@@ -449,6 +449,38 @@ msgstr ""
 msgid "not a double"
 msgstr ""
 
+#: json_container/src/schema.cc
+msgid "failed to parse schema: {1}"
+msgstr ""
+
+#: json_container/src/schema.cc
+msgid "failed to parse schema"
+msgstr ""
+
+#: json_container/src/schema.cc
+msgid "schema was populate by parsing JSON"
+msgstr ""
+
+#: json_container/src/schema.cc
+msgid "type is not JSON Object"
+msgstr ""
+
+#: json_container/src/validator.cc
+msgid "ERROR"
+msgstr ""
+
+#: json_container/src/validator.cc
+msgid "'{1}' does not match schema: {2}"
+msgstr ""
+
+#: json_container/src/validator.cc
+msgid "schema '{1}' already defined"
+msgstr ""
+
+#: json_container/src/validator.cc
+msgid "'{1}' is not a registered schema"
+msgstr ""
+
 #: logging/src/logging.cc
 msgid ""
 "invalid log level '{1}': expected none, trace, debug, info, warn, error, or "
