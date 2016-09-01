@@ -5,6 +5,7 @@
 # interface.
 
 include(leatherman) # contains some helpers we use
+include(ExternalProject)
 
 ####
 # Macros for use by leatherman libraries
@@ -136,6 +137,28 @@ macro(add_leatherman_headers)
         foreach(DIR ${ARGV})
             install(DIRECTORY "${DIR}" DESTINATION include)
         endforeach()
+    endif()
+endmacro()
+
+# Usage: add_leatherman_vendored("pkg.zip" "abcdef..." "include" [SOURCE_DIR])
+#
+# Unpacks a vendored package and installs the headers to include/leatherman/vendor
+# Optionally, a variable can be passed as the last argument that's set to the
+# unpacked location, in case it's needed for compiling a simple library.
+macro(add_leatherman_vendored pkg md5 header_path)
+    unpack_vendored(${pkg} ${md5} SOURCE_DIR)
+
+    set(include_dir "${SOURCE_DIR}/${header_path}")
+    add_leatherman_includes(${include_dir})
+
+    if (LEATHERMAN_INSTALL)
+        install(DIRECTORY "${include_dir}/" DESTINATION "include/leatherman/vendor")
+    endif()
+
+    add_custom_target(${dirname} DEPENDS ${pkg})
+
+    if (ARGV4)
+        set(${ARGV4} ${SOURCE_DIR})
     endif()
 endmacro()
 

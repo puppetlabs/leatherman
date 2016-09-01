@@ -342,3 +342,21 @@ function(append_new varname)
     endforeach()
     set(${varname} ${${varname}} PARENT_SCOPE)
 endfunction()
+
+# Usage: unpack_vendored("pkg.zip" "abcdef..." SOURCE_DIR)
+#
+# Unpacks a compressed package in the vendor directory and saves
+# the unpacked location to a variable.
+macro(unpack_vendored pkg md5 dir)
+    externalproject_add(
+        ${pkg}
+        PREFIX "${PROJECT_BINARY_DIR}"
+        URL "file://${PROJECT_SOURCE_DIR}/vendor/${pkg}"
+        URL_MD5 "${md5}"
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+        BUILD_IN_SOURCE 1
+        INSTALL_COMMAND "")
+    externalproject_get_property(${pkg} SOURCE_DIR)
+    set(${dir} ${SOURCE_DIR})
+endmacro(unpack_vendored)

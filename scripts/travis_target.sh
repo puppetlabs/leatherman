@@ -53,7 +53,7 @@ function travis_make()
 
         if [ $1 == "debug" ]; then
             # Ignore coveralls results, keep service success uncoupled
-            coveralls --gcov gcov-4.8 --gcov-options '\-lp' -r .. >/dev/null || true
+            coveralls --gcov gcov-4.8 --gcov-options '\-lp' -r .. -b . -e $1/src -e vendor >/dev/null || true
         fi
 
         mkdir dest

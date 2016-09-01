@@ -1,5 +1,6 @@
 include_directories(BEFORE ${LEATHERMAN_CATCH_INCLUDE} ${LEATHERMAN_INCLUDE_DIRS})
 add_executable(leatherman_test main.cc ${LEATHERMAN_TEST_SRCS})
+add_dependencies(leatherman_test catch)
 
 if (LEATHERMAN_SHARED)
     # Include deps first, as they may be static. If they are, linking on Windows can
@@ -16,10 +17,6 @@ endif()
 
 # We link libmock_curl instead of real libcurl in tests
 target_link_libraries(leatherman_test ${LEATHERMAN_TEST_LIBS})
-
-if (COVERALLS)
-    target_link_libraries(leatherman_test gcov)
-endif()
 
 leatherman_logging_namespace("leatherman.test")
 set_target_properties(leatherman_test PROPERTIES COMPILE_FLAGS "${LEATHERMAN_CXX_FLAGS}")
