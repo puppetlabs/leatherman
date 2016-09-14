@@ -2,7 +2,19 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.1]
+
+### Fixed
+- Externalized some strings for localization that were missed (LTH-59)
+- Fixed consuming Leatherman without cflags (LTH-113)
+- Updated the logging backend to filter records based on log level; previously filtering was only applied when using Leatherman logging functions.
+
+### Changed
+- Third-party libraries are now added as compressed files
+
 ## [0.9.0]
+
+### Added
 - Add translation helper functions and plural format support (LTH-109)
 
 ## [0.8.1]
