@@ -52,6 +52,11 @@ namespace leatherman { namespace logging {
     void color_writer::consume(boost::log::record_view const& rec)
     {
         auto level = boost::log::extract<log_level>("Severity", rec);
+
+        if (!is_enabled(*level)) {
+            return;
+        }
+
         auto line_num = boost::log::extract<int>("LineNum", rec);
         auto name_space = boost::log::extract<string>("Namespace", rec);
         auto timestamp = boost::log::extract<boost::posix_time::ptime>("TimeStamp", rec);
