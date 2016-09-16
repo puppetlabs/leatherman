@@ -544,7 +544,7 @@ namespace leatherman { namespace execution {
         // It provides two callbacks of its own to call when there's data available on stdout/stderr
         // We return from the lambda when all data has been read
         string output, error;
-        tie(output, error) = process_streams(options[execution_options::trim_output], stdout_callback, stderr_callback, [&](function<bool(string const&)> const& process_stdout, function<bool(string const&)> const& process_stderr) {
+        tie(output, error) = process_streams(options[execution_options::trim_output], false, stdout_callback, stderr_callback, [&](function<bool(string const&)> const& process_stdout, function<bool(string const&)> const& process_stderr) {
             array<pipe, 3> pipes = { {
                 pipe("stdout", move(stdout_read), process_stdout),
                 pipe("stderr", move(stderr_read), process_stderr),

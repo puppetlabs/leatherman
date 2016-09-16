@@ -645,7 +645,7 @@ namespace leatherman { namespace execution {
         }
 
         string output, error;
-        tie(output, error) = process_streams(options[execution_options::trim_output], stdout_callback, stderr_callback, [&](function<bool(string const&)> const& process_stdout, function<bool(string const&)> const& process_stderr) {
+        tie(output, error) = process_streams(options[execution_options::trim_output], options[execution_options::convert_newlines], stdout_callback, stderr_callback, [&](function<bool(string const&)> const& process_stdout, function<bool(string const&)> const& process_stderr) {
             // Read the child output
             array<pipe, 3> pipes = { {
                 input ? pipe("stdin", move(stdInWr), *input) : pipe("stdin", {}, ""),
