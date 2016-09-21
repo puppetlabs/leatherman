@@ -28,7 +28,6 @@
   - [Sample Library CMakeLists.txt file](#sample-library-cmakeliststxt-file)
   - [Vendoring Other Libraries](#vendoring-other-libraries)
 - [How To Release](#how-to-release)
-- [Maintenance](#maintenance)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -391,12 +390,6 @@ the `nowide` and `catch` CMake files are both solid examples.
 1. Build with gettext to ensure translations are up-to-date
 1. `git tag -s <version> -m '<version>' && git push <puppetlabs> refs/tags/<version>`
 1. Send out an announcement e-mail
-
-## Maintenance
-
-Maintainers: Michael Smith <michael.smith@puppet.com>, Branan Riley <branan@puppet.com>
-
-Tickets: https://tickets.puppetlabs.com/browse/LTH.
 
 [1]: https://github.com/philsquared/Catch
 [2]: https://github.com/miloyip/rapidjson
