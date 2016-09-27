@@ -434,7 +434,6 @@ namespace leatherman { namespace execution {
      */
     std::tuple<std::string, std::string> process_streams(
             bool trim,
-            bool strip_cr,
             std::function<bool(std::string&)> const& stdout_callback,
             std::function<bool(std::string&)> const& stderr_callback,
             std::function<void(std::function<bool(std::string const&)>, std::function<bool(std::string const&)>)> const& read_streams);

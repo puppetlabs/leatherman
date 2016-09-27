@@ -350,21 +350,12 @@ namespace leatherman { namespace execution {
         return execute(file, &arguments, nullptr, &environment, nullptr, stdout_callback, stderr_callback, actual_options, timeout).success;
     }
 
-    static bool process_data(bool trim, bool strip_cr, string const& raw_data, string& buffer, string const& logger, function<bool(string&)> const& callback)
+    static bool process_data(bool trim, string const& data, string& buffer, string const& logger, function<bool(string&)> const& callback)
     {
         // Do nothing if nothing was read
-        if (raw_data.empty()) {
+        if (data.empty()) {
             return true;
         }
-
-        string stripped_data;
-        if (strip_cr) {
-            stripped_data = raw_data;
-            stripped_data.erase(
-                std::remove(stripped_data.begin(), stripped_data.end(), '\r'),
-                stripped_data.end());
-        }
-        string const& data = strip_cr ? stripped_data : raw_data;
 
         // If given no callback, buffer the entire output
         if (!callback) {
@@ -421,7 +412,7 @@ namespace leatherman { namespace execution {
         return true;
     }
 
-    tuple<string, string> process_streams(bool trim, bool strip_cr, function<bool(string&)> const& stdout_callback, function<bool(string&)> const& stderr_callback, function<void(function<bool(string const&)>, function<bool(string const&)>)> const& read_streams)
+    tuple<string, string> process_streams(bool trim, function<bool(string&)> const& stdout_callback, function<bool(string&)> const& stderr_callback, function<void(function<bool(string const&)>, function<bool(string const&)>)> const& read_streams)
     {
         // Get a special logger used specifically for child process output
         static const string stdout_logger = "|";
@@ -434,14 +425,14 @@ namespace leatherman { namespace execution {
         // Read the streams
         read_streams(
             [&](string const& data) {
-                if (!process_data(trim, strip_cr, data, stdout_buffer, stdout_logger, stdout_callback)) {
+                if (!process_data(trim, data, stdout_buffer, stdout_logger, stdout_callback)) {
                     LOG_DEBUG("completed processing output: closing child pipes.");
                     return false;
                 }
                 return true;
             },
             [&](string const& data) {
-                if (!process_data(trim, strip_cr, data, stderr_buffer, stderr_logger, stderr_callback)) {
+                if (!process_data(trim, data, stderr_buffer, stderr_logger, stderr_callback)) {
                     LOG_DEBUG("completed processing output: closing child pipes.");
                     return false;
                 }
