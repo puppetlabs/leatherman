@@ -375,6 +375,22 @@ SCENARIO("executing commands with execution::execute") {
             }
         }
     }
+    GIVEN("a command that outputs windows-style newlines") {
+        // These are the default options so that I don't override them.
+        lth_util::option_set<execution_options> options = { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_null };
+        WHEN("newlines are not normalized") {
+            auto exec = execute("cmd.exe", { "/c", "type", normalize(EXEC_TESTS_DIRECTORY "/fixtures/ls/crlf.txt") }, 0, options);
+            REQUIRE(exec.success);
+            REQUIRE(exec.error == "");
+            REQUIRE(exec.output.find('\r') != std::string::npos);
+        }
+        WHEN("requested to normalize newlines") {
+            auto exec = execute("cmd.exe", { "/c", "type", normalize(EXEC_TESTS_DIRECTORY "/fixtures/ls/crlf.txt") }, 0, options | option_set<execution_options>{ execution_options::convert_newlines });
+            REQUIRE(exec.success);
+            REQUIRE(exec.error == "");
+            REQUIRE(exec.output.find('\r') == std::string::npos);
+        }
+    }
 }
 
 SCENARIO("executing commands with leatherman::execution::each_line") {
