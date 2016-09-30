@@ -67,6 +67,10 @@ namespace leatherman { namespace execution {
          */
         inherit_locale = (1 << 9),
         /**
+         * On windows, converts \r\n newlines to standard \n
+         */
+        convert_newlines = (1 << 10),
+         /**
          * A combination of all throw options.
          */
         throw_on_failure = throw_on_nonzero_exit | throw_on_signal,

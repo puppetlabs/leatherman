@@ -260,7 +260,7 @@ namespace leatherman { namespace execution {
         }
     };
 
-    static void rw_from_child(DWORD child, array<pipe, 3>& pipes, uint32_t timeout, HANDLE timer)
+    static void rw_from_child(DWORD child, array<pipe, 3>& pipes, uint32_t timeout, HANDLE timer, bool convert_newlines)
     {
         vector<HANDLE> wait_handles;
         while (true)
@@ -313,6 +313,11 @@ namespace leatherman { namespace execution {
                     if (pipe.read) {
                         // Read completed immediately, process the data
                         pipe.buffer.resize(count);
+                        if (convert_newlines) {
+                            pipe.buffer.erase(
+                                std::remove(pipe.buffer.begin(), pipe.buffer.end(), '\r'),
+                                pipe.buffer.end());
+                        }
                         if (!pipe.callback(pipe.buffer)) {
                             // Callback signaled that we're done
                             return;
@@ -383,6 +388,11 @@ namespace leatherman { namespace execution {
                 if (pipe.read) {
                     // Read completed, process the data
                     pipe.buffer.resize(count);
+                    if (convert_newlines) {
+                        pipe.buffer.erase(
+                            std::remove(pipe.buffer.begin(), pipe.buffer.end(), '\r'),
+                            pipe.buffer.end());
+                    }
                     if (!pipe.callback(pipe.buffer)) {
                         // Callback signaled that we're done
                         return;
@@ -653,7 +663,7 @@ namespace leatherman { namespace execution {
                 pipe("stderr", move(stdErrRd), process_stderr)
             } };
 
-            rw_from_child(procInfo.dwProcessId, pipes, timeout, timer);
+            rw_from_child(procInfo.dwProcessId, pipes, timeout, timer, options[execution_options::convert_newlines]);
         });
 
         HANDLE handles[2] = { hProcess, timer };
