@@ -5,7 +5,6 @@
 # interface.
 
 include(leatherman) # contains some helpers we use
-include(ExternalProject)
 
 ####
 # Macros for use by leatherman libraries

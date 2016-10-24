@@ -343,20 +343,18 @@ function(append_new varname)
     set(${varname} ${${varname}} PARENT_SCOPE)
 endfunction()
 
-# Usage: unpack_vendored("pkg.zip" "abcdef..." SOURCE_DIR)
+# Usage: unpack_vendored("pkg.zip" "pkg" SOURCE_DIR)
 #
-# Unpacks a compressed package in the vendor directory and saves
-# the unpacked location to a variable.
-macro(unpack_vendored pkg md5 dir)
-    externalproject_add(
-        ${pkg}
-        PREFIX "${PROJECT_BINARY_DIR}"
-        URL "file://${PROJECT_SOURCE_DIR}/vendor/${pkg}"
-        URL_MD5 "${md5}"
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-        BUILD_IN_SOURCE 1
-        INSTALL_COMMAND "")
-    externalproject_get_property(${pkg} SOURCE_DIR)
-    set(${dir} ${SOURCE_DIR})
+# Unpacks a compressed pkg.zip in the vendor directory to
+# ${PROJECT_BINARY_DIR}/src/pkg and saves the unpacked location to a variable.
+macro(unpack_vendored pkg extracted_dir dir)
+    set(pkgfile ${PROJECT_SOURCE_DIR}/vendor/${pkg})
+    set(${dir} ${PROJECT_BINARY_DIR}/src/${extracted_dir})
+
+    message(STATUS "Unpacking ${pkgfile} into ${${dir}}")
+    file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/src)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E tar xzf ${PROJECT_SOURCE_DIR}/vendor/${pkg}
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/src
+        )
 endmacro(unpack_vendored)
