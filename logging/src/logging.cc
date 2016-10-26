@@ -82,7 +82,7 @@ namespace leatherman { namespace logging {
         core->remove_all_sinks();
 
         using sink_t = sinks::synchronous_sink<color_writer>;
-        boost::shared_ptr<sink_t> sink(new sink_t(&dst));
+        boost::shared_ptr<sink_t> sink = boost::make_shared<sink_t>(boost::make_shared<color_writer>(&dst));
         core->add_sink(sink);
 
 
