@@ -1,6 +1,5 @@
 include_directories(BEFORE ${LEATHERMAN_CATCH_INCLUDE} ${LEATHERMAN_INCLUDE_DIRS})
 add_executable(leatherman_test main.cc ${LEATHERMAN_TEST_SRCS})
-add_dependencies(leatherman_test catch)
 
 if (LEATHERMAN_SHARED)
     # Include deps first, as they may be static. If they are, linking on Windows can
