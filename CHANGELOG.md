@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.3]
+
+### Fixed
+- Fix Boost.Log sink initialization with Boost 1.62 (LTH-115)
+
+### Changed
+- Switch to compile-time unpacking vendored packages (LTH-117)
+
 ## [0.9.2]
 
 ### Changed
