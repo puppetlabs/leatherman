@@ -126,7 +126,7 @@ SCENARIO("executing commands with execution::execute") {
             REQUIRE(exec.exit_code == 0);
         }
         WHEN("the create new process group option is used") {
-            auto exec = execute("cmd.exe", { "/c", "type", normalize(EXEC_TESTS_DIRECTORY "/fixtures/ls/file3.txt") }, 0, { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_null, execution_options::create_new_process_group });
+            auto exec = execute("cmd.exe", { "/c", "type", normalize(EXEC_TESTS_DIRECTORY "/fixtures/ls/file3.txt") }, 0, { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_null, execution_options::create_detached_process });
             REQUIRE(exec.success);
             REQUIRE(exec.output == "file3");
             REQUIRE(exec.error == "");
@@ -229,7 +229,7 @@ SCENARIO("executing commands with execution::execute") {
             }
         }
         WHEN("the create new process group option is used") {
-            auto exec = execute("cmd.exe", { "/c", "dir", "/B", "does_not_exist" }, 0, { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_null, execution_options::create_new_process_group });
+            auto exec = execute("cmd.exe", { "/c", "dir", "/B", "does_not_exist" }, 0, { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_null, execution_options::create_detached_process });
             THEN("no output is returned") {
                 REQUIRE_FALSE(exec.success);
                 REQUIRE(exec.output == "");

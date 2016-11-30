@@ -57,9 +57,10 @@ namespace leatherman { namespace execution {
          */
         preserve_arguments = (1 << 7),
         /**
-         * On Windows, create a new process group for the child process, but not a Job Object.
+         * Create a new process such that it can outlive its parent. This involves running it
+         * in a separate process group on Windows, and in a separate contract on Solaris.
          */
-        create_new_process_group = (1 << 8),
+        create_detached_process = (1 << 8),
         /**
          * Inherit locale environment variables from the current process. Limited to LC_ALL and
          * LOCALE, which are specifically overridden to "C" with merge_environment.
