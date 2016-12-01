@@ -6,9 +6,11 @@ static const std::string JSON = "{\"foo\" : {\"bar\" : 2},"
                                 " \"goo\" : 1,"
                                 " \"bool\" : true,"
                                 " \"string\" : \"a string\","
+                                " \"string_with_null\" : \"a string\\u0000with\\u0000null\","
                                 " \"null\" : null,"
                                 " \"real\" : 3.1415,"
                                 " \"vec\" : [1, 2], "
+                                " \"string_vec\" : [\"one\", \"two\\u0000null\"], "
                                 " \"nested\" : {"
                                 "                  \"foo\" : \"bar\""
                                 "               }"
@@ -122,6 +124,10 @@ TEST_CASE("JsonContainer::get for object entries", "[data]") {
         REQUIRE(data.get<std::string>("string") == "a string");
     }
 
+    SECTION("it can get a string value containing null character(s)") {
+        REQUIRE(data.get<std::string>("string_with_null") == std::string("a string\0with\0null", 18));
+    }
+
     SECTION("it can get a double value") {
         REQUIRE(data.get<double>("real") == 3.1415);
     }
@@ -129,6 +135,15 @@ TEST_CASE("JsonContainer::get for object entries", "[data]") {
     SECTION("it can get a vector") {
         std::vector<int> tmp { 1, 2 };
         std::vector<int> result { data.get<std::vector<int>>("vec") };
+        REQUIRE(tmp.size() == result.size());
+        REQUIRE(tmp[0] == result[0]);
+        REQUIRE(tmp[1] == result[1]);
+    }
+
+    SECTION("it can get a string vector") {
+        std::vector<std::string> tmp { "one", { "two\0null", 8 } };
+        std::vector<std::string> result { data.get<std::vector<std::string>>("string_vec") };
+        REQUIRE(tmp.size() == result.size());
         REQUIRE(tmp[0] == result[0]);
         REQUIRE(tmp[1] == result[1]);
     }
@@ -539,7 +554,7 @@ TEST_CASE("JsonContainer::size", "[data]") {
 
         SECTION("non-empty multi element object") {
             JsonContainer bigger_data { JSON };
-            REQUIRE(bigger_data.size() == 8u);
+            REQUIRE(bigger_data.size() == 10u);
         }
 
         SECTION("non-empty array") {
@@ -739,8 +754,9 @@ TEST_CASE("JsonContainer::set", "[data]") {
 TEST_CASE("JsonContainer::keys", "[data]") {
     SECTION("It returns a vector of keys") {
         JsonContainer data { "{ \"a\" : 1, "
-                              " \"b\" : 2}"};
-        std::vector<std::string> expected_keys { "a", "b" };
+                             " \"b\" : 2, "
+                             " \"c\\u0000null\" : 2}" };
+        std::vector<std::string> expected_keys { "a", "b", { "c\0null", 6 } };
 
         REQUIRE(data.keys() == expected_keys);
     }

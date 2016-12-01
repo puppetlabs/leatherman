@@ -185,7 +185,7 @@ namespace leatherman { namespace json_container {
         if (jval->IsObject()) {
             for (json_value::ConstMemberIterator itr = jval->MemberBegin();
                  itr != jval->MemberEnd(); ++itr) {
-                k.push_back(itr->name.GetString());
+                k.emplace_back(itr->name.GetString(), itr->name.GetStringLength());
             }
         }
 
@@ -390,7 +390,7 @@ namespace leatherman { namespace json_container {
             throw data_type_error { _("not a string") };
         }
 
-        return std::string(value.GetString());
+        return std::string(value.GetString(), value.GetStringLength());
     }
 
     template<>
@@ -446,7 +446,7 @@ namespace leatherman { namespace json_container {
                 throw data_type_error { _("not a string") };
             }
 
-            tmp.push_back(itr->GetString());
+            tmp.emplace_back(itr->GetString(), itr->GetStringLength());
         }
 
         return tmp;
