@@ -1,6 +1,12 @@
 find_package(Boost 1.54 REQUIRED COMPONENTS regex filesystem system)
 
 add_leatherman_deps("${Boost_LIBRARIES}")
+if ("${CMAKE_SYSTEM_NAME}" MATCHES "SunOS")
+    # We use functions provided by this library in the implementation
+    # of the create_detached_process execution option on Solaris to
+    # execute the child processes in their own contracts
+    add_leatherman_deps(contract)
+endif()
 add_leatherman_includes("${Boost_INCLUDE_DIRS}")
 
 leatherman_dependency(util)
@@ -21,13 +27,20 @@ add_leatherman_headers(inc/leatherman)
 if(WIN32)
     add_leatherman_library(src/execution.cc src/windows/execution.cc)
 else()
-    add_leatherman_library(src/execution.cc src/posix/execution.cc)
+    if("${CMAKE_SYSTEM_NAME}" MATCHES "SunOS")
+        add_leatherman_library(src/execution.cc src/posix/execution.cc src/posix/solaris/platform.cc)
+    else()
+        add_leatherman_library(src/execution.cc src/posix/execution.cc src/posix/generic/platform.cc)
+    endif()
 endif()
 
 if(WIN32)
     set(PLATFORM_TESTS tests/windows/execution.cc)
 else()
     set(PLATFORM_TESTS tests/posix/execution.cc)
+    if("${CMAKE_SYSTEM_NAME}" MATCHES "SunOS")
+        list(APPEND PLATFORM_TESTS tests/posix/solaris/execution.cc)
+    endif()
 endif()
 
 add_leatherman_test(tests/log_capture.cc ${PLATFORM_TESTS})
