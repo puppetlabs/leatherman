@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.10.0]
+
+### Added
+- Solaris implementation of the `create_detached_process` execution option - execution of child processes in separate contracts (LTH-120)
+
+### Changed
+- Renamed `create_new_process_group` execution option to `create_detached_process` to make the concept more broadly applicable (LTH-120)
+
 ## [0.9.4]
 
 ### Fixed
