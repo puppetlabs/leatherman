@@ -185,10 +185,6 @@ msgstr ""
 msgid "{1}={2}"
 msgstr ""
 
-#: execution/src/posix/execution.cc
-msgid "failed to fork child process"
-msgstr ""
-
 #. debug
 #: execution/src/posix/execution.cc
 #: execution/src/windows/execution.cc
@@ -244,6 +240,31 @@ msgstr ""
 
 #: execution/src/posix/execution.cc
 msgid "child process was terminated by signal ({1})."
+msgstr ""
+
+#: execution/src/posix/generic/platform.cc
+#: execution/src/posix/solaris/platform.cc
+msgid "failed to fork child process"
+msgstr ""
+
+#: execution/src/posix/solaris/platform.cc
+msgid "failed to create process contract template"
+msgstr ""
+
+#: execution/src/posix/solaris/platform.cc
+msgid "failed to lookup the latest child process contract"
+msgstr ""
+
+#: execution/src/posix/solaris/platform.cc
+msgid "failed to abandon contract created for a child process"
+msgstr ""
+
+#: execution/src/posix/solaris/platform.cc
+msgid "failed to deactivate contract template in the child process"
+msgstr ""
+
+#: execution/src/posix/solaris/platform.cc
+msgid "failed to deactivate contract template created for a child process"
 msgstr ""
 
 #: execution/src/windows/execution.cc

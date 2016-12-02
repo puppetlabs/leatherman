@@ -7,13 +7,15 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <array>
-#include <unistd.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/time.h>
 #include <fcntl.h>
 #include <signal.h>
+
+#include "platform.hpp"
 
 // Mark string for translation (alias for leatherman::locale::format)
 using leatherman::locale::_;
@@ -72,7 +74,7 @@ namespace leatherman { namespace execution {
         command_timedout = true;
     }
 
-    static string format_error(string const& message = string(), int error = errno)
+    string format_error(string const& message, int error)
     {
         if (message.empty()) {
             return _("{1} ({2})", strerror(error), error);
@@ -272,7 +274,7 @@ namespace leatherman { namespace execution {
         throw timeout_exception(_("command timed out after {1} seconds.", timeout), static_cast<size_t>(child));
     }
 
-    static void exec_child(int in, int out, int err, char const* program, char const** argv, char const** envp)
+    static void do_exec_child(int in_fd, int out_fd, int err_fd, char const* program, char const** argv, char const** envp)
     {
         // WARNING: this function is called from a vfork'd child
         // Do not modify program state from this function; only call setpgid, dup2, close, execve, and _exit
@@ -283,34 +285,34 @@ namespace leatherman { namespace execution {
         // Set the process group; this will be used by the parent if we need to kill the process and its children
         if (setpgid(0, 0) == -1) {
             string message = _("failed to setpgid.");
-            if (write(err, message.c_str(), message.size()) == -1) {
+            if (write(err_fd, message.c_str(), message.size()) == -1) {
                 // Do not care
             }
             return;
         }
 
         // Redirect stdin
-        if (dup2(in, STDIN_FILENO) == -1) {
+        if (dup2(in_fd, STDIN_FILENO) == -1) {
             string message = _("failed to redirect child stdin.");
-            if (write(err, message.c_str(), message.size()) == -1) {
+            if (write(err_fd, message.c_str(), message.size()) == -1) {
                 // Do not care
             }
             return;
         }
 
         // Redirect stdout
-        if (dup2(out, STDOUT_FILENO) == -1) {
+        if (dup2(out_fd, STDOUT_FILENO) == -1) {
             string message = _("failed to redirect child stdout.");
-            if (write(err, message.c_str(), message.size()) == -1) {
+            if (write(err_fd, message.c_str(), message.size()) == -1) {
                 // Do not care
             }
             return;
         }
 
         // Redirect stderr
-        if (dup2(err, STDERR_FILENO) == -1) {
+        if (dup2(err_fd, STDERR_FILENO) == -1) {
             string message = _("failed to redirect child stderr.");
-            if (write(err, message.c_str(), message.size()) == -1) {
+            if (write(err_fd, message.c_str(), message.size()) == -1) {
                 // Do not care
             }
             return;
@@ -323,6 +325,20 @@ namespace leatherman { namespace execution {
 
         // Execute the given program; this should not return if successful
         execve(program, const_cast<char* const*>(argv), const_cast<char* const*>(envp));
+    }
+
+    void exec_child(int in_fd, int out_fd, int err_fd, char const* program, char const** argv, char const** envp)
+    {
+        // WARNING: this function is called from a vfork'd child
+        // Do not modify program state from this function; only call setpgid, dup2, close, execve, and _exit
+        // Do not allocate heap memory or throw exceptions
+        // The child is sharing the address space of the parent process, so carelessly modifying this
+        // function may lead to parent state corruption, memory leaks, and/or total protonic reversal
+
+        do_exec_child(in_fd, out_fd, err_fd, program, argv, envp);
+
+        // If we've reached here, we've failed, so exit the child
+        _exit(errno == 0 ? EXIT_FAILURE : errno);
     }
 
     // Helper function that turns a vector of strings into a vector of const cstr pointers
@@ -383,28 +399,6 @@ namespace leatherman { namespace execution {
             }
         }
         return result;
-    }
-
-    static pid_t create_child(int in, int out, int err, char const* program, char const** argv, char const** envp)
-    {
-        // Fork the child process
-        // Note: this uses vfork, which is inherently unsafe (the parent's address space is shared with the child)
-        pid_t child = vfork();
-        if (child < 0) {
-            throw execution_exception(format_error(_("failed to fork child process")));
-        }
-
-        // If this is the parent process, return
-        if (child != 0) {
-            return child;
-        }
-
-        // Exec the child; this only returns if there was a failure
-        exec_child(in, out, err, program, argv, envp);
-
-        // If we've reached here, we've failed, so exit the child
-        _exit(errno == 0 ? EXIT_FAILURE : errno);
-        return -1;
     }
 
     result execute(
@@ -470,7 +464,9 @@ namespace leatherman { namespace execution {
         auto envp = to_exec_arg(&variables);
 
         // Create the child
-        pid_t child = create_child(stdin_read, stdout_write, child_stderr, executable.c_str(), args.data(), envp.data());
+        pid_t child = create_child(options[execution_options::create_detached_process],
+                                   stdin_read, stdout_write, child_stderr,
+                                   executable.c_str(), args.data(), envp.data());
 
         // Close the unused descriptors
         if (!input) {

@@ -42,7 +42,11 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
     # missing-field-initializers is disabled because GCC can't make up their mind how to treat C++11 initializers
     set(LEATHERMAN_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Werror -Wno-unused-parameter -Wno-unused-local-typedefs -Wno-unknown-pragmas -Wno-missing-field-initializers")
-    if (NOT "${CMAKE_SYSTEM_NAME}" MATCHES "SunOS")
+    if ("${CMAKE_SYSTEM_NAME}" MATCHES "SunOS")
+        # this is needed to link against the libcontract library
+        EXECUTE_PROCESS( COMMAND getconf LFS_CFLAGS OUTPUT_VARIABLE LFS_CFLAGS OUTPUT_STRIP_TRAILING_WHITESPACE )
+        set(LEATHERMAN_CXX_FLAGS "${LEATHERMAN_CXX_FLAGS} ${LFS_CFLAGS}")
+    else()
         set(LEATHERMAN_CXX_FLAGS "${LEATHERMAN_CXX_FLAGS} -Wextra")
     endif()
 

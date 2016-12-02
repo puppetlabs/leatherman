@@ -564,14 +564,14 @@ namespace leatherman { namespace execution {
 
         PROCESS_INFORMATION procInfo = {};
 
-        // Set up flags for CreateProcess based on whether the create_new_process_group
+        // Set up flags for CreateProcess based on whether the create_detached_process
         // option was set and the parent process is running in a Job object.
         auto creation_flags = CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT;
 
         if (use_job_object) {
             creation_flags |= CREATE_BREAKAWAY_FROM_JOB;
         }
-        if (options[execution_options::create_new_process_group]) {
+        if (options[execution_options::create_detached_process]) {
             creation_flags |= CREATE_NEW_PROCESS_GROUP;
         }
 
@@ -603,7 +603,7 @@ namespace leatherman { namespace execution {
 
         // Use a Job Object to group any child processes spawned by the CreateProcess invocation, so we can
         // easily stop them in case of a timeout.
-        bool create_job_object = use_job_object && !options[execution_options::create_new_process_group];
+        bool create_job_object = use_job_object && !options[execution_options::create_detached_process];
         scoped_handle hJob;
         if (create_job_object) {
             hJob = scoped_handle(CreateJobObjectW(nullptr, nullptr));
