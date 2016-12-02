@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Handle null characters in JSON strings (LTH-116)
+- Explicitly pass release flag to pod2man
 
 ## [0.9.3]
 
