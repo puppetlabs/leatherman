@@ -28,6 +28,12 @@ if(WIN32)
     add_leatherman_library(src/execution.cc src/windows/execution.cc)
 else()
     if("${CMAKE_SYSTEM_NAME}" MATCHES "SunOS")
+        # LFS flags are needed to compile the posix/solaris/platform.cc such that it links correctly
+        # against the libcontract library. They're not applied universally as they impact the ability
+        # to use other OS functions. This usage is safe as long as global variables based on these flags
+        # are avoided, according to http://docs.oracle.com/cd/E19455-01/806-0634/6j9vo5alu/index.html
+        EXECUTE_PROCESS( COMMAND getconf LFS_CFLAGS OUTPUT_VARIABLE LFS_CFLAGS OUTPUT_STRIP_TRAILING_WHITESPACE )
+        set(LEATHERMAN_CXX_FLAGS "${LEATHERMAN_CXX_FLAGS} ${LFS_CFLAGS}")
         add_leatherman_library(src/execution.cc src/posix/execution.cc src/posix/solaris/platform.cc)
     else()
         add_leatherman_library(src/execution.cc src/posix/execution.cc src/posix/generic/platform.cc)
