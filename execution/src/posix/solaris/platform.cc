@@ -45,7 +45,7 @@ namespace leatherman { namespace execution {
         int err;
 
         // Open a template
-        if ((tmpl_fd = open64(CT_TEMPLATE, O_RDWR)) == -1) {
+        if ((tmpl_fd = open(CT_TEMPLATE, O_RDWR)) == -1) {
             err = errno;
             goto fail;
         }
@@ -105,7 +105,7 @@ namespace leatherman { namespace execution {
         ctid_t ctid;
         int err;
 
-        if ((stat_fd = open64(CT_LATEST, O_RDONLY)) < 0) {
+        if ((stat_fd = open(CT_LATEST, O_RDONLY)) < 0) {
             err = errno;
             goto fail;
         }
@@ -137,7 +137,7 @@ namespace leatherman { namespace execution {
         int ctl_fd;
         int err;
 
-        if ((ctl_fd = open64((boost::format { "%s/process/%d/ctl" } % CTFS_ROOT % ctid).str().c_str(), O_WRONLY)) < 0) {
+        if ((ctl_fd = open((boost::format { "%s/process/%d/ctl" } % CTFS_ROOT % ctid).str().c_str(), O_WRONLY)) < 0) {
             err = errno;
             goto fail;
         }
