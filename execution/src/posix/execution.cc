@@ -281,11 +281,12 @@ namespace leatherman { namespace execution {
         // Do not allocate heap memory or throw exceptions
         // The child is sharing the address space of the parent process, so carelessly modifying this
         // function may lead to parent state corruption, memory leaks, and/or total protonic reversal
+        // As such, strings are explicitly not localized in this function.
 
         // Set the process group; this will be used by the parent if we need to kill the process and its children
         if (setpgid(0, 0) == -1) {
-            string message = _("failed to setpgid.");
-            if (write(err_fd, message.c_str(), message.size()) == -1) {
+            char const* message = "failed to setpgid.";
+            if (write(err_fd, message, strlen(message)) == -1) {
                 // Do not care
             }
             return;
@@ -293,8 +294,8 @@ namespace leatherman { namespace execution {
 
         // Redirect stdin
         if (dup2(in_fd, STDIN_FILENO) == -1) {
-            string message = _("failed to redirect child stdin.");
-            if (write(err_fd, message.c_str(), message.size()) == -1) {
+            char const* message = "failed to redirect child stdin.";
+            if (write(err_fd, message, strlen(message)) == -1) {
                 // Do not care
             }
             return;
@@ -302,8 +303,8 @@ namespace leatherman { namespace execution {
 
         // Redirect stdout
         if (dup2(out_fd, STDOUT_FILENO) == -1) {
-            string message = _("failed to redirect child stdout.");
-            if (write(err_fd, message.c_str(), message.size()) == -1) {
+            char const* message = "failed to redirect child stdout.";
+            if (write(err_fd, message, strlen(message)) == -1) {
                 // Do not care
             }
             return;
@@ -311,8 +312,8 @@ namespace leatherman { namespace execution {
 
         // Redirect stderr
         if (dup2(err_fd, STDERR_FILENO) == -1) {
-            string message = _("failed to redirect child stderr.");
-            if (write(err_fd, message.c_str(), message.size()) == -1) {
+            char const* message = "failed to redirect child stderr.";
+            if (write(err_fd, message, strlen(message)) == -1) {
                 // Do not care
             }
             return;
