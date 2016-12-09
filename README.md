@@ -28,7 +28,6 @@
   - [Sample Library CMakeLists.txt file](#sample-library-cmakeliststxt-file)
   - [Vendoring Other Libraries](#vendoring-other-libraries)
 - [How To Release](#how-to-release)
-- [Maintenance](#maintenance)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -198,9 +197,29 @@ The format strings in logging (the first argument) will automatically be
 extracted for the translation template file and translated. Substitution
 arguments will not, and must be explicitly translated.
 
-To translate strings outside of logging, use the
-`leatherman::locale::translate` and `leatherman::locale::format`
-helpers. Strings passed to the helpers will be extracted to .po files.
+To translate strings outside of logging, use the `leatherman::locale::translate`
+and `leatherman::locale::format` helpers. Strings passed to the helpers will be
+extracted to .po files. There are several versions of these helpers:
+
+* Basic version (`translate`, `format`) for most standard translations.
+```
+translate("Apple");
+```
+* Pluralized (`translate_n`, `format_n`) when translation depends on number of items.
+```
+// Note the parameter duplication: The first count value `2` selects the appropriate
+// translated message, and the second `2` fills in the `{1}` substitution token.
+format_n("Apple", "{1} Apples", 2, 2);
+```
+* Prefixed-context (`translate_p`, `format_p`) when a word or phrase has multiple meanings.
+```
+translate_p("Fruit", "Apple")
+```
+* Pluralized and prefixed-context (`translate_np`, `format_np`)
+```
+format_np("Fruit", "Apple", "{1} Apples", 3, 3);
+```
+
 `leatherman::locale::format` is a replacement for
 [`boost::locale::format`](http://www.boost.org/doc/libs/1_58_0/libs/locale/doc/html/localized_text_formatting.html),
 which adds locale-aware formatting to `boost::format`, but requires
@@ -220,12 +239,22 @@ in your project, add an include to the top of your cpp file:
 #include <leatherman/locale/locale.hpp>
 ```
 
-Next, if you would like to use either of the functions, you could do so
+Next, if you would like to use any of the functions, you could do so
 by following this example:
 
 ```
 std::cout << leatherman::locale::translate("This is translated") << std::endl;
 std::cout << leatherman::locale::format("This is {1} translated message", 1) << std::endl;
+```
+
+Leatherman also provides format helpers with short names: _(), n_(), p_(), np_().
+These reduce code disruption when adding i18n support, and naming is consistent with
+macros from other i18n libraries.
+
+```
+using namespace leatherman::locale;
+std::cout << _("This is translated") << std::endl;
+std::cout << _("This is {1} translated message", 1) << std::endl;
 ```
 
 #### Limitations
@@ -361,12 +390,6 @@ the `nowide` and `catch` CMake files are both solid examples.
 1. Build with gettext to ensure translations are up-to-date
 1. `git tag -s <version> -m '<version>' && git push <puppetlabs> refs/tags/<version>`
 1. Send out an announcement e-mail
-
-## Maintenance
-
-Maintainers: Michael Smith <michael.smith@puppet.com>, Branan Riley <branan@puppet.com>
-
-Tickets: https://tickets.puppetlabs.com/browse/LTH.
 
 [1]: https://github.com/philsquared/Catch
 [2]: https://github.com/miloyip/rapidjson

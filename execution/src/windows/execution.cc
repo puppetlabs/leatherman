@@ -6,6 +6,7 @@
 #include <leatherman/windows/system_error.hpp>
 #include <leatherman/windows/windows.hpp>
 #include <leatherman/logging/logging.hpp>
+#include <leatherman/locale/locale.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/nowide/convert.hpp>
@@ -18,6 +19,9 @@
 #include <cstring>
 #include <random>
 
+// Mark string for translation (alias for leatherman::locale::format)
+using leatherman::locale::_;
+
 using namespace std;
 using namespace leatherman::windows;
 using namespace leatherman::logging;
@@ -25,7 +29,6 @@ using namespace leatherman::util;
 using namespace leatherman::util::windows;
 using namespace boost::filesystem;
 using namespace boost::algorithm;
-namespace lth_locale = leatherman::locale;
 
 namespace leatherman { namespace execution {
 
@@ -124,7 +127,7 @@ namespace leatherman { namespace execution {
         // but the other end doesn't release. Then the invoking thread shuts down and another with
         // the same thread id is started and reconnects to the existing named pipe. Use the process
         // id and a random UUID to make that highly unlikely.
-        wstring name = boost::nowide::widen(lth_locale::format("\\\\.\\Pipe\\leatherman.{1}.{2}.{3}.{4}",
+        wstring name = boost::nowide::widen(_("\\\\.\\Pipe\\leatherman.{1}.{2}.{3}.{4}",
             GetCurrentProcessId(),
             GetCurrentThreadId(),
             InterlockedIncrement(&counter),
@@ -143,7 +146,7 @@ namespace leatherman { namespace execution {
 
         if (read_handle == INVALID_HANDLE_VALUE) {
             LOG_ERROR("failed to create read pipe: {1}.", windows::system_error());
-            throw execution_exception("failed to create read pipe.");
+            throw execution_exception(_("failed to create read pipe."));
         }
 
         // Open the write pipe
@@ -158,7 +161,7 @@ namespace leatherman { namespace execution {
 
         if (write_handle == INVALID_HANDLE_VALUE) {
             LOG_ERROR("failed to create write pipe: {1}.", windows::system_error());
-            throw execution_exception("failed to create write pipe.");
+            throw execution_exception(_("failed to create write pipe."));
         }
 
         return make_tuple(move(read_handle), move(write_handle));
@@ -250,14 +253,14 @@ namespace leatherman { namespace execution {
                 event = scoped_handle(CreateEvent(nullptr, TRUE, FALSE, nullptr));
                 if (!event) {
                     LOG_ERROR("failed to create {1} read event: {2}.", name, windows::system_error());
-                    throw execution_exception("failed to create read event.");
+                    throw execution_exception(_("failed to create read event."));
                 }
                 overlapped.hEvent = event;
             }
         }
     };
 
-    static void rw_from_child(DWORD child, array<pipe, 3>& pipes, uint32_t timeout, HANDLE timer)
+    static void rw_from_child(DWORD child, array<pipe, 3>& pipes, uint32_t timeout, HANDLE timer, bool convert_newlines)
     {
         vector<HANDLE> wait_handles;
         while (true)
@@ -274,7 +277,7 @@ namespace leatherman { namespace execution {
                     // Before doing anything, check to see if there's been a timeout
                     // This is done pre-emptively in case ReadFile never returns ERROR_IO_PENDING
                     if (timeout && WaitForSingleObject(timer, 0) == WAIT_OBJECT_0) {
-                        throw timeout_exception(lth_locale::format("command timed out after {1} seconds.", timeout), static_cast<size_t>(child));
+                        throw timeout_exception(_("command timed out after {1} seconds.", timeout), static_cast<size_t>(child));
                     }
 
                     if (pipe.read) {
@@ -298,7 +301,7 @@ namespace leatherman { namespace execution {
                             break;
                         }
                         LOG_ERROR("{1} pipe i/o failed: {2}.", pipe.name, windows::system_error());
-                        throw execution_exception("child i/o failed.");
+                        throw execution_exception(_("child i/o failed."));
                     }
 
                     // Check for closed pipe
@@ -310,6 +313,11 @@ namespace leatherman { namespace execution {
                     if (pipe.read) {
                         // Read completed immediately, process the data
                         pipe.buffer.resize(count);
+                        if (convert_newlines) {
+                            pipe.buffer.erase(
+                                std::remove(pipe.buffer.begin(), pipe.buffer.end(), '\r'),
+                                pipe.buffer.end());
+                        }
                         if (!pipe.callback(pipe.buffer)) {
                             // Callback signaled that we're done
                             return;
@@ -343,13 +351,13 @@ namespace leatherman { namespace execution {
             auto result = WaitForMultipleObjects(wait_handles.size(), wait_handles.data(), FALSE, INFINITE);
             if (result >= (WAIT_OBJECT_0 + wait_handles.size())) {
                 LOG_ERROR("failed to wait for child process i/o: {1}.", windows::system_error());
-                throw execution_exception("failed to wait for child process i/o.");
+                throw execution_exception(_("failed to wait for child process i/o."));
             }
 
             // Check for timeout
             DWORD index = result - WAIT_OBJECT_0;
             if (timeout && wait_handles[index] == timer) {
-                throw timeout_exception(lth_locale::format("command timed out after {1} seconds.", timeout), static_cast<size_t>(child));
+                throw timeout_exception(_("command timed out after {1} seconds.", timeout), static_cast<size_t>(child));
             }
 
             // Find the pipe for the event that was signalled
@@ -366,7 +374,7 @@ namespace leatherman { namespace execution {
                 if (!GetOverlappedResult(pipe.handle, &pipe.overlapped, &count, FALSE)) {
                     if (GetLastError() != ERROR_BROKEN_PIPE) {
                         LOG_ERROR("asynchronous i/o on {1} failed: {2}.", pipe.name, windows::system_error());
-                        throw execution_exception("asynchronous i/o failed.");
+                        throw execution_exception(_("asynchronous i/o failed."));
                     }
                     // Treat a broken pipe as nothing left to read
                     count = 0;
@@ -380,6 +388,11 @@ namespace leatherman { namespace execution {
                 if (pipe.read) {
                     // Read completed, process the data
                     pipe.buffer.resize(count);
+                    if (convert_newlines) {
+                        pipe.buffer.erase(
+                            std::remove(pipe.buffer.begin(), pipe.buffer.end(), '\r'),
+                            pipe.buffer.end());
+                    }
                     if (!pipe.callback(pipe.buffer)) {
                         // Callback signaled that we're done
                         return;
@@ -410,7 +423,7 @@ namespace leatherman { namespace execution {
         BOOL in_job;
         bool use_job_object = true;
         if (!IsProcessInJob(GetCurrentProcess(), nullptr, &in_job)) {
-            throw execution_exception("could not determine if the parent process is running in a job object");
+            throw execution_exception(_("could not determine if the parent process is running in a job object"));
         }
         if (in_job) {
             JOBOBJECT_BASIC_LIMIT_INFORMATION limits;
@@ -426,7 +439,7 @@ namespace leatherman { namespace execution {
         if (executable.empty()) {
             LOG_DEBUG("{1} was not found on the PATH.", file);
             if (options[execution_options::throw_on_nonzero_exit]) {
-                throw child_exit_exception("child process returned non-zero exit status.", 127, {}, {});
+                throw child_exit_exception(_("child process returned non-zero exit status."), 127, {}, {});
             }
             return {false, "", "", 127, 0};
         }
@@ -503,13 +516,13 @@ namespace leatherman { namespace execution {
         scoped_handle stdInRd, stdInWr;
         tie(stdInRd, stdInWr) = CreatePipeThrow();
         if (!SetHandleInformation(stdInWr, HANDLE_FLAG_INHERIT, 0)) {
-            throw execution_exception("pipe could not be modified");
+            throw execution_exception(_("pipe could not be modified"));
         }
 
         scoped_handle stdOutRd, stdOutWr;
         tie(stdOutRd, stdOutWr) = CreatePipeThrow();
         if (!SetHandleInformation(stdOutRd, HANDLE_FLAG_INHERIT, 0)) {
-            throw execution_exception("pipe could not be modified");
+            throw execution_exception(_("pipe could not be modified"));
         }
 
         scoped_handle stdErrRd, stdErrWr;
@@ -521,13 +534,13 @@ namespace leatherman { namespace execution {
                 attributes.bInheritHandle = TRUE;
                 stdErrWr = scoped_handle(CreateFileW(L"nul", GENERIC_WRITE, FILE_SHARE_WRITE, &attributes, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr));
                 if (stdErrWr == INVALID_HANDLE_VALUE) {
-                    throw execution_exception("cannot open NUL device for redirecting stderr.");
+                    throw execution_exception(_("cannot open NUL device for redirecting stderr."));
                 }
             } else {
                 // Otherwise, we're reading from stderr, so create a pipe
                 tie(stdErrRd, stdErrWr) = CreatePipeThrow();
                 if (!SetHandleInformation(stdErrRd, HANDLE_FLAG_INHERIT, 0)) {
-                    throw execution_exception("pipe could not be modified");
+                    throw execution_exception(_("pipe could not be modified"));
                 }
             }
         }
@@ -551,14 +564,14 @@ namespace leatherman { namespace execution {
 
         PROCESS_INFORMATION procInfo = {};
 
-        // Set up flags for CreateProcess based on whether the create_new_process_group
+        // Set up flags for CreateProcess based on whether the create_detached_process
         // option was set and the parent process is running in a Job object.
         auto creation_flags = CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT;
 
         if (use_job_object) {
             creation_flags |= CREATE_BREAKAWAY_FROM_JOB;
         }
-        if (options[execution_options::create_new_process_group]) {
+        if (options[execution_options::create_detached_process]) {
             creation_flags |= CREATE_NEW_PROCESS_GROUP;
         }
 
@@ -574,7 +587,7 @@ namespace leatherman { namespace execution {
             &startupInfo,   /* STARTUPINFO for child process */
             &procInfo)) {   /* PROCESS_INFORMATION pointer for output */
             LOG_ERROR("failed to create process: {1}.", windows::system_error());
-            throw execution_exception("failed to create child process.");
+            throw execution_exception(_("failed to create child process."));
         }
 
         // Release unused pipes, to avoid any races in process completion.
@@ -590,16 +603,16 @@ namespace leatherman { namespace execution {
 
         // Use a Job Object to group any child processes spawned by the CreateProcess invocation, so we can
         // easily stop them in case of a timeout.
-        bool create_job_object = use_job_object && !options[execution_options::create_new_process_group];
+        bool create_job_object = use_job_object && !options[execution_options::create_detached_process];
         scoped_handle hJob;
         if (create_job_object) {
             hJob = scoped_handle(CreateJobObjectW(nullptr, nullptr));
             if (hJob == NULL) {
                 LOG_ERROR("failed to create job object: {1}.", windows::system_error());
-                throw execution_exception("failed to create job object.");
+                throw execution_exception(_("failed to create job object."));
             } else if (!AssignProcessToJobObject(hJob, hProcess)) {
                 LOG_ERROR("failed to associate process with job object: {1}.", windows::system_error());
-                throw execution_exception("failed to associate process with job object.");
+                throw execution_exception(_("failed to associate process with job object."));
             }
         }
 
@@ -623,7 +636,7 @@ namespace leatherman { namespace execution {
             timer = scoped_handle(CreateWaitableTimer(nullptr, TRUE, nullptr));
             if (!timer) {
                 LOG_ERROR("failed to create waitable timer: {1}.", windows::system_error());
-                throw execution_exception("failed to create waitable timer.");
+                throw execution_exception(_("failed to create waitable timer."));
             }
 
             // "timeout" in X intervals in the future (1 interval = 100 ns)
@@ -632,7 +645,7 @@ namespace leatherman { namespace execution {
             future.QuadPart = timeout * -10000000ll;
             if (!SetWaitableTimer(timer, &future, 0, nullptr, nullptr, FALSE)) {
                 LOG_ERROR("failed to set waitable timer: {1}.", windows::system_error());
-                throw execution_exception("failed to set waitable timer.");
+                throw execution_exception(_("failed to set waitable timer."));
             }
         }
 
@@ -650,7 +663,7 @@ namespace leatherman { namespace execution {
                 pipe("stderr", move(stdErrRd), process_stderr)
             } };
 
-            rw_from_child(procInfo.dwProcessId, pipes, timeout, timer);
+            rw_from_child(procInfo.dwProcessId, pipes, timeout, timer, options[execution_options::convert_newlines]);
         });
 
         HANDLE handles[2] = { hProcess, timer };
@@ -660,22 +673,22 @@ namespace leatherman { namespace execution {
             terminate = false;
         } else if (wait_result == WAIT_OBJECT_0 + 1) {
             // Timeout while waiting on the process to complete
-            throw timeout_exception(lth_locale::format("command timed out after {1} seconds.", timeout), static_cast<size_t>(procInfo.dwProcessId));
+            throw timeout_exception(_("command timed out after {1} seconds.", timeout), static_cast<size_t>(procInfo.dwProcessId));
         } else {
             LOG_ERROR("failed to wait for child process to terminate: {1}.", windows::system_error());
-            throw execution_exception("failed to wait for child process to terminate.");
+            throw execution_exception(_("failed to wait for child process to terminate."));
         }
 
         // Now check the process return status.
         DWORD exit_code;
         if (!GetExitCodeProcess(hProcess, &exit_code)) {
-            throw execution_exception("error retrieving exit code of completed process");
+            throw execution_exception(_("error retrieving exit code of completed process"));
         }
 
         LOG_DEBUG("process exited with exit code {1}.", exit_code);
 
         if (exit_code != 0 && options[execution_options::throw_on_nonzero_exit]) {
-            throw child_exit_exception("child process returned non-zero exit status.", exit_code, output, error);
+            throw child_exit_exception(_("child process returned non-zero exit status."), exit_code, output, error);
         }
         return {exit_code == 0, move(output), move(error), static_cast<int>(exit_code), static_cast<size_t>(procInfo.dwProcessId)};
     }

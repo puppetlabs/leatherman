@@ -54,6 +54,10 @@ endmacro()
 macro(add_leatherman_test)
 endmacro()
 
+macro(add_leatherman_vendored pkg md5 header_path)
+    add_leatherman_includes("${LEATHERMAN_PREFIX}/include/leatherman/vendor")
+endmacro()
+
 macro(leatherman_component id)
     string(TOUPPER "${id}" id_upper)
     set(include_var "LEATHERMAN_${id_upper}_INCLUDE")

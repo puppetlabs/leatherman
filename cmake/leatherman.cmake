@@ -188,12 +188,19 @@ macro(gettext_templates dir)
                 --keyword=LOG_WARNING:1,\\"warning\\"
                 --keyword=LOG_ERROR:1,\\"error\\"
                 --keyword=LOG_FATAL:1,\\"fatal\\"
-                --keyword=_
+                --keyword=log:2,\\"log\\"
                 --keyword=translate:1
-                --keyword=translate:1,2
-                --keyword=translate_c:1c,2
-                --keyword=translate_c:1c,2,3
-                --keyword=format
+                --keyword=translate_n:1,2
+                --keyword=translate_p:1c,2
+                --keyword=translate_np:1c,2,3
+                --keyword=format:1
+                --keyword=format_n:1,2
+                --keyword=format_p:1c,2
+                --keyword=format_np:1c,2,3
+                --keyword=_:1
+                --keyword=n_:1,2
+                --keyword=p_:1c,2
+                --keyword=np_:1c,2,3
                 --add-location=file
                 --add-comments=LOCALE
                 ${ALL_PROJECT_SOURCES}
@@ -335,3 +342,19 @@ function(append_new varname)
     endforeach()
     set(${varname} ${${varname}} PARENT_SCOPE)
 endfunction()
+
+# Usage: unpack_vendored("pkg.zip" "pkg" SOURCE_DIR)
+#
+# Unpacks a compressed pkg.zip in the vendor directory to
+# ${PROJECT_BINARY_DIR}/src/pkg and saves the unpacked location to a variable.
+macro(unpack_vendored pkg extracted_dir dir)
+    set(pkgfile ${PROJECT_SOURCE_DIR}/vendor/${pkg})
+    set(${dir} ${PROJECT_BINARY_DIR}/src/${extracted_dir})
+
+    message(STATUS "Unpacking ${pkgfile} into ${${dir}}")
+    file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/src)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E tar xzf ${PROJECT_SOURCE_DIR}/vendor/${pkg}
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/src
+        )
+endmacro(unpack_vendored)

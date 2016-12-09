@@ -63,6 +63,8 @@ endif()
 # Add code coverage
 if (COVERALLS)
     set(LEATHERMAN_CXX_FLAGS "${LEATHERMAN_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 endif()
 
 if (WIN32)

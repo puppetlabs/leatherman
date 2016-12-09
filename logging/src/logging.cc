@@ -2,6 +2,9 @@
 #include <leatherman/locale/locale.hpp>
 #include <vector>
 
+// Mark string for translation (alias for leatherman::locale::format)
+using leatherman::locale::_;
+
 // boost includes are not always warning-clean. Disable warnings that
 // cause problems before including the headers, then re-enable the warnings.
 #pragma GCC diagnostic push
@@ -49,6 +52,11 @@ namespace leatherman { namespace logging {
     void color_writer::consume(boost::log::record_view const& rec)
     {
         auto level = boost::log::extract<log_level>("Severity", rec);
+
+        if (!is_enabled(*level)) {
+            return;
+        }
+
         auto line_num = boost::log::extract<int>("LineNum", rec);
         auto name_space = boost::log::extract<string>("Namespace", rec);
         auto timestamp = boost::log::extract<boost::posix_time::ptime>("TimeStamp", rec);
@@ -74,7 +82,7 @@ namespace leatherman { namespace logging {
         core->remove_all_sinks();
 
         using sink_t = sinks::synchronous_sink<color_writer>;
-        boost::shared_ptr<sink_t> sink(new sink_t(&dst));
+        boost::shared_ptr<sink_t> sink = boost::make_shared<sink_t>(boost::make_shared<color_writer>(&dst));
         core->add_sink(sink);
 
 
@@ -198,7 +206,7 @@ namespace leatherman { namespace logging {
                 return in;
             }
         }
-        throw runtime_error(lth_locale::format("invalid log level '%1%': expected none, trace, debug, info, warn, error, or fatal.", value));
+        throw runtime_error(_("invalid log level '{1}': expected none, trace, debug, info, warn, error, or fatal.", value));
     }
 
     ostream& operator<<(ostream& strm, log_level level)

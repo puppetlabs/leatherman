@@ -2,10 +2,52 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.8.2]
+## [0.10.1]
+
+### Fixed
+- Only apply large file support flags to Leatherman.execution (LTH-120)
+
+## [0.10.0]
+
+### Added
+- Solaris implementation of the `create_detached_process` execution option - execution of child processes in separate contracts (LTH-120)
+
+### Changed
+- Renamed `create_new_process_group` execution option to `create_detached_process` to make the concept more broadly applicable (LTH-120)
+
+## [0.9.4]
 
 ### Fixed
 - Handle null characters in JSON strings (LTH-116)
+- Explicitly pass release flag to pod2man
+
+## [0.9.3]
+
+### Fixed
+- Fix Boost.Log sink initialization with Boost 1.62 (LTH-115)
+
+### Changed
+- Switch to compile-time unpacking vendored packages (LTH-117)
+
+## [0.9.2]
+
+### Changed
+- leatherman::execution can now be requested to convert Windows line endings to standard ones (LTH-114)
+
+## [0.9.1]
+
+### Fixed
+- Externalized some strings for localization that were missed (LTH-59)
+- Fixed consuming Leatherman without cflags (LTH-113)
+- Updated the logging backend to filter records based on log level; previously filtering was only applied when using Leatherman logging functions.
+
+### Changed
+- Third-party libraries are now added as compressed files
+
+## [0.9.0]
+
+### Added
+- Add translation helper functions and plural format support (LTH-109)
 
 ## [0.8.1]
 

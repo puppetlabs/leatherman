@@ -6,6 +6,10 @@
 #include <tuple>
 #include <typeinfo>
 #include <memory>
+#include <leatherman/locale/locale.hpp>
+
+// Mark string for translation (alias for leatherman::locale::format)
+using leatherman::locale::_;
 
 // Forward declarations for rapidjson
 namespace rapidjson {
@@ -259,7 +263,7 @@ namespace leatherman { namespace json_container {
             auto key_data = key.data();
 
             if (!isObject(*jval)) {
-                throw data_type_error { "not an object" };
+                throw data_type_error { _("not an object") };
             }
 
             if (!hasKey(*jval, key_data)) {
@@ -281,7 +285,7 @@ namespace leatherman { namespace json_container {
             auto jval_obj = getValueInJson(keys.cbegin(), keys.cend()-1);
 
             if (!isObject(*jval_obj)) {
-                throw data_type_error { "not an object" };
+                throw data_type_error { _("not an object") };
             }
 
             if (!hasKey(*jval_obj, key_data)) {
@@ -299,7 +303,7 @@ namespace leatherman { namespace json_container {
             auto key_data = key.data();
 
             if (!isObject(*jval)) {
-                throw data_key_error { "root is not a valid JSON object" };
+                throw data_key_error { _("root is not a valid JSON object") };
             }
 
             if (!hasKey(*jval, key_data)) {
@@ -320,8 +324,7 @@ namespace leatherman { namespace json_container {
                 const char* key_data = key.data();
 
                 if (!isObject(*jval)) {
-                    throw data_key_error { "invalid key supplied; cannot "
-                                           "navigate the provided path" };
+                    throw data_key_error { _("invalid key supplied; cannot navigate the provided path") };
                 }
 
                 if (!hasKey(*jval, key_data)) {

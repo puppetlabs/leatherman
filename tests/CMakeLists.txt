@@ -17,10 +17,6 @@ endif()
 # We link libmock_curl instead of real libcurl in tests
 target_link_libraries(leatherman_test ${LEATHERMAN_TEST_LIBS})
 
-if (COVERALLS)
-    target_link_libraries(leatherman_test gcov)
-endif()
-
 leatherman_logging_namespace("leatherman.test")
 set_target_properties(leatherman_test PROPERTIES COMPILE_FLAGS "${LEATHERMAN_CXX_FLAGS}")
 add_test(NAME "leatherman\\ tests" COMMAND leatherman_test)

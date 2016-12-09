@@ -6,7 +6,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: leatherman 0.8.1\n"
+"Project-Id-Version: leatherman 0.10.1\n"
 "Report-Msgid-Bugs-To: docs@puppet.com\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -17,9 +17,21 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: curl/src/client.cc
+msgid "curl_easy_escape failed to escape string."
+msgstr ""
+
+#: curl/src/client.cc
+msgid "failed to create cURL handle."
+msgstr ""
+
 #. debug
 #: curl/src/client.cc
 msgid "request completed (status {1})."
+msgstr ""
+
+#: curl/src/client.cc
+msgid "unexpected HTTP method specified."
 msgstr ""
 
 #. debug
@@ -92,9 +104,21 @@ msgstr ""
 msgid "library {1} not found {2}."
 msgstr ""
 
+#: dynamic_library/src/windows/dynamic_library.cc
+msgid "library is not loaded"
+msgstr ""
+
 #. debug
 #: execution/src/execution.cc
 msgid "executing command: {1}"
+msgstr ""
+
+#: execution/src/execution.cc
+msgid "failed to open the output file."
+msgstr ""
+
+#: execution/src/execution.cc
+msgid "failed to open the error file."
 msgstr ""
 
 #. debug
@@ -109,6 +133,15 @@ msgstr ""
 
 #: execution/src/posix/execution.cc
 msgid "{1}: {2} ({3})."
+msgstr ""
+
+#: execution/src/posix/execution.cc
+msgid "select call failed"
+msgstr ""
+
+#: execution/src/posix/execution.cc
+#: execution/src/windows/execution.cc
+msgid "child i/o failed."
 msgstr ""
 
 #. debug
@@ -133,6 +166,22 @@ msgid "command timed out after {1} seconds."
 msgstr ""
 
 #: execution/src/posix/execution.cc
+msgid "failed to setpgid."
+msgstr ""
+
+#: execution/src/posix/execution.cc
+msgid "failed to redirect child stdin."
+msgstr ""
+
+#: execution/src/posix/execution.cc
+msgid "failed to redirect child stdout."
+msgstr ""
+
+#: execution/src/posix/execution.cc
+msgid "failed to redirect child stderr."
+msgstr ""
+
+#: execution/src/posix/execution.cc
 msgid "{1}={2}"
 msgstr ""
 
@@ -140,6 +189,39 @@ msgstr ""
 #: execution/src/posix/execution.cc
 #: execution/src/windows/execution.cc
 msgid "{1} was not found on the PATH."
+msgstr ""
+
+#: execution/src/posix/execution.cc
+#: execution/src/windows/execution.cc
+msgid "child process returned non-zero exit status."
+msgstr ""
+
+#: execution/src/posix/execution.cc
+msgid "failed to allocate pipe for stdin redirection"
+msgstr ""
+
+#: execution/src/posix/execution.cc
+msgid "failed to allocate pipe for stdout redirection"
+msgstr ""
+
+#: execution/src/posix/execution.cc
+msgid "failed to allocate pipe for stderr redirection"
+msgstr ""
+
+#: execution/src/posix/execution.cc
+msgid "waitpid failed"
+msgstr ""
+
+#: execution/src/posix/execution.cc
+msgid "sigaction failed"
+msgstr ""
+
+#: execution/src/posix/execution.cc
+msgid "failed to setup timer"
+msgstr ""
+
+#: execution/src/posix/execution.cc
+msgid "setitimer failed"
 msgstr ""
 
 #. debug
@@ -160,6 +242,31 @@ msgstr ""
 msgid "child process was terminated by signal ({1})."
 msgstr ""
 
+#: execution/src/posix/generic/platform.cc
+#: execution/src/posix/solaris/platform.cc
+msgid "failed to fork child process"
+msgstr ""
+
+#: execution/src/posix/solaris/platform.cc
+msgid "failed to create process contract template"
+msgstr ""
+
+#: execution/src/posix/solaris/platform.cc
+msgid "failed to lookup the latest child process contract"
+msgstr ""
+
+#: execution/src/posix/solaris/platform.cc
+msgid "failed to abandon contract created for a child process"
+msgstr ""
+
+#: execution/src/posix/solaris/platform.cc
+msgid "failed to deactivate contract template in the child process"
+msgstr ""
+
+#: execution/src/posix/solaris/platform.cc
+msgid "failed to deactivate contract template created for a child process"
+msgstr ""
+
 #: execution/src/windows/execution.cc
 msgid "\\\\.\\Pipe\\leatherman.{1}.{2}.{3}.{4}"
 msgstr ""
@@ -169,9 +276,17 @@ msgstr ""
 msgid "failed to create read pipe: {1}."
 msgstr ""
 
+#: execution/src/windows/execution.cc
+msgid "failed to create read pipe."
+msgstr ""
+
 #. error
 #: execution/src/windows/execution.cc
 msgid "failed to create write pipe: {1}."
+msgstr ""
+
+#: execution/src/windows/execution.cc
+msgid "failed to create write pipe."
 msgstr ""
 
 #. error
@@ -179,9 +294,17 @@ msgstr ""
 msgid "failed to create {1} read event: {2}."
 msgstr ""
 
+#: execution/src/windows/execution.cc
+msgid "failed to create read event."
+msgstr ""
+
 #. error
 #: execution/src/windows/execution.cc
 msgid "failed to wait for child process i/o: {1}."
+msgstr ""
+
+#: execution/src/windows/execution.cc
+msgid "failed to wait for child process i/o."
 msgstr ""
 
 #. error
@@ -189,9 +312,25 @@ msgstr ""
 msgid "asynchronous i/o on {1} failed: {2}."
 msgstr ""
 
+#: execution/src/windows/execution.cc
+msgid "asynchronous i/o failed."
+msgstr ""
+
+#: execution/src/windows/execution.cc
+msgid "could not determine if the parent process is running in a job object"
+msgstr ""
+
 #. debug
 #: execution/src/windows/execution.cc
 msgid "child environment {1}={2}"
+msgstr ""
+
+#: execution/src/windows/execution.cc
+msgid "pipe could not be modified"
+msgstr ""
+
+#: execution/src/windows/execution.cc
+msgid "cannot open NUL device for redirecting stderr."
 msgstr ""
 
 #. error
@@ -199,14 +338,26 @@ msgstr ""
 msgid "failed to create process: {1}."
 msgstr ""
 
+#: execution/src/windows/execution.cc
+msgid "failed to create child process."
+msgstr ""
+
 #. error
 #: execution/src/windows/execution.cc
 msgid "failed to create job object: {1}."
 msgstr ""
 
+#: execution/src/windows/execution.cc
+msgid "failed to create job object."
+msgstr ""
+
 #. error
 #: execution/src/windows/execution.cc
 msgid "failed to associate process with job object: {1}."
+msgstr ""
+
+#: execution/src/windows/execution.cc
+msgid "failed to associate process with job object."
 msgstr ""
 
 #. error
@@ -224,14 +375,30 @@ msgstr ""
 msgid "failed to create waitable timer: {1}."
 msgstr ""
 
+#: execution/src/windows/execution.cc
+msgid "failed to create waitable timer."
+msgstr ""
+
 #. error
 #: execution/src/windows/execution.cc
 msgid "failed to set waitable timer: {1}."
 msgstr ""
 
+#: execution/src/windows/execution.cc
+msgid "failed to set waitable timer."
+msgstr ""
+
 #. error
 #: execution/src/windows/execution.cc
 msgid "failed to wait for child process to terminate: {1}."
+msgstr ""
+
+#: execution/src/windows/execution.cc
+msgid "failed to wait for child process to terminate."
+msgstr ""
+
+#: execution/src/windows/execution.cc
+msgid "error retrieving exit code of completed process"
 msgstr ""
 
 #. debug
@@ -249,15 +416,68 @@ msgstr ""
 msgid "Error reading file: {1}"
 msgstr ""
 
+#: file_util/src/file.cc
+msgid "failed to open {1}"
+msgstr ""
+
 #. warning
 #: file_util/src/file.cc
 msgid "{1} has not been set"
 msgstr ""
 
+#: json_container/inc/leatherman/json_container/json_container.hpp
+#: json_container/src/json_container.cc
+msgid "not an object"
+msgstr ""
+
+#: json_container/inc/leatherman/json_container/json_container.hpp
+msgid "root is not a valid JSON object"
+msgstr ""
+
+#: json_container/inc/leatherman/json_container/json_container.hpp
+msgid "invalid key supplied; cannot navigate the provided path"
+msgstr ""
+
+#: json_container/src/json_container.cc
+msgid "invalid json"
+msgstr ""
+
+#: json_container/src/json_container.cc
+msgid "unknown object entry with key: {1}"
+msgstr ""
+
+#: json_container/src/json_container.cc
+msgid "not an array"
+msgstr ""
+
+#: json_container/src/json_container.cc
+msgid "array index out of bounds"
+msgstr ""
+
+#: json_container/src/json_container.cc
+msgid "not an integer"
+msgstr ""
+
+#: json_container/src/json_container.cc
+msgid "not a boolean"
+msgstr ""
+
+#: json_container/src/json_container.cc
+msgid "not a string"
+msgstr ""
+
+#: json_container/src/json_container.cc
+msgid "not a double"
+msgstr ""
+
 #: logging/src/logging.cc
 msgid ""
-"invalid log level '%1%': expected none, trace, debug, info, warn, error, or "
+"invalid log level '{1}': expected none, trace, debug, info, warn, error, or "
 "fatal."
+msgstr ""
+
+#: ruby/src/api.cc
+msgid "could not locate a ruby library"
 msgstr ""
 
 #. info
@@ -273,6 +493,14 @@ msgstr ""
 #. info
 #: ruby/src/api.cc
 msgid "using ruby version {1}"
+msgstr ""
+
+#: ruby/src/api.cc
+msgid "size_t maximum exceeded, requested size was {1}"
+msgstr ""
+
+#: ruby/src/api.cc
+msgid "maximum array size exceeded, reported size was {1}"
 msgstr ""
 
 #. warning
@@ -320,6 +548,10 @@ msgstr ""
 #. debug
 #: windows/src/process.cc
 msgid "GetTokenInformation call failed: {1}"
+msgstr ""
+
+#: windows/src/registry.cc
+msgid "invalid HKEY specified"
 msgstr ""
 
 #: windows/src/registry.cc
