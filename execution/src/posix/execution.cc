@@ -290,43 +290,22 @@ namespace leatherman { namespace execution {
 
         // Set the process group; this will be used by the parent if we need to kill the process and its children
         if (setpgid(0, 0) == -1) {
-            char const* message = "failed to setpgid.";
-            if (write(err_fd, message, strlen(message)) == -1) {
-                // Do not care
-            }
             return;
         }
 
         // Redirect stdin
         if (dup2(in_fd, STDIN_FILENO) == -1) {
-            char const* message = "failed to redirect child stdin.";
-            if (write(err_fd, message, strlen(message)) == -1) {
-                // Do not care
-            }
             return;
         }
 
         // Redirect stdout
         if (dup2(out_fd, STDOUT_FILENO) == -1) {
-            char const* message = "failed to redirect child stdout.";
-            if (write(err_fd, message, strlen(message)) == -1) {
-                // Do not care
-            }
             return;
         }
 
         // Redirect stderr
         if (dup2(err_fd, STDERR_FILENO) == -1) {
-            char const* message = "failed to redirect child stderr.";
-            if (write(err_fd, message, strlen(message)) == -1) {
-                // Do not care
-            }
             return;
-        }
-
-        // Close all open file descriptors above stderr
-        for (decltype(get_max_descriptor_limit()) i = (STDERR_FILENO + 1); i < get_max_descriptor_limit(); ++i) {
-            close(i);
         }
 
         // Execute the given program; this should not return if successful
