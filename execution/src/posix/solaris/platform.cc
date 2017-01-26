@@ -172,10 +172,6 @@ namespace leatherman { namespace execution {
 
         if (pid == 0) {  // Is this the child process?
             if ((err = deactivate_contract_template(tmpl_fd)) != 0) {
-                char const* message = "failed to deactivate contract template in the child process";
-                if (write(err_fd, message, strlen(message)) == -1) {
-                    // Do not care
-                }
                 _exit(err);
             }
             // Exec the child; this never returns

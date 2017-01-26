@@ -290,43 +290,22 @@ namespace leatherman { namespace execution {
 
         // Set the process group; this will be used by the parent if we need to kill the process and its children
         if (setpgid(0, 0) == -1) {
-            char const* message = "failed to setpgid.";
-            if (write(err_fd, message, strlen(message)) == -1) {
-                // Do not care
-            }
             return;
         }
 
         // Redirect stdin
         if (dup2(in_fd, STDIN_FILENO) == -1) {
-            char const* message = "failed to redirect child stdin.";
-            if (write(err_fd, message, strlen(message)) == -1) {
-                // Do not care
-            }
             return;
         }
 
         // Redirect stdout
         if (dup2(out_fd, STDOUT_FILENO) == -1) {
-            char const* message = "failed to redirect child stdout.";
-            if (write(err_fd, message, strlen(message)) == -1) {
-                // Do not care
-            }
             return;
         }
 
         // Redirect stderr
         if (dup2(err_fd, STDERR_FILENO) == -1) {
-            char const* message = "failed to redirect child stderr.";
-            if (write(err_fd, message, strlen(message)) == -1) {
-                // Do not care
-            }
             return;
-        }
-
-        // Close all open file descriptors above stderr
-        for (decltype(get_max_descriptor_limit()) i = (STDERR_FILENO + 1); i < get_max_descriptor_limit(); ++i) {
-            close(i);
         }
 
         // Execute the given program; this should not return if successful
@@ -469,10 +448,25 @@ namespace leatherman { namespace execution {
                                             options[execution_options::inherit_locale]);
         auto envp = to_exec_arg(&variables);
 
+        // Set all open file descriptors above stderr to close on exec
+        auto max_desc_limit = get_max_descriptor_limit();
+        std::vector<int> fd_flags(max_desc_limit);
+        for (decltype(max_desc_limit) i = (STDERR_FILENO + 1); i < max_desc_limit; ++i) {
+            fd_flags[i] = fcntl(i, F_GETFD);
+            fcntl(i, F_SETFD, FD_CLOEXEC);
+        }
+
         // Create the child
         pid_t child = create_child(options[execution_options::create_detached_process],
                                    stdin_read, stdout_write, child_stderr,
                                    executable.c_str(), args.data(), envp.data());
+
+        // Reset flags on all open file descriptors above stderr
+        for (decltype(max_desc_limit) i = (STDERR_FILENO + 1); i < max_desc_limit; ++i) {
+            fcntl(i, F_SETFD, fd_flags[i]);
+        }
+        fd_flags.clear();
+        fd_flags.shrink_to_fit();
 
         // Close the unused descriptors
         if (!input) {
