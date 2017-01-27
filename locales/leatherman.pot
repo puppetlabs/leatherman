@@ -6,7 +6,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: leatherman 0.10.1\n"
+"Project-Id-Version: leatherman 0.10.2\n"
 "Report-Msgid-Bugs-To: docs@puppet.com\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -166,22 +166,6 @@ msgid "command timed out after {1} seconds."
 msgstr ""
 
 #: execution/src/posix/execution.cc
-msgid "failed to setpgid."
-msgstr ""
-
-#: execution/src/posix/execution.cc
-msgid "failed to redirect child stdin."
-msgstr ""
-
-#: execution/src/posix/execution.cc
-msgid "failed to redirect child stdout."
-msgstr ""
-
-#: execution/src/posix/execution.cc
-msgid "failed to redirect child stderr."
-msgstr ""
-
-#: execution/src/posix/execution.cc
 msgid "{1}={2}"
 msgstr ""
 
@@ -257,10 +241,6 @@ msgstr ""
 
 #: execution/src/posix/solaris/platform.cc
 msgid "failed to abandon contract created for a child process"
-msgstr ""
-
-#: execution/src/posix/solaris/platform.cc
-msgid "failed to deactivate contract template in the child process"
 msgstr ""
 
 #: execution/src/posix/solaris/platform.cc

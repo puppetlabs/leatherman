@@ -15,6 +15,12 @@
 #include <fcntl.h>
 #include <signal.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#include <boost/thread/thread.hpp>
+#include <boost/thread/locks.hpp>
+#pragma GCC diagnostic pop
+
 #include "platform.hpp"
 
 // Mark string for translation (alias for leatherman::locale::format)
@@ -281,46 +287,31 @@ namespace leatherman { namespace execution {
         // Do not allocate heap memory or throw exceptions
         // The child is sharing the address space of the parent process, so carelessly modifying this
         // function may lead to parent state corruption, memory leaks, and/or total protonic reversal
+        // As such, strings are explicitly not localized in this function.
+        //
+        // This is especially important due to a deadlock in vfork/exec on Solaris, identified in
+        // http://www.oracle.com/technetwork/server-storage/solaris10/subprocess-136439.html. The solution
+        // they use in posix_spawn is to avoid calling functions exported as from libc as global symbols
+        // after the fork. `write`, `strlen`, and `close` are still suspect below.
 
         // Set the process group; this will be used by the parent if we need to kill the process and its children
         if (setpgid(0, 0) == -1) {
-            string message = _("failed to setpgid.");
-            if (write(err_fd, message.c_str(), message.size()) == -1) {
-                // Do not care
-            }
             return;
         }
 
         // Redirect stdin
         if (dup2(in_fd, STDIN_FILENO) == -1) {
-            string message = _("failed to redirect child stdin.");
-            if (write(err_fd, message.c_str(), message.size()) == -1) {
-                // Do not care
-            }
             return;
         }
 
         // Redirect stdout
         if (dup2(out_fd, STDOUT_FILENO) == -1) {
-            string message = _("failed to redirect child stdout.");
-            if (write(err_fd, message.c_str(), message.size()) == -1) {
-                // Do not care
-            }
             return;
         }
 
         // Redirect stderr
         if (dup2(err_fd, STDERR_FILENO) == -1) {
-            string message = _("failed to redirect child stderr.");
-            if (write(err_fd, message.c_str(), message.size()) == -1) {
-                // Do not care
-            }
             return;
-        }
-
-        // Close all open file descriptors above stderr
-        for (decltype(get_max_descriptor_limit()) i = (STDERR_FILENO + 1); i < get_max_descriptor_limit(); ++i) {
-            close(i);
         }
 
         // Execute the given program; this should not return if successful
@@ -463,10 +454,30 @@ namespace leatherman { namespace execution {
                                             options[execution_options::inherit_locale]);
         auto envp = to_exec_arg(&variables);
 
-        // Create the child
-        pid_t child = create_child(options[execution_options::create_detached_process],
-                                   stdin_read, stdout_write, child_stderr,
-                                   executable.c_str(), args.data(), envp.data());
+        // This section uses system operations in a way that is not thread-safe.
+        // Use a mutex to ensure we only execute it serially.
+        static boost::mutex exec_mutex;
+        pid_t child;
+        {
+            boost::lock_guard<boost::mutex> the_lock { exec_mutex };
+            // Set all open file descriptors above stderr to close on exec
+            auto max_desc_limit = get_max_descriptor_limit();
+            std::vector<int> fd_flags(max_desc_limit);
+            for (decltype(max_desc_limit) i = (STDERR_FILENO + 1); i < max_desc_limit; ++i) {
+                fd_flags[i] = fcntl(i, F_GETFD);
+                fcntl(i, F_SETFD, FD_CLOEXEC);
+            }
+
+            // Create the child
+            child = create_child(options[execution_options::create_detached_process],
+                                 stdin_read, stdout_write, child_stderr,
+                                 executable.c_str(), args.data(), envp.data());
+
+            // Reset flags on all open file descriptors above stderr
+            for (decltype(max_desc_limit) i = (STDERR_FILENO + 1); i < max_desc_limit; ++i) {
+                fcntl(i, F_SETFD, fd_flags[i]);
+            }
+        }
 
         // Close the unused descriptors
         if (!input) {
