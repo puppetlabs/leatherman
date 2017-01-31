@@ -7,11 +7,12 @@ using leatherman::locale::_;
 
 namespace leatherman { namespace execution {
 
-    pid_t create_child(bool detach, int in_fd, int out_fd, int err_fd, char const* program, char const** argv, char const** envp)
+    pid_t create_child(leatherman::util::option_set<execution_options> const& options, int in_fd, int out_fd, int err_fd, char const* program, char const** argv, char const** envp)
     {
         // Fork the child process
-        // Note: this uses vfork, which is inherently unsafe (the parent's address space is shared with the child)
-        pid_t pid = vfork();
+        // Note: this uses vfork (unless the thread_safe execution option is specified), which is inherently unsafe
+        // (the parent's address space is shared with the child)
+        pid_t pid = options[execution_options::thread_safe] ? fork() : vfork();
         if (pid < 0) {
             throw execution_exception(format_error(_("failed to fork child process")));
         }

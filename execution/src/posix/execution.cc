@@ -46,7 +46,7 @@ namespace leatherman { namespace execution {
 
     static uint64_t get_max_descriptor_limit()
     {
-        // WARNING: this function is called under vfork
+        // WARNING: this function is potentially called under vfork
         // See comment below in exec_child in case you're not afraid
 #ifdef _SC_OPEN_MAX
         {
@@ -282,7 +282,7 @@ namespace leatherman { namespace execution {
 
     static void do_exec_child(int in_fd, int out_fd, int err_fd, char const* program, char const** argv, char const** envp)
     {
-        // WARNING: this function is called from a vfork'd child
+        // WARNING: this function is potentially called from a vfork'd child
         // Do not modify program state from this function; only call setpgid, dup2, close, execve, and _exit
         // Do not allocate heap memory or throw exceptions
         // The child is sharing the address space of the parent process, so carelessly modifying this
@@ -320,7 +320,7 @@ namespace leatherman { namespace execution {
 
     void exec_child(int in_fd, int out_fd, int err_fd, char const* program, char const** argv, char const** envp)
     {
-        // WARNING: this function is called from a vfork'd child
+        // WARNING: this function is potentially called from a vfork'd child
         // Do not modify program state from this function; only call setpgid, dup2, close, execve, and _exit
         // Do not allocate heap memory or throw exceptions
         // The child is sharing the address space of the parent process, so carelessly modifying this
@@ -469,7 +469,7 @@ namespace leatherman { namespace execution {
             }
 
             // Create the child
-            child = create_child(options[execution_options::create_detached_process],
+            child = create_child(options,
                                  stdin_read, stdout_write, child_stderr,
                                  executable.c_str(), args.data(), envp.data());
 
