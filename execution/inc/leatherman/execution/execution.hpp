@@ -71,7 +71,16 @@ namespace leatherman { namespace execution {
          * On windows, converts \r\n newlines to standard \n
          */
         convert_newlines = (1 << 10),
-         /**
+        /**
+         * On POSIX systems, use `fork()` instead of `vfork()` when creating the new process.
+         * Ignored on windows.
+         * The `fork()` is typically slower than `vfork()` because it creates a copy
+         * of the parent's address space for the child process (`vfork()` lets the
+         * child process re-use the parent's address space) but safer from deadlocks
+         * if called from multi threaded processes.
+         */
+        thread_safe = (1 << 11),
+        /**
          * A combination of all throw options.
          */
         throw_on_failure = throw_on_nonzero_exit | throw_on_signal,

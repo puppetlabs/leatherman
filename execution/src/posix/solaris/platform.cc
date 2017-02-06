@@ -79,7 +79,7 @@ namespace leatherman { namespace execution {
 
     static int deactivate_contract_template(int tmpl_fd)
     {
-        // WARNING: this function is called from a vfork'd child
+        // WARNING: this function is potentially called from a vfork'd child
         // Do not modify program state from this function; only call setpgid, dup2, close, execve, and _exit
         // Do not allocate heap memory or throw exceptions
         // The child is sharing the address space of the parent process, so carelessly modifying this
@@ -155,15 +155,19 @@ namespace leatherman { namespace execution {
         throw execution_exception(format_error(_("failed to abandon contract created for a child process"), err));
     }
 
-    pid_t create_child(bool detach, int in_fd, int out_fd, int err_fd, char const* program, char const** argv, char const** envp)
+    pid_t create_child(leatherman::util::option_set<execution_options> const& options,
+                       int in_fd, int out_fd, int err_fd, uint64_t max_fd,
+                       char const* program, char const** argv, char const** envp)
     {
+        bool detach = options[execution_options::create_detached_process];
         // Create a new process contract template & activate it
         int tmpl_fd = detach ? activate_new_contract_template() : -1;
         int err;
 
         // Fork the child process
-        // Note: this uses vfork, which is inherently unsafe (the parent's address space is shared with the child)
-        pid_t pid = vfork();
+        // Note: this uses vfork (unless the thread_safe execution option is specified), which is inherently unsafe
+        // (the parent's address space is shared with the child)
+        pid_t pid = options[execution_options::thread_safe] ? fork() : vfork();
         if (pid < 0) {
             err = errno;
             deactivate_contract_template(tmpl_fd);
@@ -175,7 +179,7 @@ namespace leatherman { namespace execution {
                 _exit(err);
             }
             // Exec the child; this never returns
-            exec_child(in_fd, out_fd, err_fd, program, argv, envp);
+            exec_child(in_fd, out_fd, err_fd, max_fd, program, argv, envp);
         }
 
         // This is the parent process

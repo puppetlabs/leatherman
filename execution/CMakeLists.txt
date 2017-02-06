@@ -1,4 +1,4 @@
-find_package(Boost 1.54 REQUIRED COMPONENTS thread regex filesystem system)
+find_package(Boost 1.54 REQUIRED COMPONENTS regex filesystem system)
 
 add_leatherman_deps("${Boost_LIBRARIES}")
 if ("${CMAKE_SYSTEM_NAME}" MATCHES "SunOS")

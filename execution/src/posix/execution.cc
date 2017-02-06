@@ -15,12 +15,6 @@
 #include <fcntl.h>
 #include <signal.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstrict-aliasing"
-#include <boost/thread/thread.hpp>
-#include <boost/thread/locks.hpp>
-#pragma GCC diagnostic pop
-
 #include "platform.hpp"
 
 // Mark string for translation (alias for leatherman::locale::format)
@@ -46,7 +40,7 @@ namespace leatherman { namespace execution {
 
     static uint64_t get_max_descriptor_limit()
     {
-        // WARNING: this function is called under vfork
+        // WARNING: this function is potentially called under vfork
         // See comment below in exec_child in case you're not afraid
 #ifdef _SC_OPEN_MAX
         {
@@ -280,9 +274,9 @@ namespace leatherman { namespace execution {
         throw timeout_exception(_("command timed out after {1} seconds.", timeout), static_cast<size_t>(child));
     }
 
-    static void do_exec_child(int in_fd, int out_fd, int err_fd, char const* program, char const** argv, char const** envp)
+    static void do_exec_child(int in_fd, int out_fd, int err_fd, uint64_t max_fd, char const* program, char const** argv, char const** envp)
     {
-        // WARNING: this function is called from a vfork'd child
+        // WARNING: this function is potentially called from a vfork'd child
         // Do not modify program state from this function; only call setpgid, dup2, close, execve, and _exit
         // Do not allocate heap memory or throw exceptions
         // The child is sharing the address space of the parent process, so carelessly modifying this
@@ -314,19 +308,24 @@ namespace leatherman { namespace execution {
             return;
         }
 
+        // Close all open file descriptors above stderr
+        for (uint64_t i = (STDERR_FILENO + 1); i < max_fd; ++i) {
+            close(i);
+        }
+
         // Execute the given program; this should not return if successful
         execve(program, const_cast<char* const*>(argv), const_cast<char* const*>(envp));
     }
 
-    void exec_child(int in_fd, int out_fd, int err_fd, char const* program, char const** argv, char const** envp)
+    void exec_child(int in_fd, int out_fd, int err_fd, uint64_t max_fd, char const* program, char const** argv, char const** envp)
     {
-        // WARNING: this function is called from a vfork'd child
+        // WARNING: this function is potentially called from a vfork'd child
         // Do not modify program state from this function; only call setpgid, dup2, close, execve, and _exit
         // Do not allocate heap memory or throw exceptions
         // The child is sharing the address space of the parent process, so carelessly modifying this
         // function may lead to parent state corruption, memory leaks, and/or total protonic reversal
 
-        do_exec_child(in_fd, out_fd, err_fd, program, argv, envp);
+        do_exec_child(in_fd, out_fd, err_fd, max_fd, program, argv, envp);
 
         // If we've reached here, we've failed, so exit the child
         _exit(errno == 0 ? EXIT_FAILURE : errno);
@@ -454,30 +453,11 @@ namespace leatherman { namespace execution {
                                             options[execution_options::inherit_locale]);
         auto envp = to_exec_arg(&variables);
 
-        // This section uses system operations in a way that is not thread-safe.
-        // Use a mutex to ensure we only execute it serially.
-        static boost::mutex exec_mutex;
-        pid_t child;
-        {
-            boost::lock_guard<boost::mutex> the_lock { exec_mutex };
-            // Set all open file descriptors above stderr to close on exec
-            auto max_desc_limit = get_max_descriptor_limit();
-            std::vector<int> fd_flags(max_desc_limit);
-            for (decltype(max_desc_limit) i = (STDERR_FILENO + 1); i < max_desc_limit; ++i) {
-                fd_flags[i] = fcntl(i, F_GETFD);
-                fcntl(i, F_SETFD, FD_CLOEXEC);
-            }
-
-            // Create the child
-            child = create_child(options[execution_options::create_detached_process],
-                                 stdin_read, stdout_write, child_stderr,
-                                 executable.c_str(), args.data(), envp.data());
-
-            // Reset flags on all open file descriptors above stderr
-            for (decltype(max_desc_limit) i = (STDERR_FILENO + 1); i < max_desc_limit; ++i) {
-                fcntl(i, F_SETFD, fd_flags[i]);
-            }
-        }
+        // Create the child
+        pid_t child = create_child(options,
+                                   stdin_read, stdout_write, child_stderr,
+                                   get_max_descriptor_limit(),
+                                   executable.c_str(), args.data(), envp.data());
 
         // Close the unused descriptors
         if (!input) {
