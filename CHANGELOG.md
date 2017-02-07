@@ -2,10 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.10.3]
+## [0.11.0]
 
-### Fixed
-- Add an option to use thread-safe forking at the expense of failing to fork if maxed out on memory; more permanent fix for the Solaris deadlock issue fixed in 0.10.2 (LTH-126)
+### Added
+- Add an option to use thread-safe forking at the expense of failing to fork if maxed out on memory; more permanent fix for the Solaris deadlock issue addressed in 0.10.2 (LTH-126)
 
 ## [0.10.2]
 
