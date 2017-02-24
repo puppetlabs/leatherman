@@ -1,6 +1,8 @@
 # This file contains utilities used by both leatherman and consuming
 # projects.
 
+include(GNUInstallDirs)
+
 # Save the directory this script is from, to reference other files
 # located in the same directory when using cmake in script mode.
 set(LEATHERMAN_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
@@ -76,8 +78,8 @@ endmacro()
 macro(leatherman_install)
     install(TARGETS ${ARGV}
         RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib${LIB_SUFFIX}
-        ARCHIVE DESTINATION lib${LIB_SUFFIX})
+	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+	ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
     foreach(ARG ${ARGV})
         if (TARGET ${ARG})
             set_target_properties(${ARG} PROPERTIES PREFIX "" IMPORT_PREFIX "")
