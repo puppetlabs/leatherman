@@ -12,7 +12,7 @@ using leatherman::locale::_;
 
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/attributes/scoped_attribute.hpp>
-#include <boost/log/sources/severity_logger.hpp>
+#include <boost/log/sources/logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
 #include <boost/log/sinks/sync_frontend.hpp>
 #include <boost/log/sinks/basic_sink_backend.hpp>
@@ -163,13 +163,14 @@ namespace leatherman { namespace logging {
             return;
         }
 
-        src::severity_logger<log_level> slg;
+        src::logger slg;
+        slg.add_attribute("Severity", attrs::constant<log_level>(level));
         slg.add_attribute("Namespace", attrs::constant<string>(logger));
         if (line_num > 0) {
             slg.add_attribute("LineNum", attrs::constant<int>(line_num));
         }
 
-        BOOST_LOG_SEV(slg, level) << message;
+        BOOST_LOG(slg) << message;
     }
 
     istream& operator>>(istream& in, log_level& level)
