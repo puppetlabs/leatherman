@@ -14,6 +14,8 @@ if (LEATHERMAN_USE_LOCALES AND BOOST_STATIC AND APPLE)
     add_leatherman_deps(iconv)
 endif()
 
+leatherman_dependency(util)
+
 add_leatherman_headers(inc/leatherman)
 
 if (LEATHERMAN_USE_LOCALES)

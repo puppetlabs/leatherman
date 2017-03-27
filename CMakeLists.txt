@@ -41,21 +41,28 @@ endif()
 defoption(LEATHERMAN_MOCK_CURL "Use mock curl library for testing Leatherman.curl" ${MOCK_CURL})
 
 add_definitions(${LEATHERMAN_DEFINITIONS})
-add_definitions(-DLEATHERMAN_LOCALE_INSTALL="${CMAKE_INSTALL_PREFIX}/share/locale")
+if (LEATHERMAN_LOCALE_VAR AND LEATHERMAN_LOCALE_INSTALL)
+    # Add an environment variable to look up install prefix at runtime.
+    add_definitions(-DLEATHERMAN_LOCALE_VAR="${LEATHERMAN_LOCALE_VAR}"
+                    -DLEATHERMAN_LOCALE_INSTALL="${LEATHERMAN_LOCALE_INSTALL}")
+else()
+    # Add install location instead.
+    add_definitions(-DLEATHERMAN_LOCALE_INSTALL="${CMAKE_INSTALL_PREFIX}/share/locale")
+endif()
 
 file(GLOB_RECURSE ALL_LEATHERMAN_SOURCES */src/*.cc */inc/*.hpp)
 add_subdirectory(locales)
 
 add_leatherman_dir(catch EXCLUDE_FROM_VARS)
 add_leatherman_dir(nowide)
+add_leatherman_dir(util)
 add_leatherman_dir(locale)
 add_leatherman_dir(logging)
 add_leatherman_dir(rapidjson)
 add_leatherman_dir(json_container)
-add_leatherman_dir(util)
 add_leatherman_dir(file_util)
 add_leatherman_dir(curl)
-if(WIN32)
+if (WIN32)
   add_leatherman_dir(windows)
 endif()
 add_leatherman_dir(dynamic_library)
