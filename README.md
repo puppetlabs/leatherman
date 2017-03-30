@@ -191,6 +191,13 @@ add_definitions(${LEATHERMAN_DEFINITIONS})
 add_definitions(-DLEATHERMAN_I18N)
 ```
 
+By default locale files are installed to `${CMAKE_INSTALL_PREFIX}/share/locale`.
+This behavior can be changed to use environment variables for the prefix
+instead by defining `LEATHERMAN_LOCALE_VAR` and `LEATHERMAN_LOCALE_INSTALL`.
+For example, if `LEATHERMAN_LOCALE_VAR=MY_LOCALE_VAR` and
+`LEATHERMAN_LOCALE_INSTALL=../share/locale`, and at runtime `MY_LOCALE_VAR=C:/bin`,
+then Leatherman will search for locale files at `C:/bin/../share/locale`.
+
 #### Extracting and Translating Text
 
 The format strings in logging (the first argument) will automatically be

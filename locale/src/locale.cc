@@ -1,4 +1,5 @@
 #include <leatherman/locale/locale.hpp>
+#include <leatherman/util/environment.hpp>
 #include <map>
 
 // boost includes are not always warning-clean. Disable warnings that
@@ -26,8 +27,14 @@ namespace leatherman { namespace locale {
         boost::locale::generator gen;
 
         if (!domain.empty()) {
-#ifdef LEATHERMAN_LOCALE_INSTALL
-            // Setup so we can find installed locales.
+            // Setup so we can find installed locales. Expects a default path unless
+            // an environment variable is specified.
+#ifdef LEATHERMAN_LOCALE_VAR
+            string locale_path;
+            if (util::environment::get(LEATHERMAN_LOCALE_VAR, locale_path)) {
+                gen.add_messages_path(locale_path+'/'+LEATHERMAN_LOCALE_INSTALL);
+            }
+#else
             gen.add_messages_path(LEATHERMAN_LOCALE_INSTALL);
 #endif
             for (auto& path : paths) {
