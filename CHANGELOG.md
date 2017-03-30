@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.11.2]
+
+### Fixed
+- Ability to find locale files with a relocatable package, particularly on Windows (LTH-133)
+
 ## [0.11.1]
 
 ### Fixed
