@@ -266,6 +266,10 @@ namespace leatherman {  namespace ruby {
         /**
          * See MRI documentation.
          */
+        VALUE (* const rb_ll2inum)(LONG_LONG);
+        /**
+         * See MRI documentation.
+         */
         VALUE (* const rb_enc_str_new)(char const*, long, rb_encoding_p);
         /**
          * See MRI documentation.
