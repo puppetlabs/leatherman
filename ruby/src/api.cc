@@ -65,6 +65,7 @@ namespace leatherman { namespace ruby {
         LOAD_SYMBOL(rb_protect),
         LOAD_SYMBOL(rb_jump_tag),
         LOAD_SYMBOL(rb_int2inum),
+        LOAD_SYMBOL(rb_ll2inum),
         LOAD_SYMBOL(rb_enc_str_new),
         LOAD_SYMBOL(rb_utf8_encoding),
         LOAD_SYMBOL(rb_str_encode),
