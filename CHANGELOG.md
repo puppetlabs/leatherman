@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Support for finding locale files with a relocatable package, particularly on Windows (LTH-133)
 
+## [0.11.2]
+
+### Added
+- Ruby API binding for rb_ll2inum
+
 ## [0.11.1]
 
 ### Fixed
