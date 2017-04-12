@@ -1,9 +1,14 @@
 # This file contains utilities used by both leatherman and consuming
 # projects.
 
-# Save the directory this script is from, to reference other files
-# located in the same directory when using cmake in script mode.
-set(LEATHERMAN_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
+# Save the directory containing other cmake script files.
+# If we're top-level, this file is generated and dropped
+# in a different directory from the other script files.
+if(LEATHERMAN_TOPLEVEL)
+    set(LEATHERMAN_CMAKE_DIR ${CMAKE_SOURCE_DIR}/cmake)
+else()
+    set(LEATHERMAN_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
+endif()
 
 # Usage: leatherman_logging_namespace("namespace")
 #
@@ -26,7 +31,7 @@ endmacro()
 # logic.
 macro(debug str)
     if (LEATHERMAN_DEBUG)
-	message(STATUS ${str})
+        message(STATUS ${str})
     endif()
 endmacro(debug)
 
@@ -37,10 +42,10 @@ endmacro(debug)
 # create a new scope, but a function does.
 macro(export_var varname)
     if (NOT "${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
-	debug("Exporting ${varname}")
-	set(${varname} ${${varname}} PARENT_SCOPE)
+        debug("Exporting ${varname}")
+        set(${varname} ${${varname}} PARENT_SCOPE)
     else()
-	debug("Skipping export of ${varname} because I'm top-level")
+        debug("Skipping export of ${varname} because I'm top-level")
     endif()
     debug("It's value is: ${${varname}}")
 endmacro(export_var)
@@ -54,11 +59,11 @@ endmacro(export_var)
 # option() to ignore its default.
 macro(defoption name doc default)
     if(DEFINED ${name})
-	debug("${name} is already set, using it")
-	set(enabled ${${name}})
+        debug("${name} is already set, using it")
+        set(enabled ${${name}})
     else()
-	debug("${name} unset, using default")
-	set(enabled ${default})
+        debug("${name} unset, using default")
+        set(enabled ${default})
     endif()
     option(${name} ${doc} ${enabled})
 endmacro()
@@ -111,7 +116,7 @@ macro(enable_cppcheck)
 endmacro()
 
 # We set this here so that enable_cpplint() can find it
-set(LEATHERMAN_CPPLINT_PATH "${CMAKE_CURRENT_LIST_DIR}/../scripts/cpplint.py")
+set(LEATHERMAN_CPPLINT_PATH "${LEATHERMAN_CMAKE_DIR}/../scripts/cpplint.py")
 
 # Usage: enable_cpplint()
 #
@@ -120,9 +125,9 @@ set(LEATHERMAN_CPPLINT_PATH "${CMAKE_CURRENT_LIST_DIR}/../scripts/cpplint.py")
 macro(enable_cpplint)
     include(FindPythonInterp)
     if (NOT PYTHONINTERP_FOUND)
-	message(STATUS "Python not found; 'cpplint' target will not be available")
+        message(STATUS "Python not found; 'cpplint' target will not be available")
     else()
-	set(CPPLINT_FILTER
+        set(CPPLINT_FILTER
             "-build/c++11"            # <thread>, <condvar>, etc...
             "-whitespace/indent"      # We use 4 space indentation
             "-build/include"          # Why?
@@ -144,19 +149,19 @@ macro(enable_cpplint)
             "-whitespace/operators"   # Expects spaces around perfect forwarding (&&)
         )
 
-	set(CPPLINT_ARGS "--extensions=cc,cpp,hpp,h")
-	if (CPPLINT_FILTER)
+        set(CPPLINT_ARGS "--extensions=cc,cpp,hpp,h")
+        if (CPPLINT_FILTER)
             string(REPLACE ";" "," CPPLINT_FILTER "${CPPLINT_FILTER}")
             set(CPPLINT_ARGS "${CPPLINT_ARGS};--filter=${CPPLINT_FILTER}")
-	endif()
-	if (MSVC)
+        endif()
+        if (MSVC)
             set(CPPLINT_ARGS "${CPPLINT_ARGS};--output=vs7")
-	endif()
+        endif()
 
-	add_custom_target(cpplint
+        add_custom_target(cpplint
             COMMAND ${PYTHON_EXECUTABLE} ${LEATHERMAN_CPPLINT_PATH} ${CPPLINT_ARGS} ${CPPLINT_FILES}
             VERBATIM
-	)
+        )
     endif()
 endmacro()
 
@@ -273,7 +278,11 @@ macro(gettext_compile dir inst)
                 DEPENDS ${fpath})
             add_custom_target(${lang}-${PROJECT_NAME} DEPENDS ${mo})
             add_dependencies(translations ${lang}-${PROJECT_NAME})
-            install(FILES ${mo} DESTINATION "${inst}/${lang}/LC_MESSAGES")
+            if(LEATHERMAN_LOCALE_INSTALL)
+                install(FILES ${mo} DESTINATION "@CMAKE_INSTALL_PREFIX@/${LEATHERMAN_LOCALE_INSTALL}/${lang}/LC_MESSAGES")
+            else()
+                install(FILES ${mo} DESTINATION "@CMAKE_INSTALL_PREFIX@/share/locale/${lang}/LC_MESSAGES")
+            endif()
         endforeach()
         set(GETTEXT_ENABLED ON)
     else()

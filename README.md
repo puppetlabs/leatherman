@@ -194,9 +194,22 @@ add_definitions(-DLEATHERMAN_I18N)
 By default locale files are installed to `${CMAKE_INSTALL_PREFIX}/share/locale`.
 This behavior can be changed to use environment variables for the prefix
 instead by defining `LEATHERMAN_LOCALE_VAR` and `LEATHERMAN_LOCALE_INSTALL`.
-For example, if `LEATHERMAN_LOCALE_VAR=MY_LOCALE_VAR` and
-`LEATHERMAN_LOCALE_INSTALL=../share/locale`, and at runtime `MY_LOCALE_VAR=C:/bin`,
-then Leatherman will search for locale files at `C:/bin/../share/locale`.
+`LEATHERMAN_LOCALE_VAR` should refer to an environment variable pointing to the
+root of the Leatherman install, while `LEATHERMAN_LOCALE_INSTALL` should contain
+a path relative to that location, where locale files should be installed and searched
+for at run time.
+
+For example, if Leatherman is installed to `C:/tools`, and you would like
+to install translation files to `C:/languages/leatherman`, you can create an environment
+variable (e.g. `$LEATHERMAN_LOCATION`) containing `C:\tools`, then set
+`LEATHERMAN_LOCALE_VAR=LEATHERMAN_LOCATION` and 
+`LEATHERMAN_LOCALE_INSTALL=../languages/leatherman`. Then locale files will be installed to
+`C:/tools/../languages/leatherman` and at runtime Leatherman will search for locale
+files there.
+
+To ensure that consuming projects also install their locale files to the right location,
+it is recommended to set `LEATHERMAN_LOCALE_INSTALL` for all projects attempting to use
+Leatherman's i18n tooling.
 
 #### Extracting and Translating Text
 

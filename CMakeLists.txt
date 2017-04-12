@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.2.2)
 project(leatherman VERSION 0.12.0)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${PROJECT_BINARY_DIR}/cmake")
+# Populate locale install location
+configure_file(cmake/leatherman.cmake.in "${PROJECT_BINARY_DIR}/cmake/leatherman.cmake" @ONLY)
 include(internal)
 
 # If we're the top-level project, we want to ensure the build type is
@@ -113,14 +115,16 @@ if (LEATHERMAN_INSTALL)
         cmake/GetGitRevisionDescription.cmake
         cmake/GetGitRevisionDescription.cmake.in
         cmake/pod2man.cmake
-        cmake/leatherman.cmake
         cmake/options.cmake
         cmake/leatherman_config.cmake
         cmake/normalize_pot.cmake
         cmake/generate_translations.cmake
     )
     set(INSTALL_LOC "lib${LIB_SUFFIX}/cmake/leatherman")
-    install(FILES ${CMAKE_FILES} DESTINATION "${INSTALL_LOC}/cmake/")
+    install(FILES
+        ${CMAKE_FILES}
+        "${PROJECT_BINARY_DIR}/cmake/leatherman.cmake"
+        DESTINATION "${INSTALL_LOC}/cmake/")
 
     configure_file(LeathermanConfig.cmake.in "${PROJECT_BINARY_DIR}/LeathermanConfig.cmake" @ONLY)
     configure_file(LeathermanConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/LeathermanConfigVersion.cmake" @ONLY)
