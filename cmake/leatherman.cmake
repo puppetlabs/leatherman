@@ -239,6 +239,10 @@ endmacro()
 # Compile gettext .po files into .mo files and configure installing to inst
 # Creates a custom target `translations`.
 #
+# If LEATHERMAN_LOCALE_INSTALL and LEATHERMAN_LOCALE_VAR are set, this will
+# install the newly compiled .mo files to the location specified by these vars.
+# Otherwise, it will use the specified `inst` arg.
+#
 # Does nothing if msgfmt (part of gettext) isn't found. Sets GETTEXT_ENABLED
 # to ON if we can compile .mo files, otherwise sets to OFF. This variable can
 # be used to disable functionality (such as testing) that requires gettext
@@ -273,7 +277,11 @@ macro(gettext_compile dir inst)
                 DEPENDS ${fpath})
             add_custom_target(${lang}-${PROJECT_NAME} DEPENDS ${mo})
             add_dependencies(translations ${lang}-${PROJECT_NAME})
-            install(FILES ${mo} DESTINATION "${inst}/${lang}/LC_MESSAGES")
+            if(LEATHERMAN_LOCALE_VAR AND LEATHERMAN_LOCALE_INSTALL)
+                install(FILES ${mo} DESTINATION "${LEATHERMAN_LOCALE_VAR}/${LEATHERMAN_LOCALE_INSTALL}/${lang}/LC_MESSAGES")
+            else()
+                install(FILES ${mo} DESTINATION "${inst}/${lang}/LC_MESSAGES")
+            endif()
         endforeach()
         set(GETTEXT_ENABLED ON)
     else()
