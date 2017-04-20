@@ -90,8 +90,6 @@ namespace leatherman { namespace curl {
         SECTION("The header response delimiter should be ignored") {
             request test_request {"http://response-delimiter.com/"};
             auto resp = test_client.get(test_request);
-            CURL* const& handle = test_client.get_handle();
-            auto test_impl = reinterpret_cast<curl_impl* const>(handle);
             int headers = 0;
             resp.each_header([&](string const& name, string const& value) {
                 ++headers;
@@ -103,8 +101,6 @@ namespace leatherman { namespace curl {
         SECTION("Non-standard response header should be parsed for name and value") {
             request test_request {"http://nonstd-header.com/"};
             auto resp = test_client.get(test_request);
-            CURL* const& handle = test_client.get_handle();
-            auto test_impl = reinterpret_cast<curl_impl* const>(handle);
             REQUIRE(resp.header("nonstd_header_name"));
             REQUIRE(*(resp.header("nonstd_header_name")) == "nonstd_header_value");
         }
@@ -112,8 +108,6 @@ namespace leatherman { namespace curl {
         SECTION("Invalid headers should not be parsed or returned in the response") {
             request test_request {"http://invalid-header.com/"};
             auto resp = test_client.get(test_request);
-            CURL* const& handle = test_client.get_handle();
-            auto test_impl = reinterpret_cast<curl_impl* const>(handle);
             int headers = 0;
             resp.each_header([&](string const& name, string const& value) {
                 ++headers;

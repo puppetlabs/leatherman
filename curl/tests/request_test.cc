@@ -48,7 +48,6 @@ namespace leatherman { namespace curl {
         SECTION("A cookie should be retrievable by name") {
             test_request.add_cookie("cookie_0", "cookie_val_0");
             test_request.add_cookie("cookie_1", "cookie_val_1");
-            auto cookie = test_request.cookie("cookie_0");
             REQUIRE(*(test_request.cookie("cookie_0")) == "cookie_val_0");
         }
 
