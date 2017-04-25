@@ -23,7 +23,7 @@ addons:
       name: "puppetlabs/leatherman"
       description: "Build submitted via Travis CI"
     notification_email: michael.smith@puppetlabs.com
-    build_command_prepend: "CC=gcc-4.8 CXX=g++-4.8 $USERDIR/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=$USERDIR -DLEATHERMAN_GETTEXT=OFF ."
+    build_command_prepend: "cov-configure --comptype gcc --compiler gcc-4.8 --template && $USERDIR/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=$USERDIR -DLEATHERMAN_GETTEXT=OFF ."
     build_command: "make"
     branch_pattern: coverity_scan
 
@@ -46,6 +46,7 @@ before_install:
   - tar xjvf yaml-cpp-0.5.1_install.tar.bz2 --strip 1 -C $USERDIR
   # Install coveralls.io update utility
   - pip install --user cpp-coveralls
+  - export CC=gcc-4.8 CXX=g++-4.8
 
 script: if [ ${COVERITY_SCAN_BRANCH} != 1 ]; then ./scripts/travis_target.sh ; fi
 
