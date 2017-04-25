@@ -18,6 +18,14 @@ addons:
       - libboost-log1.55-dev
       - libboost-locale1.55-dev
       - libboost-chrono1.55-dev
+  coverity_scan:
+    project:
+      name: "puppetlabs/leatherman"
+      description: "Build submitted via Travis CI"
+    notification_email: michael.smith@puppetlabs.com
+    build_command_prepend: "CC=gcc-4.8 CXX=g++-4.8 $USERDIR/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=$USERDIR -DLEATHERMAN_GETTEXT=OFF ."
+    build_command: "make"
+    branch_pattern: coverity_scan
 
 before_install:
   # Use a predefined install location; cppcheck requires the cfg location is defined at compile-time.
@@ -39,29 +47,14 @@ before_install:
   # Install coveralls.io update utility
   - pip install --user cpp-coveralls
 
-script: ./scripts/travis_target.sh
+script: if [ ${COVERITY_SCAN_BRANCH} != 1 ]; then ./scripts/travis_target.sh ; fi
 
 env:
   global:
+    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+    #   via the "travis encrypt" command using the project repo's public key
+    - secure: "ftI7BV1urhuEd2TixJb3dYjixB98H3d+SSTBnZMSP7XCRnvw0ztVHK8b452tnTbz/8K7+78Dg4tQMEJyKFkIp7YNjF/0nZwhVY/jfCmcYi/zX1mliJGBjdeOBLXWnJLNBFsyusMd7MvCzaZNR5oVSNXXxJJ8+dFQpWnN2B8PdVk="
     - USERDIR=/tmp/userdir
     - PYTHONUSERBASE=$USERDIR
     - PATH=$USERDIR/bin:$PATH
     - LD_LIBRARY_PATH=$USERDIR/lib:$LD_LIBRARY_PATH
-  matrix:
-    - TRAVIS_TARGET=CPPLINT
-    - TRAVIS_TARGET=CPPCHECK
-    - TRAVIS_TARGET=RELEASE
-    - TRAVIS_TARGET=DEBUG
-    - TRAVIS_TARGET=SHARED_RELEASE
-    - TRAVIS_TARGET=LOCALE_DISABLED
-    - TRAVIS_TARGET=GETTEXT_DISABLED
-deploy:
-  provider: releases
-  api_key:
-    secure: XARXGAo5DNbqu7/EVPlKocdAAdtVqui2yaJiqw8GVXMSsK5lxqkHNfm1UF204y9ONl7DTa1hzBS8VRLupfb2aIjIZWMM68tnWYbyJYNdRUevylPTK01rO9wpR8iVe7xFqQOlDXPrX0UVfKCvf+e1j+IleO5Eyjf1mTLIRR3fuOY=
-  file: leatherman.tar.gz
-  skip_cleanup: true
-  on:
-    repo: puppetlabs/leatherman
-    tags: true
-    condition: '"$TRAVIS_TARGET" == "RELEASE"'
