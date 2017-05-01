@@ -101,9 +101,8 @@ namespace leatherman { namespace ruby {
         LOAD_SYMBOL(rb_cHash),
         LOAD_SYMBOL(rb_cString),
         LOAD_SYMBOL(rb_cSymbol),
-        LOAD_SYMBOL(rb_cFixnum),
         LOAD_SYMBOL(rb_cFloat),
-        LOAD_SYMBOL(rb_cBignum),
+        LOAD_SYMBOL(rb_cInteger),
         LOAD_SYMBOL(rb_eException),
         LOAD_SYMBOL(rb_eArgError),
         LOAD_SYMBOL(rb_eTypeError),
@@ -395,14 +394,9 @@ namespace leatherman { namespace ruby {
         return is_a(value, *rb_cSymbol);
     }
 
-    bool api::is_fixednum(VALUE value) const
+    bool api::is_integer(VALUE value) const
     {
-        return is_a(value, *rb_cFixnum);
-    }
-
-    bool api::is_bignum(VALUE value) const
-    {
-        return is_a(value, *rb_cBignum);
+        return is_a(value, *rb_cInteger);
     }
 
     bool api::is_float(VALUE value) const

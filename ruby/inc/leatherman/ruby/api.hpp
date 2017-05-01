@@ -32,7 +32,7 @@ namespace leatherman {  namespace ruby {
     /**
      * Represents a MRI VALUE (a Ruby object).
      * VALUEs can be constants denoting things like true, false, or nil.
-     * They can also be encoded numerical values (Fixnum, for example).
+     * They can also be encoded numerical values (Integer, for example).
      * They can also be pointers to a heap-allocated Ruby object (class, module, etc).
      * The Ruby garbage collector scans the main thread's stack for VALUEs to mark during garbage collection.
      * Therefore, you may encounter "volatile" VALUES. These are marked simply to ensure the compiler
@@ -416,15 +416,11 @@ namespace leatherman {  namespace ruby {
         /**
          * See MRI documentation.
          */
-        VALUE* const rb_cFixnum;
-        /**
-         * See MRI documentation.
-         */
         VALUE* const rb_cFloat;
         /**
          * See MRI documentation.
          */
-        VALUE* const rb_cBignum;
+        VALUE* const rb_cInteger;
 
         /**
          * See MRI documentation.
@@ -596,19 +592,12 @@ namespace leatherman {  namespace ruby {
          */
         bool is_symbol(VALUE value) const;
 
-        /**
-         * Determines if the given value is a fixed number (Fixnum).
-         * @param value The value to check.
-         * @return Returns true if the given value is a fixed number (Fixnum) or false if it is not.
-         */
-        bool is_fixednum(VALUE value) const;
-
          /**
-         * Determines if the given value is a big number (Bignum).
+         * Determines if the given value is an Integer.
          * @param value The value to check.
-         * @return Returns true if the given value is a fixed number (Fixnum) or false if it is not.
+         * @return Returns true if the given value is an integer (Integer) or false if it is not.
          */
-        bool is_bignum(VALUE value) const;
+        bool is_integer(VALUE value) const;
 
         /**
          * Determines if the given value is a float.
