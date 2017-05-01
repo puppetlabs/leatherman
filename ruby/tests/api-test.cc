@@ -48,12 +48,8 @@ TEST_CASE("api::is_*", "[ruby-api]") {
         REQUIRE(ruby.is_float(ruby.eval("1.5")));
         REQUIRE_FALSE(ruby.is_float(ruby.utf8_value("foo")));
 
-        REQUIRE(ruby.is_fixednum(ruby.eval("2")));
-        REQUIRE_FALSE(ruby.is_fixednum(ruby.eval("1.5")));
-
-        REQUIRE(ruby.is_bignum(ruby.eval(to_string(numeric_limits<int64_t>::max()))));
-        REQUIRE_FALSE(ruby.is_bignum(ruby.eval("2")));
-        REQUIRE_FALSE(ruby.is_bignum(ruby.eval("1.5")));
+        REQUIRE(ruby.is_integer(ruby.eval("2")));
+        REQUIRE_FALSE(ruby.is_integer(ruby.eval("1.5")));
     }
 
     SECTION("can correctly identify hashes") {
