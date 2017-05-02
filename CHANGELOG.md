@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.12.1]
+
+### Fixed
+- Locale files are installed relative to the Leatherman install root, taking into account support for relocatable packages (LTH-135)
+
 ## [0.12.0]
 
 ### Added
