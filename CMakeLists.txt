@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2.2)
-project(leatherman VERSION 0.12.1)
+project(leatherman VERSION 0.99.0)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${PROJECT_BINARY_DIR}/cmake")
 # Populate locale install location
