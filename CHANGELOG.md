@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.99.0]
+This is a pre-release version for Leatherman 1.0.0, containing backwards-incompatible API changes.
+
+### Changed
+- Remove Ruby bindings for Fixnum and Bignum, replace with Integer for Ruby 2.4 support [LTH-124]
+
 ## [0.12.1]
 
 ### Fixed
