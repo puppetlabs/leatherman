@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.0]
+Final tag for Leatherman 1.0.0, containing the same change set as 0.99.0.
+
 ## [0.99.0]
 This is a pre-release version for Leatherman 1.0.0, containing backwards-incompatible API changes.
 
