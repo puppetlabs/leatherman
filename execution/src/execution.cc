@@ -443,6 +443,14 @@ namespace leatherman { namespace execution {
         if (trim) {
             boost::trim(stdout_buffer);
             boost::trim(stderr_buffer);
+        } else {
+            // The last output may be just a newline. Trim it so we don't print extra.
+            if (stdout_callback) {
+                boost::trim_if(stdout_buffer, is_any_of("\n\r"));
+            }
+            if (stderr_callback) {
+                boost::trim_if(stderr_buffer, is_any_of("\n\r"));
+            }
         }
         // Log the last line of output for stdout
         if (!stdout_buffer.empty()) {
