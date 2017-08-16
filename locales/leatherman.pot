@@ -127,11 +127,19 @@ msgid "executing command: {1}"
 msgstr ""
 
 #: execution/src/execution.cc
-msgid "failed to open the output file."
+msgid "failed to open output file {1}"
 msgstr ""
 
 #: execution/src/execution.cc
-msgid "failed to open the error file."
+msgid "failed to modify permissions on output file {1} to {2,num,oct}: {3}"
+msgstr ""
+
+#: execution/src/execution.cc
+msgid "failed to open error file {1}"
+msgstr ""
+
+#: execution/src/execution.cc
+msgid "failed to modify permissions on error file {1} to {2,num,oct}: {3}"
 msgstr ""
 
 #. debug
