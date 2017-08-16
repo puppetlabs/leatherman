@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.0]
+
+### Added
+- Execution with file redirection and `atomic_write_to_file` can specify the permissions of those files. (LTH-139)
+- Leatherman.curl added a download_file function for doing streaming file downloads. (LTH-140)
+
+### Fixed
+- Fix redundant newlines when using `execute` that redirects output to files when not using the `trim` option. This combination now also ensures empty lines are not skipped. A side effect is that when not using `trim`, empty lines may appear when iterating over lines of output via `each_line` as well. (LTH-138)
+
 ## [1.0.0]
 Final tag for Leatherman 1.0.0, containing the same change set as 0.99.0.
 
@@ -9,7 +18,7 @@ Final tag for Leatherman 1.0.0, containing the same change set as 0.99.0.
 This is a pre-release version for Leatherman 1.0.0, containing backwards-incompatible API changes.
 
 ### Changed
-- Remove Ruby bindings for Fixnum and Bignum, replace with Integer for Ruby 2.4 support [LTH-124]
+- Remove Ruby bindings for Fixnum and Bignum, replace with Integer for Ruby 2.4 support (LTH-124)
 
 ## [0.12.1]
 
