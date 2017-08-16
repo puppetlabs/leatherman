@@ -12,9 +12,9 @@ namespace leatherman { namespace file_util {
     TEST_CASE("file_util::tilde_expand", "[utils]") {
 
 #ifdef _WIN32
-_putenv("USERPROFILE=/testhome");
+        _putenv("USERPROFILE=/testhome");
 #else
-    setenv("HOME", "/testhome", 1);
+        setenv("HOME", "/testhome", 1);
 #endif
 
         SECTION("empty path should be empty") {
@@ -126,6 +126,20 @@ _putenv("USERPROFILE=/testhome");
             REQUIRE(file_readable(file.get_file_name()));
             REQUIRE(read(file.get_file_name()) == "test");
         }
+
+#ifndef _WIN32
+        SECTION("can write a file with permissions") {
+            auto file_path = unique_fixture_path().string();
+            REQUIRE_FALSE(file_readable(file_path));
+            auto perms = boost::filesystem::owner_read | boost::filesystem::owner_write;
+            atomic_write_to_file("test\n", file_path, perms, std::ios::binary);
+            REQUIRE(file_readable(file_path));
+            auto stat = boost::filesystem::status(file_path);
+            REQUIRE(stat.permissions() == perms);
+            boost::filesystem::remove(file_path);
+            REQUIRE_FALSE(file_readable(file_path));
+        }
+#endif
     }
 
     TEST_CASE("file_util::read", "[utils]") {
