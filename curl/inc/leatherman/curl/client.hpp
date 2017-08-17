@@ -216,6 +216,18 @@ namespace leatherman { namespace curl {
         LEATHERMAN_CURL_NO_EXPORT void set_ca_info(context& ctx);
         LEATHERMAN_CURL_NO_EXPORT void set_client_protocols(context& ctx);
 
+        template <typename ParamType>
+        LEATHERMAN_CURL_NO_EXPORT void curl_easy_setopt_maybe(
+            context &ctx,
+            CURLoption option,
+            ParamType const& param
+        ) {
+            auto result = curl_easy_setopt(_handle, option, param);
+            if (result != CURLE_OK) {
+                throw http_request_exception(ctx.req, curl_easy_strerror(result));
+            }
+        }
+
         static size_t read_body(char* buffer, size_t size, size_t count, void* ptr);
         static int seek_body(void* ptr, curl_off_t offset, int origin);
         static size_t write_header(char* buffer, size_t size, size_t count, void* ptr);

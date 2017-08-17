@@ -18,30 +18,49 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: curl/src/client.cc
+#: curl/src/client_with_download.cc
 msgid "curl_easy_escape failed to escape string."
 msgstr ""
 
 #: curl/src/client.cc
+#: curl/src/client_with_download.cc
 msgid "failed to create cURL handle."
 msgstr ""
 
 #. debug
 #: curl/src/client.cc
+#: curl/src/client_with_download.cc
 msgid "request completed (status {1})."
 msgstr ""
 
 #: curl/src/client.cc
+#: curl/src/client_with_download.cc
 msgid "unexpected HTTP method specified."
 msgstr ""
 
 #. debug
 #: curl/src/client.cc
+#: curl/src/client_with_download.cc
 msgid "requesting {1}."
 msgstr ""
 
 #. warning
 #: curl/src/client.cc
+#: curl/src/client_with_download.cc
 msgid "unexpected HTTP response header: {1}."
+msgstr ""
+
+#: curl/src/client_with_download.cc
+msgid "Failed to open temporary file for writing"
+msgstr ""
+
+#. debug
+#: curl/src/client_with_download.cc
+msgid "download completed, now writing result to file"
+msgstr ""
+
+#: curl/src/client_with_download.cc
+msgid " and failed to remove temporary file"
 msgstr ""
 
 #. debug
