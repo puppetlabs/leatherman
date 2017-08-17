@@ -364,7 +364,7 @@ namespace leatherman { namespace execution {
         }
 
         // Find the last newline, because anything after may not be a complete line.
-        auto lastNL = data.find_last_of("\n\r");
+        auto lastNL = data.find_last_of("\n");
         if (lastNL == string::npos) {
             // No newline found, so keep appending and continue.
             buffer.append(data);
@@ -374,7 +374,7 @@ namespace leatherman { namespace execution {
         // Make a range for iterating through lines.
         auto str_range = make_pair(data.begin(), data.begin()+lastNL);
         auto line_iterator = boost::make_iterator_range(
-                make_split_iterator(str_range, token_finder(is_any_of("\n\r"), token_compress_on)),
+                make_split_iterator(str_range, token_finder(is_any_of("\n"))),
                 split_iterator<string::const_iterator>());
 
         for (auto &line : line_iterator) {
@@ -383,12 +383,18 @@ namespace leatherman { namespace execution {
 
             if (trim) {
                 boost::trim(buffer);
+
+                // Skip empty lines only if trimming output.
+                // Otherwise we want to include empty lines to remain honest to the original output.
+                if (buffer.empty()) {
+                    continue;
+                }
             }
 
-            // Skip empty lines
-            if (buffer.empty()) {
-                continue;
-            }
+#ifdef _WIN32
+            // Remove leading or trailing carriage returns. We don't want them during callbacks.
+            boost::trim_if(buffer, is_any_of("\r"));
+#endif
 
             // Log the line to the output logger
             if (LOG_IS_DEBUG_ENABLED()) {
@@ -407,8 +413,8 @@ namespace leatherman { namespace execution {
             }
         }
 
-        // Save the new trailing data
-        buffer.assign(data.begin()+lastNL, data.end());
+        // Save the new trailing data; step past the newline
+        buffer.assign(data.begin()+lastNL+1, data.end());
         return true;
     }
 
@@ -443,14 +449,6 @@ namespace leatherman { namespace execution {
         if (trim) {
             boost::trim(stdout_buffer);
             boost::trim(stderr_buffer);
-        } else {
-            // The last output may be just a newline. Trim it so we don't print extra.
-            if (stdout_callback) {
-                boost::trim_if(stdout_buffer, is_any_of("\n\r"));
-            }
-            if (stderr_callback) {
-                boost::trim_if(stderr_buffer, is_any_of("\n\r"));
-            }
         }
         // Log the last line of output for stdout
         if (!stdout_buffer.empty()) {
