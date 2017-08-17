@@ -274,7 +274,7 @@ SCENARIO("executing commands with execution::execute") {
             REQUIRE(exists(out_file));
             THEN("stdout is correctly redirected to file") {
                 auto output = get_file_content("stdout_test.out");
-                REQUIRE(output == "foo=bar\n");
+                REQUIRE(output == "foo=bar\nsome more stuff\n");
             }
             THEN("the returned results are correct and stdout was not buffered") {
                 REQUIRE(exec.success);
@@ -282,13 +282,13 @@ SCENARIO("executing commands with execution::execute") {
                 REQUIRE(exec.error == "error message!");
             }
         }
-        WHEN("requested to write stdout and stderr to the same file") {
+        WHEN("requested to write stdout and stderr to the same file with trim") {
             string out_file(spool_dir + "/stdout_stderr_test.out");
             auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message", {}, "", out_file, "", map<string, string>(), nullptr, 0, { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_stdout });
             REQUIRE(boost::filesystem::exists(out_file));
             THEN("stdout and stderr are correctly redirected to file") {
                 auto output = get_file_content("stdout_stderr_test.out");
-                REQUIRE(output == "error message!\nfoo=bar\n");
+                REQUIRE(output == "error message!\nfoo=bar\nsome more stuff\n");
             }
             THEN("the returned results are correct and out/err streams were not buffered") {
                 REQUIRE(exec.success);
@@ -317,7 +317,7 @@ SCENARIO("executing commands with execution::execute") {
             THEN("stdout and stderr are correctly redirected to different files") {
                 auto output = get_file_content("stdout_test_b.out");
                 auto error = get_file_content("stderr_test_b.err");
-                REQUIRE(output == "foo=bar\n");
+                REQUIRE(output == "foo=bar\n\nsome more stuff\n");
                 REQUIRE(error == "error message!\n");
             }
             THEN("the returned results are correct and out/err streams were not buffered") {
@@ -427,7 +427,7 @@ SCENARIO("executing commands with execution::execute") {
             log_capture capture(log_level::debug);
             auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message");
             REQUIRE(exec.success);
-            REQUIRE(exec.output == "foo=bar");
+            REQUIRE(exec.output == "foo=bar\n\nsome more stuff");
             REQUIRE(exec.error.empty());
             THEN("stderr is logged") {
                 auto output = capture.result();
@@ -439,7 +439,7 @@ SCENARIO("executing commands with execution::execute") {
             log_capture capture(log_level::warning);
             auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message");
             REQUIRE(exec.success);
-            REQUIRE(exec.output == "foo=bar");
+            REQUIRE(exec.output == "foo=bar\n\nsome more stuff");
             REQUIRE(exec.error.empty());
             THEN("stderr is not logged") {
                 auto output = capture.result();

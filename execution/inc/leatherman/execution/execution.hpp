@@ -355,7 +355,8 @@ namespace leatherman { namespace execution {
         lth_util::option_set<execution_options> const& options = { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_null });
 
     /**
-     * Executes the given program by writing the output of stdout and stderr to specified files.
+     * Executes the given program by writing the output of stdout and stderr to specified files. The output
+     * is processed line-by-line, so binary data isn't supported.
      * @param file The name or path of the program to execute.
      * @param arguments The arguments to pass to the program. On Windows they will be quoted as needed for spaces.
      * @param input A string to place on stdin for the child process before reading output.
