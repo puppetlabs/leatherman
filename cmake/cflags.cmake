@@ -2,7 +2,7 @@
 # Each of our project dirs sets CMAKE_CXX_FLAGS based on these. We do
 # not set CMAKE_CXX_FLAGS globally because gtest is not warning-clean.
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "\\w*Clang")
-    set(LEATHERMAN_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Werror -Wno-unused-parameter -Wno-tautological-constant-out-of-range-compare")
+    set(LEATHERMAN_CXX_FLAGS "-std=c++11 -Wall -Wextra -Werror -Wno-unused-parameter -Wno-tautological-constant-out-of-range-compare ${CMAKE_CXX_FLAGS}")
 
     # Clang warns that 'register' is deprecated; 'register' is used throughout boost, so it can't be an error yet.
     # The warning flag is different on different clang versions so we need to extract the clang version.
@@ -21,13 +21,13 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "\\w*Clang")
 
     # Now based on clang version set the appropriate warning flag
     if ("${CLANG_VERSION_STRING}" VERSION_GREATER "3.4")
-        set(LEATHERMAN_CXX_FLAGS "${LEATHERMAN_CXX_FLAGS} -Wno-deprecated-register")
+        set(LEATHERMAN_CXX_FLAGS "-Wno-deprecated-register ${LEATHERMAN_CXX_FLAGS}")
     else()
-        set(LEATHERMAN_CXX_FLAGS "${LEATHERMAN_CXX_FLAGS} -Wno-deprecated")
+        set(LEATHERMAN_CXX_FLAGS "-Wno-deprecated ${LEATHERMAN_CXX_FLAGS}")
     endif()
 
     if ("${CLANG_VERSION_STRING}" VERSION_GREATER "6.9")
-        set(LEATHERMAN_CXX_FLAGS "${LEATHERMAN_CXX_FLAGS} -Wno-unused-local-typedef")
+        set(LEATHERMAN_CXX_FLAGS "-Wno-unused-local-typedef ${LEATHERMAN_CXX_FLAGS}")
     endif()
 
     # FreeBSD needs -fPIC
@@ -38,17 +38,17 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "\\w*Clang")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     # maybe-uninitialized is a relatively new GCC warning that Boost 1.57 violates; disable it for now until it's available in Clang as well
     # it's also sometimes wrong
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-maybe-uninitialized")
+    set(CMAKE_CXX_FLAGS "-Wno-maybe-uninitialized ${CMAKE_CXX_FLAGS}")
 
     # missing-field-initializers is disabled because GCC can't make up their mind how to treat C++11 initializers
-    set(LEATHERMAN_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Werror -Wno-unused-parameter -Wno-unused-local-typedefs -Wno-unknown-pragmas -Wno-missing-field-initializers")
+    set(LEATHERMAN_CXX_FLAGS "-std=c++11 -Wall -Werror -Wno-unused-parameter -Wno-unused-local-typedefs -Wno-unknown-pragmas -Wno-missing-field-initializers ${CMAKE_CXX_FLAGS}")
     if (NOT "${CMAKE_SYSTEM_NAME}" MATCHES "SunOS")
-        set(LEATHERMAN_CXX_FLAGS "${LEATHERMAN_CXX_FLAGS} -Wextra")
+        set(LEATHERMAN_CXX_FLAGS "-Wextra ${LEATHERMAN_CXX_FLAGS}")
     endif()
 
     # On Windows with GCC 5.2.0, disable deprecated declarations because it causes warnings with Boost's use of auto_ptr
     if (WIN32)
-        set(LEATHERMAN_CXX_FLAGS "${LEATHERMAN_CXX_FLAGS} -Wno-deprecated-declarations")
+        set(LEATHERMAN_CXX_FLAGS "-Wno-deprecated-declarations ${LEATHERMAN_CXX_FLAGS}")
     endif()
 
     # On unix systems we want to be sure to specify -fPIC for libraries
@@ -62,9 +62,9 @@ endif()
 
 # Add code coverage
 if (COVERALLS)
-    set(LEATHERMAN_CXX_FLAGS "${LEATHERMAN_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+    set(LEATHERMAN_CXX_FLAGS "-fprofile-arcs -ftest-coverage ${LEATHERMAN_CXX_FLAGS}")
+    set(CMAKE_SHARED_LINKER_FLAGS "--coverage ${CMAKE_SHARED_LINKER_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "--coverage ${CMAKE_EXE_LINKER_FLAGS}")
 endif()
 
 if (WIN32)
