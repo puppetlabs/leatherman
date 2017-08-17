@@ -229,7 +229,7 @@ translate("Apple");
 ```
 // Note the parameter duplication: The first count value `2` selects the appropriate
 // translated message, and the second `2` fills in the `{1}` substitution token.
-format_n("Apple", "{1} Apples", 2, 2);
+format_n("{1} Apple", "{1} Apples", 2, 2);
 ```
 * Prefixed-context (`translate_p`, `format_p`) when a word or phrase has multiple meanings.
 ```
@@ -237,7 +237,7 @@ translate_p("Fruit", "Apple")
 ```
 * Pluralized and prefixed-context (`translate_np`, `format_np`)
 ```
-format_np("Fruit", "Apple", "{1} Apples", 3, 3);
+format_np("Fruit", "{1} Apple", "{1} Apples", 3, 3);
 ```
 
 `leatherman::locale::format` is a replacement for
