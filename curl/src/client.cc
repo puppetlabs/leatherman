@@ -6,12 +6,15 @@
 #include <leatherman/locale/locale.hpp>
 #include <boost/utility/string_ref.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/nowide/cstdio.hpp>
 #include <sstream>
+#include <cstdio>
 
 // Mark string for translation (alias for leatherman::locale::format)
 using leatherman::locale::_;
 
 using namespace std;
+namespace fs = boost::filesystem;
 
 namespace leatherman { namespace curl {
 
@@ -165,6 +168,74 @@ namespace leatherman { namespace curl {
         // Set the body of the response
         res.body(move(ctx.response_buffer));
         return res;
+    }
+
+    void client::download_file(request const& req, std::string const& file_path)
+    {
+        response res;
+        context ctx(req, res);
+
+        // Reset the options
+        curl_easy_reset(_handle);
+
+        CURLcode result = CURLE_OK;
+        char errbuf[CURL_ERROR_SIZE] = { '\0' };
+        FILE* fp = nullptr;
+        fs::path temp_path = fs::path("");
+        try {
+            temp_path = fs::path(file_path).parent_path() / fs::unique_path("temp_file_%%%%-%%%%-%%%%-%%%%");
+            fp = boost::nowide::fopen(temp_path.string().c_str(), "wb");
+            if (!fp) {
+                throw http_file_download_exception(req, file_path, _("Failed to open temporary file for writing"));
+            }
+
+            curl_easy_setopt_maybe(ctx, CURLOPT_NOPROGRESS, 1);
+            curl_easy_setopt_maybe(ctx, CURLOPT_WRITEFUNCTION, write_file);
+            curl_easy_setopt_maybe(ctx, CURLOPT_WRITEDATA, fp);
+
+            // Setup the remaining request
+            set_url(ctx);
+            set_headers(ctx);
+            set_timeouts(ctx);
+            set_ca_info(ctx);
+            set_client_info(ctx);
+            set_client_protocols(ctx);
+
+            // More detailed error messages
+            curl_easy_setopt_maybe(ctx, CURLOPT_ERRORBUFFER, errbuf);
+
+            // Perform the request
+            result = curl_easy_perform(_handle);
+            if (result != CURLE_OK) {
+                cleanup_temp_file(temp_path, fp, req, file_path, std::string(errbuf));
+                throw http_file_download_exception(req, file_path, errbuf);
+            }
+            fclose(fp);
+
+            LOG_DEBUG("download completed, now writing result to file");
+            fs::rename(temp_path, file_path);
+        } catch (http_file_download_exception& e) {
+            // so that the code in the lower catch block is not hit
+            throw e;
+        } catch (http_request_exception& e) {
+            cleanup_temp_file(temp_path, fp, req, file_path, e.what());
+            throw http_file_download_exception(e.req(), file_path, e.what());
+        } catch (fs::filesystem_error& e) {
+              throw http_file_download_exception(req, file_path, e.what());
+        }
+    }
+
+    void client::cleanup_temp_file(fs::path const& temp_path, FILE* tfp, request const& req, std::string const& file_path, std::string const& reason) {
+        fclose(tfp);
+        try {
+            fs::remove(temp_path);
+        } catch (fs::filesystem_error& e) {
+            throw http_file_download_exception(
+                req,
+                file_path,
+                temp_path.string(),
+                _("{1} and failed to remove temporary file {2}", reason, temp_path.string()));
+        }
     }
 
     void client::set_ca_cert(string const& cert_file)
@@ -383,6 +454,11 @@ namespace leatherman { namespace curl {
         }
 
         return written;
+    }
+
+    size_t client::write_file(char *buffer, size_t size, size_t count, void* ptr)
+    {
+        return fwrite(buffer, size, count, reinterpret_cast<FILE*>(ptr));
     }
 
     int client::debug(CURL* handle, curl_infotype type, char* data, size_t size, void* ptr)
