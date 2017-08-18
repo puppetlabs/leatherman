@@ -31,6 +31,19 @@ msgid "request completed (status {1})."
 msgstr ""
 
 #: curl/src/client.cc
+msgid "Failed to open temporary file for writing"
+msgstr ""
+
+#. debug
+#: curl/src/client.cc
+msgid "download completed, now writing result to file"
+msgstr ""
+
+#: curl/src/client.cc
+msgid "{1} and failed to remove temporary file {2}"
+msgstr ""
+
+#: curl/src/client.cc
 msgid "unexpected HTTP method specified."
 msgstr ""
 

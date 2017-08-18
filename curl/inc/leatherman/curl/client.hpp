@@ -8,6 +8,7 @@
 #include "request.hpp"
 #include "response.hpp"
 #include <curl/curl.h>
+#include <boost/filesystem.hpp>
 #include "export.h"
 
 
@@ -108,6 +109,58 @@ namespace leatherman { namespace curl {
     };
 
     /**
+     * The exception for HTTP file downloads.
+     */
+    struct LEATHERMAN_CURL_EXPORT http_file_download_exception : http_request_exception
+    {
+        /**
+         * Constructs an http_file_download_exception.
+         * @param request The request that caused the exception
+         * @param file_path The file that was meant to be downloaded
+         * @param message The exception message.
+         */
+        http_file_download_exception(request req, std::string file_path, std::string const &message) : http_file_download_exception(req, file_path, "", message)
+        {
+        }
+
+        /**
+         * Constructs an http_file_download_exception.
+         * @param request The request that caused the exception
+         * @param file_path The file that was meant to be downloaded
+         * @param temp_path The path to the temporary file that wasn't successfully cleaned up.
+         * @param message The exception message.
+         */
+        http_file_download_exception(request req, std::string file_path, std::string temp_path, std::string const &message) :
+            http_request_exception(req, message),
+            _file_path(std::move(file_path)),
+            _temp_path(std::move(temp_path))
+        {
+        }
+
+        /**
+         * Gets the file_path associated with the exception
+         * @return Returns the file_path associated with the exception.
+         */
+        std::string const& file_path() const
+        {
+            return _file_path;
+        }
+
+        /**
+         * Gets the temp_path associated with the exception
+         * @return Returns the temp_path associated with the exception.
+         */
+        std::string const& temp_path() const
+        {
+            return _temp_path;
+        }
+
+     private:
+        std::string _file_path;
+        std::string _temp_path;
+    };
+
+    /**
      * Implements a client for HTTP.
      * Note: this class is not thread-safe.
      */
@@ -151,6 +204,13 @@ namespace leatherman { namespace curl {
          * @return Returns the HTTP response.
          */
         response put(request const& req);
+
+        /**
+         * Downloads the file from the specified url.
+         * @param req The HTTP request to perform 
+         * @param file_path The file that the downloaded contents will be written to. 
+         */
+        void download_file(request const& req, std::string const& file_path);
 
         /**
          * Sets the path to the CA certificate file.
@@ -216,10 +276,25 @@ namespace leatherman { namespace curl {
         LEATHERMAN_CURL_NO_EXPORT void set_ca_info(context& ctx);
         LEATHERMAN_CURL_NO_EXPORT void set_client_protocols(context& ctx);
 
+        LEATHERMAN_CURL_NO_EXPORT void cleanup_temp_file(boost::filesystem::path const& temp_path, FILE* tfp, request const& req, std::string const& file_path, std::string const& reason);
+
+        template <typename ParamType>
+        LEATHERMAN_CURL_NO_EXPORT void curl_easy_setopt_maybe(
+            context &ctx,
+            CURLoption option,
+            ParamType const& param
+        ) {
+            auto result = curl_easy_setopt(_handle, option, param);
+            if (result != CURLE_OK) {
+                throw http_request_exception(ctx.req, curl_easy_strerror(result));
+            }
+        }
+
         static size_t read_body(char* buffer, size_t size, size_t count, void* ptr);
         static int seek_body(void* ptr, curl_off_t offset, int origin);
         static size_t write_header(char* buffer, size_t size, size_t count, void* ptr);
         static size_t write_body(char* buffer, size_t size, size_t count, void* ptr);
+        static size_t write_file(char *buffer, size_t size, size_t count, void* ptr);
         static int debug(CURL* handle, curl_infotype type, char* data, size_t size, void* ptr);
 
         curl_handle _handle;
