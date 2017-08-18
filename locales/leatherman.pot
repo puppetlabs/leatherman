@@ -34,9 +34,13 @@ msgstr ""
 msgid "Failed to open temporary file for writing"
 msgstr ""
 
+#: curl/src/client.cc
+msgid "Failed to modify permissions of temporary file"
+msgstr ""
+
 #. debug
 #: curl/src/client.cc
-msgid "download completed, now writing result to file"
+msgid "download completed, now writing result to file {1}"
 msgstr ""
 
 #: curl/src/client.cc
