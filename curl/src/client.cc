@@ -8,7 +8,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <sstream>
-#include <cstdio>
 
 // Mark string for translation (alias for leatherman::locale::format)
 using leatherman::locale::_;
@@ -170,7 +169,7 @@ namespace leatherman { namespace curl {
         return res;
     }
 
-    void client::download_file(request const& req, std::string const& file_path)
+    void client::download_file(request const& req, std::string const& file_path, boost::optional<fs::perms> perms)
     {
         response res;
         context ctx(req, res);
@@ -187,6 +186,14 @@ namespace leatherman { namespace curl {
             fp = boost::nowide::fopen(temp_path.string().c_str(), "wb");
             if (!fp) {
                 throw http_file_download_exception(req, file_path, _("Failed to open temporary file for writing"));
+            }
+
+            if (perms) {
+                boost::system::error_code ec;
+                fs::permissions(temp_path.string(), *perms, ec);
+                if (ec) {
+                    throw http_request_exception(req, _("Failed to modify permissions of temporary file"));
+                }
             }
 
             curl_easy_setopt_maybe(ctx, CURLOPT_NOPROGRESS, 1);
@@ -207,34 +214,26 @@ namespace leatherman { namespace curl {
             // Perform the request
             result = curl_easy_perform(_handle);
             if (result != CURLE_OK) {
-                cleanup_temp_file(temp_path, fp, req, file_path, std::string(errbuf));
-                throw http_file_download_exception(req, file_path, errbuf);
+                throw http_request_exception(req, errbuf);
             }
             fclose(fp);
 
-            LOG_DEBUG("download completed, now writing result to file");
+            LOG_DEBUG("download completed, now writing result to file {1}", file_path);
             fs::rename(temp_path, file_path);
         } catch (http_file_download_exception& e) {
             // so that the code in the lower catch block is not hit
             throw e;
         } catch (http_request_exception& e) {
-            cleanup_temp_file(temp_path, fp, req, file_path, e.what());
+            fclose(fp);
+            boost::system::error_code ec;
+            fs::remove(temp_path, ec);
+            if (ec) {
+                throw http_file_download_exception(e.req(), file_path, temp_path.string(),
+                                                   _("{1} and failed to remove temporary file {2}", e.what(), temp_path.string()));
+            }
             throw http_file_download_exception(e.req(), file_path, e.what());
         } catch (fs::filesystem_error& e) {
-              throw http_file_download_exception(req, file_path, e.what());
-        }
-    }
-
-    void client::cleanup_temp_file(fs::path const& temp_path, FILE* tfp, request const& req, std::string const& file_path, std::string const& reason) {
-        fclose(tfp);
-        try {
-            fs::remove(temp_path);
-        } catch (fs::filesystem_error& e) {
-            throw http_file_download_exception(
-                req,
-                file_path,
-                temp_path.string(),
-                _("{1} and failed to remove temporary file {2}", reason, temp_path.string()));
+            throw http_file_download_exception(req, file_path, e.what());
         }
     }
 

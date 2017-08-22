@@ -3,6 +3,7 @@
 #include <leatherman/locale/locale.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/optional.hpp>
 #include <boost/nowide/fstream.hpp>
 #include <cstdlib>
 #include <cstdio>
@@ -15,7 +16,7 @@ using leatherman::locale::_;
 using namespace std;
 using namespace leatherman::logging;
 using namespace leatherman::util;
-using namespace boost::filesystem;
+namespace fs = boost::filesystem;
 using namespace boost::algorithm;
 
 namespace leatherman { namespace execution {
@@ -253,6 +254,21 @@ namespace leatherman { namespace execution {
         uint32_t timeout,
         lth_util::option_set<execution_options> const& options)
     {
+        return execute(file, arguments, input, out_file, err_file, environment, pid_callback, timeout, {}, options);
+    }
+
+    result execute(
+        std::string const& file,
+        std::vector<std::string> const& arguments,
+        std::string const& input,
+        std::string const& out_file,
+        std::string const& err_file,
+        std::map<std::string, std::string> const& environment,
+        std::function<void(size_t)> pid_callback,
+        uint32_t timeout,
+        boost::optional<fs::perms> perms,
+        lth_util::option_set<execution_options> const& options)
+    {
         auto actual_options = options;
         function<bool(string&)> stderr_callback;
         function<bool(string&)> stdout_callback;
@@ -261,7 +277,15 @@ namespace leatherman { namespace execution {
 
         out_stream.open(out_file.c_str(), std::ios::binary);
         if (!out_stream.is_open()) {
-            throw execution_exception(_("failed to open the output file."));
+            throw execution_exception(_("failed to open output file {1}", out_file));
+        }
+
+        boost::system::error_code ec;
+        if (perms) {
+            fs::permissions(out_file, *perms, ec);
+            if (ec) {
+                throw execution_exception(_("failed to modify permissions on output file {1} to {2,num,oct}: {3}", out_file, *perms, ec.message()));
+            }
         }
 
         if (err_file.empty()) {
@@ -269,7 +293,14 @@ namespace leatherman { namespace execution {
         } else {
             err_stream.open(err_file.c_str(), std::ios::binary);
             if (!err_stream.is_open()) {
-                throw execution_exception(_("failed to open the error file."));
+                throw execution_exception(_("failed to open error file {1}", err_file));
+            }
+
+            if (perms) {
+                fs::permissions(err_file, *perms, ec);
+                if (ec) {
+                    throw execution_exception(_("failed to modify permissions on error file {1} to {2,num,oct}: {3}", err_file, *perms, ec.message()));
+                }
             }
 
             stderr_callback = ([&](string& line) {

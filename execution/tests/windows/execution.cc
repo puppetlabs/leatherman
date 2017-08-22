@@ -190,7 +190,8 @@ SCENARIO("executing commands with execution::execute") {
         WHEN("requested to write both stdout and stderr to file without trim") {
             string out_file(spool_dir + "/stdout_test_b.out");
             string err_file(spool_dir + "/stderr_test_b.err");
-            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/windows/error_message.bat", {}, "", out_file, err_file, {}, nullptr, 0, {});
+            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/windows/error_message.bat", {}, "",
+                                out_file, err_file, {}, nullptr, 0, lth_util::option_set<execution_options>{});
             REQUIRE(boost::filesystem::exists(out_file));
             REQUIRE(boost::filesystem::exists(err_file));
             THEN("stdout and stderr are correctly redirected to different files") {

@@ -8,6 +8,7 @@
 #include "request.hpp"
 #include "response.hpp"
 #include <curl/curl.h>
+#include <boost/optional.hpp>
 #include <boost/filesystem.hpp>
 #include "export.h"
 
@@ -207,10 +208,14 @@ namespace leatherman { namespace curl {
 
         /**
          * Downloads the file from the specified url.
-         * @param req The HTTP request to perform 
-         * @param file_path The file that the downloaded contents will be written to. 
+         * Throws http_file_download_exception if anything goes wrong.
+         * @param req The HTTP request to perform.
+         * @param file_path The file that the downloaded contents will be written to.
+         * @param perms The file permissions to apply when writing to file_path. Ignored on Windows.
          */
-        void download_file(request const& req, std::string const& file_path);
+        void download_file(request const& req,
+                           std::string const& file_path,
+                           boost::optional<boost::filesystem::perms> perms = {});
 
         /**
          * Sets the path to the CA certificate file.
@@ -275,8 +280,6 @@ namespace leatherman { namespace curl {
         LEATHERMAN_CURL_NO_EXPORT void set_client_info(context &ctx);
         LEATHERMAN_CURL_NO_EXPORT void set_ca_info(context& ctx);
         LEATHERMAN_CURL_NO_EXPORT void set_client_protocols(context& ctx);
-
-        LEATHERMAN_CURL_NO_EXPORT void cleanup_temp_file(boost::filesystem::path const& temp_path, FILE* tfp, request const& req, std::string const& file_path, std::string const& reason);
 
         template <typename ParamType>
         LEATHERMAN_CURL_NO_EXPORT void curl_easy_setopt_maybe(

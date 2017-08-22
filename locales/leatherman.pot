@@ -6,7 +6,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: leatherman 1.0.0\n"
+"Project-Id-Version: leatherman 1.1.0\n"
 "Report-Msgid-Bugs-To: docs@puppet.com\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -34,9 +34,13 @@ msgstr ""
 msgid "Failed to open temporary file for writing"
 msgstr ""
 
+#: curl/src/client.cc
+msgid "Failed to modify permissions of temporary file"
+msgstr ""
+
 #. debug
 #: curl/src/client.cc
-msgid "download completed, now writing result to file"
+msgid "download completed, now writing result to file {1}"
 msgstr ""
 
 #: curl/src/client.cc
@@ -127,11 +131,19 @@ msgid "executing command: {1}"
 msgstr ""
 
 #: execution/src/execution.cc
-msgid "failed to open the output file."
+msgid "failed to open output file {1}"
 msgstr ""
 
 #: execution/src/execution.cc
-msgid "failed to open the error file."
+msgid "failed to modify permissions on output file {1} to {2,num,oct}: {3}"
+msgstr ""
+
+#: execution/src/execution.cc
+msgid "failed to open error file {1}"
+msgstr ""
+
+#: execution/src/execution.cc
+msgid "failed to modify permissions on error file {1} to {2,num,oct}: {3}"
 msgstr ""
 
 #. debug

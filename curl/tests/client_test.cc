@@ -396,6 +396,7 @@ namespace leatherman { namespace curl {
         fs::path temp_dir_path = fs::path(temp_dir.get_dir_name()); 
         CURL* const& handle = test_client.get_handle();
         auto test_impl = reinterpret_cast<curl_impl* const>(handle);
+        std::string url = "https://download.com";
 
         SECTION("successfully downloads the file to the specified location") {
             std::string ca_file = "ca";
@@ -407,7 +408,6 @@ namespace leatherman { namespace curl {
             test_client.set_supported_protocols(CURLPROTO_HTTPS);
 
             std::string file_path = (temp_dir_path / "test_file").string();
-            std::string url = "https://download.com";
             std::string token = "token";
             long connect_timeout = 300000;
 
@@ -435,6 +435,18 @@ namespace leatherman { namespace curl {
             stream << in.rdbuf();
             REQUIRE(stream.str() == "successfully downloaded file"); 
         }
+
+#ifndef _WIN32
+        SECTION("sets permissions if requested") {
+            auto file_path = (temp_dir_path / "other_test_file").string();
+            request req(url);
+            auto perms = boost::filesystem::owner_read | boost::filesystem::owner_write;
+            test_client.download_file(req, file_path, perms);
+
+            REQUIRE(fs::exists(file_path));
+            REQUIRE(fs::status(file_path).permissions() == perms);
+        }
+#endif
     }
 
     TEST_CASE("curl::client download_file errors") {
