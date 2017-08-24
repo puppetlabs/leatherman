@@ -22,6 +22,7 @@ struct curl_impl
     {
         success,
         easy_perform_error,
+        easy_perform_write_error,
         http_post_error,
         http_put_error,
         set_url_error,

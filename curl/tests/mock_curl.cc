@@ -254,15 +254,12 @@ CURLcode curl_easy_setopt(CURL *handle, CURLoption option, ...)
 CURLcode curl_easy_perform(CURL * easy_handle)
 {
     auto h = reinterpret_cast<curl_impl*>(easy_handle);
+    if (h->test_failure_mode == curl_impl::error_mode::easy_perform_write_error) {
+        return CURLE_WRITE_ERROR;
+    }
     if (h->test_failure_mode == curl_impl::error_mode::easy_perform_error) {
         if (h->errbuf) {
             strcpy(h->errbuf, "easy perform failed"); 
-        }
-        if (h->trigger_external_failure) {
-            #ifdef _WIN32
-            fclose(reinterpret_cast<FILE*>(h->body_context));
-            #endif
-            h->trigger_external_failure();
         }
         return CURLE_COULDNT_CONNECT;
     }
@@ -287,6 +284,12 @@ CURLcode curl_easy_perform(CURL * easy_handle)
     if (h->request_url == "https://download.com") {
         string download_msg = "successfully downloaded file";
         h->write_body(const_cast<char*>(download_msg.c_str()), 1, reinterpret_cast<size_t>(download_msg.size()), h->body_context);
+        return CURLE_OK;
+    } else if (h->request_url == "https://remove_temp_file.com") {
+        #ifdef _WIN32
+        fclose(reinterpret_cast<FILE*>(h->body_context));
+        #endif
+        h->trigger_external_failure();
         return CURLE_OK;
     }
 
