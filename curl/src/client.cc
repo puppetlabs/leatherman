@@ -3,10 +3,8 @@
 #include <leatherman/curl/response.hpp>
 #include <leatherman/util/regex.hpp>
 #include <leatherman/logging/logging.hpp>
-#include <leatherman/locale/locale.hpp>
 #include <boost/utility/string_ref.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/nowide/cstdio.hpp>
 #include <sstream>
 
 // Mark string for translation (alias for leatherman::locale::format)
@@ -90,6 +88,62 @@ namespace leatherman { namespace curl {
     {
         if (str) {
             curl_free(const_cast<char*>(str));
+        }
+    }
+
+    download_temp_file::download_temp_file(request const& req, std::string const& file_path, boost::optional<boost::filesystem::perms> perms) :
+      _req(req),
+      _file_path(file_path)
+    {
+        try {
+            _temp_path = fs::path(file_path).parent_path() / fs::unique_path("temp_file_%%%%-%%%%-%%%%-%%%%");
+            _fp = boost::nowide::fopen(_temp_path.string().c_str(), "wb");
+            if (!_fp) {
+                throw http_file_exception(_req, _file_path, _("Failed to open temporary file for writing"));
+            }
+            if (!perms) {
+                return;
+            }
+
+            boost::system::error_code ec;
+            fs::permissions(_temp_path.string(), *perms, ec);
+            if (ec) {
+                cleanup();
+                throw http_file_exception(_req, _file_path, _("Failed to modify permissions of temporary file"));
+            }
+        } catch (fs::filesystem_error& e) {
+            throw http_file_exception(_req, _file_path, e.what());
+        }
+    }
+
+    download_temp_file::~download_temp_file() {
+        cleanup();
+    }
+
+    FILE* download_temp_file::get_fp() {
+        return _fp;
+    }
+
+    void download_temp_file::write() {
+        LOG_DEBUG("Download completed, now writing result to file {1}", _file_path);
+        fclose(_fp);
+        _fp = nullptr;
+        boost::system::error_code ec;
+        fs::rename(_temp_path, _file_path, ec);
+        if (ec) {
+            LOG_WARNING("Failed to write the results of the temporary file to the actual file {1}", _file_path);
+            throw http_file_exception(_req, _file_path, _("Failed to move over the temporary file's downloaded contents"));
+        }
+    }
+
+    void download_temp_file::cleanup() {
+        if (_fp) {
+            fclose(_fp);
+        }
+        boost::system::error_code ec;
+        fs::remove(_temp_path, ec);
+        if (ec) {
+            LOG_WARNING(_("Failed to properly clean-up the temporary file {1}", _temp_path));
         }
     }
 
@@ -177,64 +231,32 @@ namespace leatherman { namespace curl {
         // Reset the options
         curl_easy_reset(_handle);
 
-        CURLcode result = CURLE_OK;
         char errbuf[CURL_ERROR_SIZE] = { '\0' };
-        FILE* fp = nullptr;
-        fs::path temp_path = fs::path("");
-        try {
-            temp_path = fs::path(file_path).parent_path() / fs::unique_path("temp_file_%%%%-%%%%-%%%%-%%%%");
-            fp = boost::nowide::fopen(temp_path.string().c_str(), "wb");
-            if (!fp) {
-                throw http_file_download_exception(req, file_path, _("Failed to open temporary file for writing"));
-            }
+        download_temp_file temp_file(req, file_path, perms);
+        curl_easy_setopt_maybe(ctx, CURLOPT_NOPROGRESS, 1);
+        curl_easy_setopt_maybe(ctx, CURLOPT_WRITEFUNCTION, write_file);
+        curl_easy_setopt_maybe(ctx, CURLOPT_WRITEDATA, temp_file.get_fp());
 
-            if (perms) {
-                boost::system::error_code ec;
-                fs::permissions(temp_path.string(), *perms, ec);
-                if (ec) {
-                    throw http_request_exception(req, _("Failed to modify permissions of temporary file"));
-                }
-            }
+        // Setup the remaining request
+        set_url(ctx);
+        set_headers(ctx);
+        set_timeouts(ctx);
+        set_ca_info(ctx);
+        set_client_info(ctx);
+        set_client_protocols(ctx);
 
-            curl_easy_setopt_maybe(ctx, CURLOPT_NOPROGRESS, 1);
-            curl_easy_setopt_maybe(ctx, CURLOPT_WRITEFUNCTION, write_file);
-            curl_easy_setopt_maybe(ctx, CURLOPT_WRITEDATA, fp);
+        // More detailed error messages
+        curl_easy_setopt_maybe(ctx, CURLOPT_ERRORBUFFER, errbuf);
 
-            // Setup the remaining request
-            set_url(ctx);
-            set_headers(ctx);
-            set_timeouts(ctx);
-            set_ca_info(ctx);
-            set_client_info(ctx);
-            set_client_protocols(ctx);
-
-            // More detailed error messages
-            curl_easy_setopt_maybe(ctx, CURLOPT_ERRORBUFFER, errbuf);
-
-            // Perform the request
-            result = curl_easy_perform(_handle);
-            if (result != CURLE_OK) {
-                throw http_request_exception(req, errbuf);
-            }
-            fclose(fp);
-
-            LOG_DEBUG("download completed, now writing result to file {1}", file_path);
-            fs::rename(temp_path, file_path);
-        } catch (http_file_download_exception& e) {
-            // so that the code in the lower catch block is not hit
-            throw e;
-        } catch (http_request_exception& e) {
-            fclose(fp);
-            boost::system::error_code ec;
-            fs::remove(temp_path, ec);
-            if (ec) {
-                throw http_file_download_exception(e.req(), file_path, temp_path.string(),
-                                                   _("{1} and failed to remove temporary file {2}", e.what(), temp_path.string()));
-            }
-            throw http_file_download_exception(e.req(), file_path, e.what());
-        } catch (fs::filesystem_error& e) {
-            throw http_file_download_exception(req, file_path, e.what());
+        // Perform the request
+        auto result = curl_easy_perform(_handle);
+        if (result == CURLE_WRITE_ERROR) {
+          throw http_file_exception(req, file_path, _("Failed to write to the temporary file during download"));
+        } else if (result != CURLE_OK) {
+          throw http_download_exception(req, file_path, errbuf);
         }
+
+        temp_file.write();
     }
 
     void client::set_ca_cert(string const& cert_file)
