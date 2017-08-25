@@ -209,7 +209,7 @@ namespace leatherman { namespace curl {
     /**
      * The exception for HTTP file download file operation errors.
      */
-    struct LEATHERMAN_CURL_EXPORT http_file_operation_exception : http_file_download_exception
+    struct LEATHERMAN_CURL_EXPORT http_file_operation_exception : http_request_exception
     {
         /**
          * Constructs an http_file_operation_exception.
@@ -229,9 +229,19 @@ namespace leatherman { namespace curl {
          * @param message The exception message.
          */
         http_file_operation_exception(request req, std::string file_path, std::string temp_path, std::string const &message) :
-            http_file_download_exception(req, file_path, message),
+            http_request_exception(req, message),
+            _file_path(file_path),
             _temp_path(std::move(temp_path))
         {
+        }
+
+        /**
+         * Gets the file_path associated with the exception
+         * @return Returns the file_path associated with the exception.
+         */
+        std::string const& file_path() const
+        {
+            return _file_path;
         }
 
         /**
@@ -244,6 +254,7 @@ namespace leatherman { namespace curl {
         }
 
      private:
+        std::string _file_path;
         std::string _temp_path;
     };
 
