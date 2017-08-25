@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.2]
+
+### Added
+- Separated the possible failure modes for Leatherman.curl into three categories
+     * Curl setup errors
+     * File operation errors (e.g. writing to disk during file download)
+     * Server side errors (e.g. bad host)
+
+### Changed
+- Simplified the logic of Leatherman.curl's download_file method by abstracting out actions associated with the temporary file (creating, writing, removing) to a class that follows the RAII pattern.
+
 ## [1.1.1]
 
 ### Fixed
