@@ -307,90 +307,90 @@ namespace leatherman { namespace curl {
 
         SECTION("client fails to set HTTP method to POST") {
             test_impl->test_failure_mode = curl_impl::error_mode::http_post_error;
-            REQUIRE_THROWS_AS(test_client.post(test_request), http_setup_exception);
+            REQUIRE_THROWS_AS(test_client.post(test_request), http_curl_setup_exception);
         }
 
         SECTION("client fails to set HTTP method to PUT") {
             test_impl->test_failure_mode = curl_impl::error_mode::http_put_error;
-            REQUIRE_THROWS_AS(test_client.put(test_request), http_setup_exception);
+            REQUIRE_THROWS_AS(test_client.put(test_request), http_curl_setup_exception);
         }
 
         SECTION("client fails to set the request URL") {
             test_impl->test_failure_mode = curl_impl::error_mode::set_url_error;
-            REQUIRE_THROWS_AS(test_client.get(test_request), http_setup_exception);
+            REQUIRE_THROWS_AS(test_client.get(test_request), http_curl_setup_exception);
         }
 
         SECTION("client fails to set the request headers") {
             test_impl->test_failure_mode = curl_impl::error_mode::set_header_error;
-            REQUIRE_THROWS_AS(test_client.get(test_request), http_setup_exception);
+            REQUIRE_THROWS_AS(test_client.get(test_request), http_curl_setup_exception);
         }
 
         SECTION("client fails to set cookies in the request") {
             test_impl->test_failure_mode = curl_impl::error_mode::set_cookie_error;
-            REQUIRE_THROWS_AS(test_client.get(test_request), http_setup_exception);
+            REQUIRE_THROWS_AS(test_client.get(test_request), http_curl_setup_exception);
         }
 
         SECTION("client fails to set the header callback function") {
             test_impl->test_failure_mode = curl_impl::error_mode::header_function_error;
-            REQUIRE_THROWS_AS(test_client.get(test_request), http_setup_exception);
+            REQUIRE_THROWS_AS(test_client.get(test_request), http_curl_setup_exception);
         }
 
         SECTION("client fails to set the header write location") {
             test_impl->test_failure_mode = curl_impl::error_mode::header_context_error;
-            REQUIRE_THROWS_AS(test_client.get(test_request), http_setup_exception);
+            REQUIRE_THROWS_AS(test_client.get(test_request), http_curl_setup_exception);
         }
 
         SECTION("client fails to set the body writing callback function") {
             test_impl->test_failure_mode = curl_impl::error_mode::write_body_function_error;
-            REQUIRE_THROWS_AS(test_client.get(test_request), http_setup_exception);
+            REQUIRE_THROWS_AS(test_client.get(test_request), http_curl_setup_exception);
         }
 
         SECTION("client fails to set the body write location") {
             test_impl->test_failure_mode = curl_impl::error_mode::write_body_context_error;
-            REQUIRE_THROWS_AS(test_client.get(test_request), http_setup_exception);
+            REQUIRE_THROWS_AS(test_client.get(test_request), http_curl_setup_exception);
         }
         SECTION("client fails to set the read_body callback function") {
             test_impl->test_failure_mode = curl_impl::error_mode::read_body_function_error;
-            REQUIRE_THROWS_AS(test_client.get(test_request), http_setup_exception);
+            REQUIRE_THROWS_AS(test_client.get(test_request), http_curl_setup_exception);
         }
 
         SECTION("client fails to set the read_body data source") {
             test_impl->test_failure_mode = curl_impl::error_mode::read_body_context_error;
-            REQUIRE_THROWS_AS(test_client.get(test_request), http_setup_exception);
+            REQUIRE_THROWS_AS(test_client.get(test_request), http_curl_setup_exception);
         }
 
         SECTION("client fails to set the connection timeout") {
             test_impl->test_failure_mode = curl_impl::error_mode::connect_timeout_error;
-            REQUIRE_THROWS_AS(test_client.get(test_request), http_setup_exception);
+            REQUIRE_THROWS_AS(test_client.get(test_request), http_curl_setup_exception);
         }
 
         SECTION("client fails to set the request timeout") {
             test_impl->test_failure_mode = curl_impl::error_mode::request_timeout_error;
-            REQUIRE_THROWS_AS(test_client.get(test_request), http_setup_exception);
+            REQUIRE_THROWS_AS(test_client.get(test_request), http_curl_setup_exception);
         }
 
         SECTION("client fails to set certificate authority info") {
             test_client.set_ca_cert("certfile");
             test_impl->test_failure_mode = curl_impl::error_mode::ca_bundle_error;
-            REQUIRE_THROWS_AS(test_client.get(test_request), http_setup_exception);
+            REQUIRE_THROWS_AS(test_client.get(test_request), http_curl_setup_exception);
         }
 
         SECTION("client fails to set SSL cert info") {
             test_client.set_client_cert("cert", "key");
             test_impl->test_failure_mode = curl_impl::error_mode::ssl_cert_error;
-            REQUIRE_THROWS_AS(test_client.get(test_request), http_setup_exception);
+            REQUIRE_THROWS_AS(test_client.get(test_request), http_curl_setup_exception);
         }
 
         SECTION("client fails to set SSL key info") {
             test_client.set_client_cert("cert", "key");
             test_impl->test_failure_mode = curl_impl::error_mode::ssl_key_error;
-            REQUIRE_THROWS_AS(test_client.get(test_request), http_setup_exception);
+            REQUIRE_THROWS_AS(test_client.get(test_request), http_curl_setup_exception);
         }
 
         SECTION("client fails to make http call with https protocol only enabled") {
             test_client.set_supported_protocols(CURLPROTO_HTTPS);
             test_impl->test_failure_mode = curl_impl::error_mode::protocol_error;
-            REQUIRE_THROWS_AS(test_client.get(test_request), http_setup_exception);
+            REQUIRE_THROWS_AS(test_client.get(test_request), http_curl_setup_exception);
         }
     }
 
@@ -460,56 +460,56 @@ namespace leatherman { namespace curl {
          CURL* const& handle = test_client.get_handle();
          auto test_impl = reinterpret_cast<curl_impl* const>(handle);
 
-         SECTION("when fopen fails, an http_file_exception is thrown") {
+         SECTION("when fopen fails, an http_file_operation_exception is thrown") {
              fs::path parent_dir = temp_dir_path / "parent";
              std::string file_path = (parent_dir / "child").string();
              curl::request req("");
              REQUIRE_THROWS_AS_WITH(
                  test_client.download_file(req, file_path),
-                 curl::http_file_exception,
-                 Catch::Equals("Failed to open temporary file for writing"));
+                 curl::http_file_operation_exception,
+                 Catch::Equals("File operation error: failed to open temporary file for writing"));
          }
 
-         SECTION("when curl_easy_setopt fails, an http_setup_exception is thrown and the temporary file is removed") {
+         SECTION("when curl_easy_setopt fails, an http_curl_setup_exception is thrown and the temporary file is removed") {
              curl::request req("");
              std::string file_path = (temp_dir_path / "file").string();
              test_impl->test_failure_mode = curl_impl::error_mode::set_url_error;
-             REQUIRE_THROWS_AS(test_client.download_file(req, file_path), curl::http_setup_exception);
+             REQUIRE_THROWS_AS(test_client.download_file(req, file_path), curl::http_curl_setup_exception);
              // Ensure that the temp file was removed
              REQUIRE(fs::is_empty(temp_dir_path));
          }
 
-         SECTION("when curl_easy_perform fails due to a CURLE_WRITE_ERROR, but the temporary file is removed, an http_file_exception is thrown") {
+         SECTION("when curl_easy_perform fails due to a CURLE_WRITE_ERROR, but the temporary file is removed, an http_file_operation_exception is thrown") {
              std::string file_path = (temp_dir_path / "file").string();
              curl::request req("");
              test_impl->test_failure_mode = curl_impl::error_mode::easy_perform_write_error; 
              REQUIRE_THROWS_AS_WITH(
                  test_client.download_file(req, file_path),
-                 curl::http_file_exception,
-                 Catch::StartsWith("Failed to write to the temporary file during download"));
+                 curl::http_file_operation_exception,
+                 Catch::StartsWith("File operation error: failed to write to the temporary file during download"));
          }
 
-         SECTION("when curl_easy_perform fails for reasons other than a CURLE_WRITE_ERROR, but the temporary file is removed, only the errbuf message is contained in the thrown http_download_exception") {
+         SECTION("when curl_easy_perform fails for reasons other than a CURLE_WRITE_ERROR, but the temporary file is removed, only the errbuf message is contained in the thrown http_file_download_exception") {
              std::string file_path = (temp_dir_path / "file").string();
              curl::request req("");
              test_impl->test_failure_mode = curl_impl::error_mode::easy_perform_error; 
              REQUIRE_THROWS_AS_WITH(
                  test_client.download_file(req, file_path),
-                 curl::http_download_exception,
-                 Catch::Equals("easy perform failed")); 
+                 curl::http_file_download_exception,
+                 Catch::Equals("File download server side error: easy perform failed"));
 
              // Ensure that the temp file was removed
              REQUIRE(fs::is_empty(temp_dir_path));
          }
 
-         SECTION("when renaming the temporary file to the user-provided file path fails, an http_file_exception is thrown") {
+         SECTION("when renaming the temporary file to the user-provided file path fails, an http_file_operation_exception is thrown") {
              std::string file_path = (temp_dir_path / "file").string();
              curl::request req("https://remove_temp_file.com");
              test_impl->trigger_external_failure = remove_temp_file; 
              REQUIRE_THROWS_AS_WITH(
                  test_client.download_file(req, file_path),
-                 curl::http_file_exception,
-                 Catch::StartsWith("Failed to move over the temporary file's downloaded contents")); 
+                 curl::http_file_operation_exception,
+                 Catch::StartsWith("File operation error: failed to move over the temporary file's downloaded contents")); 
          }
     }
 }}

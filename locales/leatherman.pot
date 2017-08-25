@@ -26,11 +26,15 @@ msgid "curl_easy_escape failed to escape string."
 msgstr ""
 
 #: curl/src/client.cc
-msgid "Failed to open temporary file for writing"
+msgid "File operation error: {1}"
 msgstr ""
 
 #: curl/src/client.cc
-msgid "Failed to modify permissions of temporary file"
+msgid "failed to open temporary file for writing"
+msgstr ""
+
+#: curl/src/client.cc
+msgid "failed to modify permissions of temporary file"
 msgstr ""
 
 #. debug
@@ -45,7 +49,7 @@ msgid ""
 msgstr ""
 
 #: curl/src/client.cc
-msgid "Failed to move over the temporary file's downloaded contents"
+msgid "failed to move over the temporary file's downloaded contents"
 msgstr ""
 
 #: curl/src/client.cc
@@ -62,7 +66,11 @@ msgid "request completed (status {1})."
 msgstr ""
 
 #: curl/src/client.cc
-msgid "Failed to write to the temporary file during download"
+msgid "failed to write to the temporary file during download"
+msgstr ""
+
+#: curl/src/client.cc
+msgid "File download server side error: {1}"
 msgstr ""
 
 #: curl/src/client.cc
