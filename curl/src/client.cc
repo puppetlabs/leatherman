@@ -91,6 +91,10 @@ namespace leatherman { namespace curl {
         }
     }
 
+    static std::string make_file_err_msg(std::string const& reason) {
+        return _("File operation error: {1}", reason);
+    }
+
     download_temp_file::download_temp_file(request const& req, std::string const& file_path, boost::optional<boost::filesystem::perms> perms) :
       _req(req),
       _file_path(file_path)
@@ -99,7 +103,7 @@ namespace leatherman { namespace curl {
             _temp_path = fs::path(file_path).parent_path() / fs::unique_path("temp_file_%%%%-%%%%-%%%%-%%%%");
             _fp = boost::nowide::fopen(_temp_path.string().c_str(), "wb");
             if (!_fp) {
-                throw http_file_exception(_req, _file_path, _("Failed to open temporary file for writing"));
+                throw http_file_operation_exception(_req, _file_path, make_file_err_msg(_("failed to open temporary file for writing")));
             }
             if (!perms) {
                 return;
@@ -109,10 +113,10 @@ namespace leatherman { namespace curl {
             fs::permissions(_temp_path.string(), *perms, ec);
             if (ec) {
                 cleanup();
-                throw http_file_exception(_req, _file_path, _("Failed to modify permissions of temporary file"));
+                throw http_file_operation_exception(_req, _file_path, make_file_err_msg(_("failed to modify permissions of temporary file")));
             }
         } catch (fs::filesystem_error& e) {
-            throw http_file_exception(_req, _file_path, e.what());
+            throw http_file_operation_exception(_req, _file_path, make_file_err_msg(e.what()));
         }
     }
 
@@ -132,7 +136,7 @@ namespace leatherman { namespace curl {
         fs::rename(_temp_path, _file_path, ec);
         if (ec) {
             LOG_WARNING("Failed to write the results of the temporary file to the actual file {1}", _file_path);
-            throw http_file_exception(_req, _file_path, _("Failed to move over the temporary file's downloaded contents"));
+            throw http_file_operation_exception(_req, _file_path, make_file_err_msg(_("failed to move over the temporary file's downloaded contents")));
         }
     }
 
@@ -251,9 +255,9 @@ namespace leatherman { namespace curl {
         // Perform the request
         auto result = curl_easy_perform(_handle);
         if (result == CURLE_WRITE_ERROR) {
-          throw http_file_exception(req, file_path, _("Failed to write to the temporary file during download"));
+          throw http_file_operation_exception(req, file_path, make_file_err_msg(_("failed to write to the temporary file during download")));
         } else if (result != CURLE_OK) {
-          throw http_download_exception(req, file_path, errbuf);
+          throw http_file_download_exception(req, file_path, _("File download server side error: {1}", errbuf));
         }
 
         temp_file.write();

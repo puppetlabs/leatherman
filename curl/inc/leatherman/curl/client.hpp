@@ -148,15 +148,15 @@ namespace leatherman { namespace curl {
     /**
      * The exception for curl_easy_setopt errors.
      */
-    struct LEATHERMAN_CURL_EXPORT http_setup_exception : http_request_exception
+    struct LEATHERMAN_CURL_EXPORT http_curl_setup_exception : http_request_exception
     {
         /**
-         * Constructs an http_setup_exception.
+         * Constructs an http_curl_setup_exception.
          * @param req The HTTP request that caused the exception.
          * @param message The exception message.
          * @param curl_opt The CURL option that failed.
          */
-        http_setup_exception(request req, CURLoption curl_opt, std::string const &message) :
+        http_curl_setup_exception(request req, CURLoption curl_opt, std::string const &message) :
             http_request_exception(req, message),
             _curl_opt(std::move(curl_opt))
         {
@@ -179,15 +179,15 @@ namespace leatherman { namespace curl {
     /**
      * The exception for HTTP file download server-side errors.
      */
-    struct LEATHERMAN_CURL_EXPORT http_download_exception : http_request_exception
+    struct LEATHERMAN_CURL_EXPORT http_file_download_exception : http_request_exception
     {
         /**
-         * Constructs an http_download_exception.
+         * Constructs an http_file_download_exception.
          * @param request The request that caused the exception
          * @param file_path The file that was meant to be downloaded
          * @param message The exception message.
          */
-        http_download_exception(request req, std::string file_path, std::string const &message) :
+        http_file_download_exception(request req, std::string file_path, std::string const &message) :
           http_request_exception(req, message),
           _file_path(std::move(file_path))
         {
@@ -209,27 +209,27 @@ namespace leatherman { namespace curl {
     /**
      * The exception for HTTP file download file operation errors.
      */
-    struct LEATHERMAN_CURL_EXPORT http_file_exception : http_download_exception
+    struct LEATHERMAN_CURL_EXPORT http_file_operation_exception : http_file_download_exception
     {
         /**
-         * Constructs an http_file_exception.
+         * Constructs an http_file_operation_exception.
          * @param request The request that caused the exception
          * @param file_path The file that was meant to be downloaded
          * @param message The exception message.
          */
-        http_file_exception(request req, std::string file_path, std::string const &message) : http_file_exception(req, file_path, "", message)
+        http_file_operation_exception(request req, std::string file_path, std::string const &message) : http_file_operation_exception(req, file_path, "", message)
         {
         }
 
         /**
-         * Constructs an http_file_exception.
+         * Constructs an http_file_operation_exception.
          * @param request The request that caused the exception
          * @param file_path The file that was meant to be downloaded
          * @param temp_path The path to the temporary file that wasn't successfully cleaned up.
          * @param message The exception message.
          */
-        http_file_exception(request req, std::string file_path, std::string temp_path, std::string const &message) :
-            http_download_exception(req, file_path, message),
+        http_file_operation_exception(request req, std::string file_path, std::string temp_path, std::string const &message) :
+            http_file_download_exception(req, file_path, message),
             _temp_path(std::move(temp_path))
         {
         }
@@ -376,7 +376,7 @@ namespace leatherman { namespace curl {
         ) {
             auto result = curl_easy_setopt(_handle, option, param);
             if (result != CURLE_OK) {
-                throw http_setup_exception(ctx.req, option, leatherman::locale::_("Failed setting up libcurl. Reason: {1}", curl_easy_strerror(result)));
+                throw http_curl_setup_exception(ctx.req, option, leatherman::locale::_("Failed setting up libcurl. Reason: {1}", curl_easy_strerror(result)));
             }
         }
 
