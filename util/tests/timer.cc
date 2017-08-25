@@ -1,7 +1,7 @@
 #include <catch.hpp>
 #include <leatherman/util/timer.hpp>
 
-namespace leatherman { namespace util {
+using namespace leatherman::util;
 
 SCENARIO("Using Timer", "[util]") {
     SECTION("can instantiate") {
@@ -37,5 +37,3 @@ SCENARIO("Using Timer", "[util]") {
         REQUIRE_NOTHROW(t.elapsed_milliseconds());
     }
 }
-
-}}  // namespace leatherman::util

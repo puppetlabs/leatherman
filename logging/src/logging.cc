@@ -75,6 +75,7 @@ namespace leatherman { namespace logging {
         _dst << endl;
     }
 
+    // cppcheck-suppress passedByValue
     void setup_logging(ostream &dst, string locale, string domain, bool use_locale)
     {
         // Remove existing sinks before adding a new one
@@ -149,6 +150,7 @@ namespace leatherman { namespace logging {
         g_error_logged = false;
     }
 
+    // cppcheck-suppress passedByValue
     void on_message(function<bool(log_level, string const&)> callback)
     {
         g_callback = callback;
