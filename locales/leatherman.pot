@@ -52,6 +52,7 @@ msgstr ""
 msgid "failed to move over the temporary file's downloaded contents"
 msgstr ""
 
+#. warning
 #: curl/src/client.cc
 msgid "Failed to properly clean-up the temporary file {1}"
 msgstr ""
