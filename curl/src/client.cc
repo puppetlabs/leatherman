@@ -147,7 +147,7 @@ namespace leatherman { namespace curl {
         boost::system::error_code ec;
         fs::remove(_temp_path, ec);
         if (ec) {
-            LOG_WARNING(_("Failed to properly clean-up the temporary file {1}", _temp_path));
+            LOG_WARNING("Failed to properly clean-up the temporary file {1}", _temp_path);
         }
     }
 
