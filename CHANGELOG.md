@@ -2,7 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.1.3]
+## [1.2.0]
+
+### Added
+- A URI parsing utility in Leatherman.util (LTH-143)
+
+### Changed
 - Refactored Leatherman.curl's http_file_operation_exception to inherit from http_request_exception so that the three possible failure modes are distinguished by class
 
 ## [1.1.2]
