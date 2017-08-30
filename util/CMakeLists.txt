@@ -21,6 +21,7 @@ add_leatherman_library(
     src/environment.cc
     src/scope_exit.cc
     src/scoped_env.cc
+    src/uri.cc
     ${PLATFORM_SRCS}
     )
 
@@ -30,5 +31,6 @@ add_leatherman_test(
     tests/option_set.cc
     tests/environment.cc
     tests/timer.cc
+    tests/uri.cc
     ${PLATFORM_TESTS}
     )
