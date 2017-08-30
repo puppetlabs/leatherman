@@ -395,7 +395,7 @@ namespace leatherman { namespace execution {
      * @param pid_callback The callback that is called with the pid of the child process.
      * @param timeout The timeout, in seconds.
      * @param perms The file permissions to apply when creating the out_file and err_file.
-     *              Best avoided on Windows, unexpectedly makes things read-only.
+     *              On Windows this only toggles read-only.
      * @param options The execution options. Defaults to trimming output and merging the environment.
      * @return Returns a result struct that will not contain the output of the streams for which a file was specified.
      *

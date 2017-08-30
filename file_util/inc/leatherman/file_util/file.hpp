@@ -65,7 +65,7 @@ namespace leatherman { namespace file_util {
      * @param text The content to be written
      * @param file_path The final destination and name of the file
      * @param perms The file permissions to apply to the file.
-     *              Best avoided on Windows, unexpectedly makes things read-only.
+     *              On Windows this only toggles read-only.
      * @param mode The mode in which to write the file
      *
      * Throws an error in case it fails to open the file to write.

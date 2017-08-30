@@ -309,7 +309,7 @@ namespace leatherman { namespace curl {
          * @param req The HTTP request to perform.
          * @param file_path The file that the downloaded contents will be written to.
          * @param perms The file permissions to apply when writing to file_path.
-         *              Best avoided on Windows, unexpectedly makes things read-only.
+         *              On Windows this only toggles read-only.
          */
         void download_file(request const& req,
                            std::string const& file_path,
