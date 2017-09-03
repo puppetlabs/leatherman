@@ -93,7 +93,15 @@ namespace leatherman { namespace curl {
          */
         void write();
 
+        /*
+         * Writes the temporary file's contents to the body of the
+         * given response.
+         * @param response The HTTP response to write the contents to
+         */
+        void write(response& res);
+
      private:
+        void close_fp();
         void cleanup();
         FILE* _fp;
         request _req;
@@ -316,6 +324,20 @@ namespace leatherman { namespace curl {
                            boost::optional<boost::filesystem::perms> perms = {});
 
         /**
+         * Downloads the file from the specified url.
+         * Throws http_file_download_exception if anything goes wrong.
+         * @param req The HTTP request to perform.
+         * @param file_path The file that the downloaded contents will be written to.
+         * @param response The HTTP response. The body will only be included if the response status is > 400.
+         * @param perms The file permissions to apply when writing to file_path.
+         *              On Windows this only toggles read-only.
+         */
+        void download_file(request const& req,
+                           std::string const& file_path,
+                           response& res,
+                           boost::optional<boost::filesystem::perms> perms = {});
+
+        /**
          * Sets the path to the CA certificate file.
          * @param cert_file The path to the CA certificate file.
          */
@@ -368,13 +390,20 @@ namespace leatherman { namespace curl {
         long _client_protocols = CURLPROTO_ALL;
 
         response perform(http_method method, request const& req);
+        void download_file_helper(request const& req,
+                                  std::string const& file_path,
+                                  boost::optional<response&> res = {},
+                                  boost::optional<boost::filesystem::perms> perms = {});
+
         LEATHERMAN_CURL_NO_EXPORT void set_method(context& ctx, http_method method);
         LEATHERMAN_CURL_NO_EXPORT void set_url(context& ctx);
         LEATHERMAN_CURL_NO_EXPORT void set_headers(context& ctx);
         LEATHERMAN_CURL_NO_EXPORT void set_cookies(context& ctx);
         LEATHERMAN_CURL_NO_EXPORT void set_body(context& ctx, http_method method);
         LEATHERMAN_CURL_NO_EXPORT void set_timeouts(context& ctx);
+        LEATHERMAN_CURL_NO_EXPORT void set_header_write_callbacks(context& ctx);
         LEATHERMAN_CURL_NO_EXPORT void set_write_callbacks(context& ctx);
+        LEATHERMAN_CURL_NO_EXPORT void set_write_callbacks(context& ctx, FILE* fp);
         LEATHERMAN_CURL_NO_EXPORT void set_client_info(context &ctx);
         LEATHERMAN_CURL_NO_EXPORT void set_ca_info(context& ctx);
         LEATHERMAN_CURL_NO_EXPORT void set_client_protocols(context& ctx);

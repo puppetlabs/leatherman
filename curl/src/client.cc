@@ -2,9 +2,12 @@
 #include <leatherman/curl/request.hpp>
 #include <leatherman/curl/response.hpp>
 #include <leatherman/util/regex.hpp>
+#include <leatherman/file_util/file.hpp>
 #include <leatherman/logging/logging.hpp>
 #include <boost/utility/string_ref.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/nowide/iostream.hpp>
+#include <boost/nowide/fstream.hpp>
 #include <sstream>
 
 // Mark string for translation (alias for leatherman::locale::format)
@@ -130,14 +133,29 @@ namespace leatherman { namespace curl {
 
     void download_temp_file::write() {
         LOG_DEBUG("Download completed, now writing result to file {1}", _file_path);
-        fclose(_fp);
-        _fp = nullptr;
+        close_fp();
         boost::system::error_code ec;
         fs::rename(_temp_path, _file_path, ec);
         if (ec) {
             LOG_WARNING("Failed to write the results of the temporary file to the actual file {1}", _file_path);
             throw http_file_operation_exception(_req, _file_path, make_file_err_msg(_("failed to move over the temporary file's downloaded contents")));
         }
+    }
+
+    void download_temp_file::write(response& res) {
+        LOG_DEBUG("Writing the temp file's contents to the response body");
+        close_fp();
+        string res_body;
+        if (!leatherman::file_util::read(_temp_path.string(), res_body)) {
+            LOG_WARNING("Failed to write the contents of the temporary file to the response body.");
+            throw http_file_operation_exception(_req, _file_path, make_file_err_msg(_("failed to write the temporary file's contents to the response body")));
+        }
+        res.body(res_body);
+    }
+
+    void download_temp_file::close_fp() {
+      fclose(_fp);
+      _fp = nullptr;
     }
 
     void download_temp_file::cleanup() {
@@ -229,8 +247,18 @@ namespace leatherman { namespace curl {
 
     void client::download_file(request const& req, std::string const& file_path, boost::optional<fs::perms> perms)
     {
-        response res;
-        context ctx(req, res);
+        download_file_helper(req, file_path, {}, perms);
+    }
+
+    void client::download_file(request const& req, std::string const& file_path, response& res, boost::optional<fs::perms> perms)
+    {
+        download_file_helper(req, file_path, res, perms);
+    }
+
+    void client::download_file_helper(request const& req, std::string const& file_path, boost::optional<response&> res, boost::optional<fs::perms> perms)
+    {
+        response _res;
+        context ctx(req, _res);
 
         // Reset the options
         curl_easy_reset(_handle);
@@ -238,13 +266,12 @@ namespace leatherman { namespace curl {
         char errbuf[CURL_ERROR_SIZE] = { '\0' };
         download_temp_file temp_file(req, file_path, perms);
         curl_easy_setopt_maybe(ctx, CURLOPT_NOPROGRESS, 1);
-        curl_easy_setopt_maybe(ctx, CURLOPT_WRITEFUNCTION, write_file);
-        curl_easy_setopt_maybe(ctx, CURLOPT_WRITEDATA, temp_file.get_fp());
 
         // Setup the remaining request
         set_url(ctx);
         set_headers(ctx);
         set_timeouts(ctx);
+        set_write_callbacks(ctx, temp_file.get_fp());
         set_ca_info(ctx);
         set_client_info(ctx);
         set_client_protocols(ctx);
@@ -255,12 +282,22 @@ namespace leatherman { namespace curl {
         // Perform the request
         auto result = curl_easy_perform(_handle);
         if (result == CURLE_WRITE_ERROR) {
-          throw http_file_operation_exception(req, file_path, make_file_err_msg(_("failed to write to the temporary file during download")));
+            throw http_file_operation_exception(req, file_path, make_file_err_msg(_("failed to write to the temporary file during download")));
         } else if (result != CURLE_OK) {
-          throw http_file_download_exception(req, file_path, _("File download server side error: {1}", errbuf));
+            throw http_file_download_exception(req, file_path, _("File download server side error: {1}", errbuf));
         }
 
-        temp_file.write();
+        // Check the status code. If 400+, fill in the response
+        LOG_DEBUG("request completed (status {1}).", _res.status_code());
+        if (_res.status_code() >= 400 && res) {
+            temp_file.write(_res);
+        } else {
+            temp_file.write();
+        }
+
+        if (res) {
+            (*res) = move(_res);
+        }
     }
 
     void client::set_ca_cert(string const& cert_file)
@@ -356,12 +393,24 @@ namespace leatherman { namespace curl {
         curl_easy_setopt_maybe(ctx, CURLOPT_TIMEOUT_MS, ctx.req.timeout());
     }
 
-    void client::set_write_callbacks(context& ctx)
+    void client::set_header_write_callbacks(context& ctx)
     {
         curl_easy_setopt_maybe(ctx, CURLOPT_HEADERFUNCTION, write_header);
         curl_easy_setopt_maybe(ctx, CURLOPT_HEADERDATA, &ctx);
+    }
+
+    void client::set_write_callbacks(context& ctx)
+    {
+        set_header_write_callbacks(ctx);
         curl_easy_setopt_maybe(ctx, CURLOPT_WRITEFUNCTION, write_body);
         curl_easy_setopt_maybe(ctx, CURLOPT_WRITEDATA, &ctx);
+    }
+
+    void client::set_write_callbacks(context& ctx, FILE* fp)
+    {
+        set_header_write_callbacks(ctx);
+        curl_easy_setopt_maybe(ctx, CURLOPT_WRITEFUNCTION, write_file);
+        curl_easy_setopt_maybe(ctx, CURLOPT_WRITEDATA, fp);
     }
 
     void client::set_ca_info(context& ctx){

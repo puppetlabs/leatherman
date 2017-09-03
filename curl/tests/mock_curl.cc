@@ -2,6 +2,8 @@
 #include <cstring>
 #include <stdarg.h>
 #include <stdio.h>
+#include <array>
+#include <algorithm>
 #include "mock_curl.hpp"
 
 using namespace std;
@@ -276,28 +278,18 @@ CURLcode curl_easy_perform(CURL * easy_handle)
         }
     }
 
-    /*
-     * For file download. It is OK if exception is thrown if write_body is not set,
-     * that means something went wrong in our code's setup so we want our test to
-     * fail.
-     */
-    if (h->request_url == "https://download.com") {
-        string download_msg = "successfully downloaded file";
-        h->write_body(const_cast<char*>(download_msg.c_str()), 1, reinterpret_cast<size_t>(download_msg.size()), h->body_context);
-        return CURLE_OK;
-    } else if (h->request_url == "https://remove_temp_file.com") {
-        #ifdef _WIN32
-        fclose(reinterpret_cast<FILE*>(h->body_context));
-        #endif
-        h->trigger_external_failure();
-        return CURLE_OK;
-    }
+    static const array<string, 3> VALID_URLS{{
+      "http://valid.com/",
+      "https://download.com",
+      "https://remove_temp_file.com"
+    }};
 
     /*
      * If we pass 'valid.com' in the test, return HTTP status 200. Otherwise, return status 404.
      */
     if (h->write_header) {
-        if (h->request_url == "http://valid.com/") {
+        bool is_valid_url = find(VALID_URLS.begin(), VALID_URLS.end(), h->request_url) != VALID_URLS.end();
+        if (is_valid_url) {
             string header_content = "HTTP/1.1 200 OK\n"
                                     "Connection: keep-alive\n"
                                     "Date: Thu, 16 Jul 2015 18:41:08 GMT\n"
@@ -325,6 +317,23 @@ CURLcode curl_easy_perform(CURL * easy_handle)
 
             h->write_header(&header_content[0], 1, header_content.size(), h->header_context);
         }
+    }
+
+    /*
+     * For file download. It is OK if exception is thrown if write_body is not set,
+     * that means something went wrong in our code's setup so we want our test to
+     * fail.
+     */
+    if (h->request_url == "https://download.com" || h->request_url == "https://download_trigger_404.com") {
+        string download_msg = (h->request_url == "https://download.com") ? "successfully downloaded file" : "Not found";
+        h->write_body(const_cast<char*>(download_msg.c_str()), 1, reinterpret_cast<size_t>(download_msg.size()), h->body_context);
+        if (h->trigger_external_failure) {
+           #ifdef _WIN32
+           fclose(reinterpret_cast<FILE*>(h->body_context));
+           #endif
+           h->trigger_external_failure();
+        }
+        return CURLE_OK;
     }
 
     /*

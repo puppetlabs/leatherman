@@ -52,6 +52,21 @@ msgstr ""
 msgid "failed to move over the temporary file's downloaded contents"
 msgstr ""
 
+#. debug
+#: curl/src/client.cc
+msgid "Writing the temp file's contents to the response body"
+msgstr ""
+
+#. warning
+#: curl/src/client.cc
+msgid ""
+"Failed to write the contents of the temporary file to the response body."
+msgstr ""
+
+#: curl/src/client.cc
+msgid "failed to write the temporary file's contents to the response body"
+msgstr ""
+
 #. warning
 #: curl/src/client.cc
 msgid "Failed to properly clean-up the temporary file {1}"
