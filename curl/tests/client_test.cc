@@ -10,6 +10,7 @@
 #include <boost/regex.hpp>
 #include <sstream>
 #include <cstdio>
+#include <map>
 
 using namespace std;
 namespace fs = boost::filesystem;
@@ -402,114 +403,213 @@ namespace leatherman { namespace curl {
         auto test_impl = reinterpret_cast<curl_impl* const>(handle);
         std::string url = "https://download.com";
 
-        SECTION("successfully downloads the file to the specified location") {
-            std::string ca_file = "ca";
-            std::string cert_file = "client";
-            std::string key_file = "key";
+        SECTION("when a response is not passed in") {
+            SECTION("successfully downloads the file to the specified location") {
+                std::string ca_file = "ca";
+                std::string cert_file = "client";
+                std::string key_file = "key";
 
-            test_client.set_ca_cert(ca_file);
-            test_client.set_client_cert(cert_file, key_file);
-            test_client.set_supported_protocols(CURLPROTO_HTTPS);
+                test_client.set_ca_cert(ca_file);
+                test_client.set_client_cert(cert_file, key_file);
+                test_client.set_supported_protocols(CURLPROTO_HTTPS);
 
-            std::string file_path = (temp_dir_path / "test_file").string();
-            std::string token = "token";
-            long connect_timeout = 300000;
+                std::string file_path = (temp_dir_path / "test_file").string();
+                std::string token = "token";
+                long connect_timeout = 300000;
 
-            request req(url);
-            req.add_header("X-Authentication", token);
-            req.connection_timeout(connect_timeout);
-            test_client.download_file(req, file_path);
+                request req(url);
+                req.add_header("X-Authentication", token);
+                req.connection_timeout(connect_timeout);
+                test_client.download_file(req, file_path);
 
-            // ensure that the correct curl parameters were used.
-            REQUIRE(test_impl->cacert == ca_file); 
-            REQUIRE(test_impl->client_cert == cert_file); 
-            REQUIRE(test_impl->client_key == key_file); 
-            REQUIRE(test_impl->protocols == CURLPROTO_HTTPS);
-            REQUIRE(test_impl->connect_timeout == connect_timeout);
-            REQUIRE(std::string(test_impl->header->data) == ("X-Authentication: " + token));
-            if (test_impl->header->next) {
-                FAIL("X-Authentication should be the only header");
-            }
+                // ensure that the correct curl parameters were used.
+                REQUIRE(test_impl->cacert == ca_file);
+                REQUIRE(test_impl->client_cert == cert_file);
+                REQUIRE(test_impl->client_key == key_file);
+                REQUIRE(test_impl->protocols == CURLPROTO_HTTPS);
+                REQUIRE(test_impl->connect_timeout == connect_timeout);
+                REQUIRE(std::string(test_impl->header->data) == ("X-Authentication: " + token));
+                if (test_impl->header->next) {
+                  FAIL("X-Authentication should be the only header");
+                }
 
-            // now check that the file was actually downloaded and written with the right
-            // contents.
-            REQUIRE(fs::exists(file_path));
-            nw::ifstream in(file_path);
-            stringstream stream;
-            stream << in.rdbuf();
-            REQUIRE(stream.str() == "successfully downloaded file"); 
-        }
+                // now check that the file was actually downloaded and written with the right
+                // contents.
+                REQUIRE(fs::exists(file_path));
+                nw::ifstream in(file_path);
+                stringstream stream;
+                stream << in.rdbuf();
+                REQUIRE(stream.str() == "successfully downloaded file");
+          }
 
 #ifndef _WIN32
-        SECTION("sets permissions if requested") {
-            auto file_path = (temp_dir_path / "other_test_file").string();
-            request req(url);
-            auto perms = boost::filesystem::owner_read | boost::filesystem::owner_write;
-            test_client.download_file(req, file_path, perms);
+          SECTION("sets permissions if requested") {
+              auto file_path = (temp_dir_path / "other_test_file").string();
+              request req(url);
+              auto perms = boost::filesystem::owner_read | boost::filesystem::owner_write;
+              test_client.download_file(req, file_path, perms);
 
-            REQUIRE(fs::exists(file_path));
-            REQUIRE(fs::status(file_path).permissions() == perms);
-        }
+              REQUIRE(fs::exists(file_path));
+              REQUIRE(fs::status(file_path).permissions() == perms);
+          }
 #endif
+
+          SECTION("downloads the response body for a 400+ status") {
+              std::string url = "https://download_trigger_404.com";
+              auto file_path = (temp_dir_path / "404_test_file").string();
+              request req(url);
+              test_client.download_file(req, file_path); 
+
+              // now check that the file was actually downloaded and written with the right
+              // contents.
+              REQUIRE(fs::exists(file_path));
+              nw::ifstream in(file_path);
+              stringstream stream;
+              stream << in.rdbuf();
+              REQUIRE(stream.str() == "Not found");
+          }
+      }
+
+      SECTION("when a response is passed in") {
+          SECTION("successfully downloads the file to the specified location, and includes the response") {
+              std::string ca_file = "ca";
+              std::string cert_file = "client";
+              std::string key_file = "key";
+
+              test_client.set_ca_cert(ca_file);
+              test_client.set_client_cert(cert_file, key_file);
+              test_client.set_supported_protocols(CURLPROTO_HTTPS);
+
+              std::string file_path = (temp_dir_path / "test_file").string();
+              std::string token = "token";
+              long connect_timeout = 300000;
+
+              request req(url);
+              req.add_header("X-Authentication", token);
+              req.connection_timeout(connect_timeout);
+              response res;
+              test_client.download_file(req, file_path, res);
+
+              // ensure that the correct curl parameters were used.
+              REQUIRE(test_impl->cacert == ca_file);
+              REQUIRE(test_impl->client_cert == cert_file);
+              REQUIRE(test_impl->client_key == key_file);
+              REQUIRE(test_impl->protocols == CURLPROTO_HTTPS);
+              REQUIRE(test_impl->connect_timeout == connect_timeout);
+              REQUIRE(std::string(test_impl->header->data) == ("X-Authentication: " + token));
+              if (test_impl->header->next) {
+                FAIL("X-Authentication should be the only header");
+              }
+
+              // now check that the file was actually downloaded and written with the right
+              // contents.
+              REQUIRE(fs::exists(file_path));
+              nw::ifstream in(file_path);
+              stringstream stream;
+              stream << in.rdbuf();
+              REQUIRE(stream.str() == "successfully downloaded file");
+
+              // now check the response
+              REQUIRE(res.status_code() == 200);
+              REQUIRE(res.body().empty());
+          }
+
+#ifndef _WIN32
+          SECTION("sets permissions if requested") {
+              auto file_path = (temp_dir_path / "other_test_file").string();
+              request req(url);
+              response res;
+              auto perms = boost::filesystem::owner_read | boost::filesystem::owner_write;
+              test_client.download_file(req, file_path, res, perms);
+
+              REQUIRE(fs::exists(file_path));
+              REQUIRE(fs::status(file_path).permissions() == perms);
+          }
+#endif
+
+          SECTION("does not download anything for a 400+ status") {
+              std::string url = "https://download_trigger_404.com";
+              auto file_path = (temp_dir_path / "404_test_file").string();
+              request req(url);
+              response res;
+              test_client.download_file(req, file_path, res); 
+
+              REQUIRE(res.status_code() == 404);
+              REQUIRE(res.body() == "Not found");
+              // check that the file was not downloaded 
+              REQUIRE(!fs::exists(file_path));
+          }
+      }
     }
 
     TEST_CASE("curl::client download_file errors") {
-         mock_client test_client;
-         temp_directory temp_dir;
-         fs::path temp_dir_path = fs::path(temp_dir.get_dir_name()); 
-         CURL* const& handle = test_client.get_handle();
-         auto test_impl = reinterpret_cast<curl_impl* const>(handle);
+        mock_client test_client;
+        temp_directory temp_dir;
+        fs::path temp_dir_path = fs::path(temp_dir.get_dir_name()); 
+        CURL* const& handle = test_client.get_handle();
+        auto test_impl = reinterpret_cast<curl_impl* const>(handle);
 
-         SECTION("when fopen fails, an http_file_operation_exception is thrown") {
-             fs::path parent_dir = temp_dir_path / "parent";
-             std::string file_path = (parent_dir / "child").string();
-             curl::request req("");
-             REQUIRE_THROWS_AS_WITH(
-                 test_client.download_file(req, file_path),
-                 curl::http_file_operation_exception,
-                 Catch::Equals("File operation error: failed to open temporary file for writing"));
-         }
+        SECTION("when fopen fails, an http_file_operation_exception is thrown") {
+          fs::path parent_dir = temp_dir_path / "parent";
+          std::string file_path = (parent_dir / "child").string();
+          curl::request req("");
+          REQUIRE_THROWS_AS_WITH(
+              test_client.download_file(req, file_path),
+              curl::http_file_operation_exception,
+              Catch::Equals("File operation error: failed to open temporary file for writing"));
+        }
 
-         SECTION("when curl_easy_setopt fails, an http_curl_setup_exception is thrown and the temporary file is removed") {
-             curl::request req("");
-             std::string file_path = (temp_dir_path / "file").string();
-             test_impl->test_failure_mode = curl_impl::error_mode::set_url_error;
-             REQUIRE_THROWS_AS(test_client.download_file(req, file_path), curl::http_curl_setup_exception);
-             // Ensure that the temp file was removed
-             REQUIRE(fs::is_empty(temp_dir_path));
-         }
+        SECTION("when curl_easy_setopt fails, an http_curl_setup_exception is thrown and the temporary file is removed") {
+          curl::request req("");
+          std::string file_path = (temp_dir_path / "file").string();
+          test_impl->test_failure_mode = curl_impl::error_mode::set_url_error;
+          REQUIRE_THROWS_AS(test_client.download_file(req, file_path), curl::http_curl_setup_exception);
+          // Ensure that the temp file was removed
+          REQUIRE(fs::is_empty(temp_dir_path));
+        }
 
-         SECTION("when curl_easy_perform fails due to a CURLE_WRITE_ERROR, but the temporary file is removed, an http_file_operation_exception is thrown") {
-             std::string file_path = (temp_dir_path / "file").string();
-             curl::request req("");
-             test_impl->test_failure_mode = curl_impl::error_mode::easy_perform_write_error; 
-             REQUIRE_THROWS_AS_WITH(
-                 test_client.download_file(req, file_path),
-                 curl::http_file_operation_exception,
-                 Catch::StartsWith("File operation error: failed to write to the temporary file during download"));
-         }
+        SECTION("when curl_easy_perform fails due to a CURLE_WRITE_ERROR, but the temporary file is removed, an http_file_operation_exception is thrown") {
+          std::string file_path = (temp_dir_path / "file").string();
+          curl::request req("");
+          test_impl->test_failure_mode = curl_impl::error_mode::easy_perform_write_error; 
+          REQUIRE_THROWS_AS_WITH(
+              test_client.download_file(req, file_path),
+              curl::http_file_operation_exception,
+              Catch::StartsWith("File operation error: failed to write to the temporary file during download"));
+        }
 
-         SECTION("when curl_easy_perform fails for reasons other than a CURLE_WRITE_ERROR, but the temporary file is removed, only the errbuf message is contained in the thrown http_file_download_exception") {
-             std::string file_path = (temp_dir_path / "file").string();
-             curl::request req("");
-             test_impl->test_failure_mode = curl_impl::error_mode::easy_perform_error; 
-             REQUIRE_THROWS_AS_WITH(
-                 test_client.download_file(req, file_path),
-                 curl::http_file_download_exception,
-                 Catch::Equals("File download server side error: easy perform failed"));
+        SECTION("when curl_easy_perform fails for reasons other than a CURLE_WRITE_ERROR, but the temporary file is removed, only the errbuf message is contained in the thrown http_file_download_exception") {
+          std::string file_path = (temp_dir_path / "file").string();
+          curl::request req("");
+          test_impl->test_failure_mode = curl_impl::error_mode::easy_perform_error; 
+          REQUIRE_THROWS_AS_WITH(
+              test_client.download_file(req, file_path),
+              curl::http_file_download_exception,
+              Catch::Equals("File download server side error: easy perform failed"));
 
-             // Ensure that the temp file was removed
-             REQUIRE(fs::is_empty(temp_dir_path));
-         }
+          // Ensure that the temp file was removed
+          REQUIRE(fs::is_empty(temp_dir_path));
+        }
 
-         SECTION("when renaming the temporary file to the user-provided file path fails, an http_file_operation_exception is thrown") {
-             std::string file_path = (temp_dir_path / "file").string();
-             curl::request req("https://remove_temp_file.com");
-             test_impl->trigger_external_failure = remove_temp_file; 
-             REQUIRE_THROWS_AS_WITH(
-                 test_client.download_file(req, file_path),
-                 curl::http_file_operation_exception,
-                 Catch::StartsWith("File operation error: failed to move over the temporary file's downloaded contents")); 
-         }
+        SECTION("when renaming the temporary file to the user-provided file path fails, an http_file_operation_exception is thrown") {
+          std::string file_path = (temp_dir_path / "file").string();
+          curl::request req("https://download.com");
+          test_impl->trigger_external_failure = remove_temp_file; 
+          REQUIRE_THROWS_AS_WITH(
+              test_client.download_file(req, file_path),
+              curl::http_file_operation_exception,
+              Catch::StartsWith("File operation error: failed to move over the temporary file's downloaded contents"));
+        }
+
+        SECTION("when writing the temporary file's contents to the response body fails, an http_file_operation_exception is thrown") {
+          std::string file_path = (temp_dir_path / "file").string();
+          request req("https://download_trigger_404.com");
+          test_impl->trigger_external_failure = remove_temp_file;
+          response res;
+          REQUIRE_THROWS_AS_WITH(
+              test_client.download_file(req, file_path, res),
+              curl::http_file_operation_exception,
+              Catch::StartsWith("File operation error: failed to write the temporary file's contents to the response body"));
+        }
     }
 }}
