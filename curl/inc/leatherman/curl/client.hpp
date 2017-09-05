@@ -328,7 +328,7 @@ namespace leatherman { namespace curl {
          * Throws http_file_download_exception if anything goes wrong.
          * @param req The HTTP request to perform.
          * @param file_path The file that the downloaded contents will be written to.
-         * @param response The HTTP response. The body will only be included if the response status is > 400.
+         * @param response The HTTP response. The body will only be included if the response status is >= 400.
          * @param perms The file permissions to apply when writing to file_path.
          *              On Windows this only toggles read-only.
          */

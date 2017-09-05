@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.2.1]
+
+### Fixed
+- Made Leatherman.curl's download_file response accessible, with results included when an error code is returned.
+
 ## [1.2.0]
 
 ### Added
