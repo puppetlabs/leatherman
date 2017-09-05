@@ -37,6 +37,10 @@ before_install:
   # Install dependencies of cfacter
   - wget https://s3.amazonaws.com/kylo-pl-bucket/yaml-cpp-0.5.1_install.tar.bz2
   - tar xjvf yaml-cpp-0.5.1_install.tar.bz2 --strip 1 -C $USERDIR
+  # Install rapidjson
+  - wget https://github.com/Tencent/rapidjson/archive/v1.1.0.zip
+  - unzip v1.1.0.zip
+  - cp -r rapidjson-1.1.0/* $USERDIR
   # Install coveralls.io update utility
   - pip install --user cpp-coveralls
 

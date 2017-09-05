@@ -7,6 +7,9 @@ install:
   - choco install -y pl-boost-x64 -Version 1.58.0.2 -source https://www.myget.org/F/puppetlabs
   - choco install -y pl-openssl-x64 -Version 1.0.24.1 -source https://www.myget.org/F/puppetlabs
   - choco install -y pl-curl-x64 -Version 7.46.0.1 -source https://www.myget.org/F/puppetlabs
+  - ps: wget https://github.com/Tencent/rapidjson/archive/v1.1.0.zip -Outfile v1.1.0.zip
+  - ps: 7z.exe x v1.1.0.zip
+  - ps: cp -r rapidjson-1.1.0\* C:\tools\pl-build-tools
 
   - SET PATH=C:\Ruby21-x64\bin;C:\tools\mingw64\bin;C:\Program Files\gettext-iconv;%PATH%
   - ps: $env:PATH = $env:PATH.Replace("Git\bin", "Git\cmd")
