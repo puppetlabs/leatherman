@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.3.0]
+
+### Added
+- A toPrettyJson routine to Leatherman.json\_container that pretty prints a valid JSON object.
+
 ## [1.2.1]
 
 ### Fixed
