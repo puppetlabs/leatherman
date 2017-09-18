@@ -511,6 +511,152 @@ TEST_CASE("JsonContainer::toPrettyString", "[data]") {
     }
 }
 
+TEST_CASE("JsonContainer::toPrettyJson", "[data]") {
+    SECTION("it pretty prints valid json") {
+        SECTION("a null value") {
+            std::string EXPECTED_OUTPUT = "null";
+
+            JsonContainer data(EXPECTED_OUTPUT);
+            auto pretty_json = data.toPrettyJson();
+            REQUIRE(pretty_json == EXPECTED_OUTPUT);
+        }
+
+        SECTION("a double") {
+            std::string EXPECTED_OUTPUT = "42.5";
+
+            JsonContainer data(EXPECTED_OUTPUT);
+            auto pretty_json = data.toPrettyJson();
+            REQUIRE(pretty_json == EXPECTED_OUTPUT);
+        }
+
+        SECTION("a bool") {
+            std::string EXPECTED_OUTPUT = "true";
+
+            JsonContainer data(EXPECTED_OUTPUT);
+            auto pretty_json = data.toPrettyJson();
+            REQUIRE(pretty_json == EXPECTED_OUTPUT);
+        }
+
+        SECTION("an int") {
+            std::string EXPECTED_OUTPUT = "42";
+
+            JsonContainer data(EXPECTED_OUTPUT);
+            auto pretty_json = data.toPrettyJson();
+            REQUIRE(pretty_json == EXPECTED_OUTPUT);
+        }
+
+        SECTION("a string") {
+            std::string EXPECTED_OUTPUT = "\"string\"";
+
+            JsonContainer data(EXPECTED_OUTPUT);
+            auto pretty_json = data.toPrettyJson();
+            REQUIRE(pretty_json == EXPECTED_OUTPUT);
+        }
+
+        SECTION("a simple array") {
+            std::string EXPECTED_OUTPUT =
+              "[\n"
+              "    null,\n"
+              "    42.5,\n"
+              "    true,\n"
+              "    42,\n"
+              "    \"string\"\n"
+              "]";
+
+            JsonContainer data(EXPECTED_OUTPUT);
+            auto pretty_json = data.toPrettyJson();
+            REQUIRE(pretty_json == EXPECTED_OUTPUT);
+        }
+
+        SECTION("a simple object") {
+            std::string EXPECTED_OUTPUT =
+              "{\n"
+              "    \"null-key\": null,\n"
+              "    \"double-key\": 42.5,\n"
+              "    \"bool-key\": true,\n"
+              "    \"int-key\": 42,\n"
+              "    \"string-key\": \"string\"\n"
+              "}";
+
+            JsonContainer data(EXPECTED_OUTPUT);
+            auto pretty_json = data.toPrettyJson();
+            REQUIRE(pretty_json == EXPECTED_OUTPUT);
+        }
+
+        SECTION("a nested object") {
+            std::string EXPECTED_OUTPUT =
+              "{\n"
+              "    \"object-key\": {\n"
+              "        \"null-key\": null,\n"
+              "        \"double-key\": 42.5,\n"
+              "        \"bool-key\": true,\n"
+              "        \"int-key\": 42,\n"
+              "        \"string-key\": \"string\"\n"
+              "    },\n"
+              "    \"array-key\": [\n"
+              "        null,\n"
+              "        42.5,\n"
+              "        true,\n"
+              "        42,\n"
+              "        \"string\"\n"
+              "    ]\n"
+              "}";
+
+            JsonContainer data(EXPECTED_OUTPUT);
+            auto pretty_json = data.toPrettyJson();
+            REQUIRE(pretty_json == EXPECTED_OUTPUT);
+        }
+
+        SECTION("a nested array") {
+            std::string EXPECTED_OUTPUT =
+              "[\n"
+              "    {\n"
+              "        \"null-key\": null,\n"
+              "        \"double-key\": 42.5,\n"
+              "        \"bool-key\": true,\n"
+              "        \"int-key\": 42,\n"
+              "        \"string-key\": \"string\"\n"
+              "    },\n"
+              "    [\n"
+              "        null,\n"
+              "        42.5,\n"
+              "        true,\n"
+              "        42,\n"
+              "        \"string\"\n"
+              "    ]\n"
+              "]";
+
+            JsonContainer data(EXPECTED_OUTPUT);
+            auto pretty_json = data.toPrettyJson();
+            REQUIRE(pretty_json == EXPECTED_OUTPUT);
+        }
+    }
+
+    SECTION("handles variable padding") {
+        std::string EXPECTED_OUTPUT =
+          "{\n"
+          "  \"object-key\": {\n"
+          "    \"null-key\": null,\n"
+          "    \"double-key\": 42.5,\n"
+          "    \"bool-key\": true,\n"
+          "    \"int-key\": 42,\n"
+          "    \"string-key\": \"string\"\n"
+          "  },\n"
+          "  \"array-key\": [\n"
+          "    null,\n"
+          "    42.5,\n"
+          "    true,\n"
+          "    42,\n"
+          "    \"string\"\n"
+          "  ]\n"
+          "}";
+
+        JsonContainer data(EXPECTED_OUTPUT);
+        auto pretty_json = data.toPrettyJson(2);
+        REQUIRE(pretty_json == EXPECTED_OUTPUT);
+    }
+}
+
 TEST_CASE("JsonContainer::empty", "[data]") {
     SECTION("works correctly for an empty JsonContainer instance") {
         JsonContainer data {};

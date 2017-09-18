@@ -3,6 +3,7 @@
 
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/prettywriter.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/allocators.h>
 #include <rapidjson/rapidjson.h>
@@ -12,7 +13,6 @@ using leatherman::locale::_;
 
 namespace leatherman { namespace json_container {
 
-    const size_t DEFAULT_LEFT_PADDING { 4 };
     const size_t LEFT_PADDING_INCREMENT { 2 };
 
     //
@@ -144,6 +144,15 @@ namespace leatherman { namespace json_container {
 
     std::string JsonContainer::toPrettyString() const {
         return toPrettyString(DEFAULT_LEFT_PADDING);
+    }
+
+    std::string JsonContainer::toPrettyJson(size_t left_padding) const {
+        rapidjson::StringBuffer buffer;
+        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer { buffer };
+        writer.SetIndent(' ', left_padding);
+        auto& jval = *getValueInJson();
+        jval.Accept(writer);
+        return buffer.GetString();
     }
 
     // capacity
