@@ -143,8 +143,10 @@ SCENARIO("executing commands with execution::execute") {
             auto exec = execute("cmd.exe", { "/c", CMAKE_BIN_DIRECTORY "/lth_cat.exe", "prefix", "suffix", "overwhelm", "stderr" },
                 "hello\ngoodbye", 0, { execution_options::merge_environment });
             REQUIRE(exec.success);
-            REQUIRE(exec.output == lth_cat::prefix+lth_cat::overwhelm+"hello\n"+lth_cat::overwhelm+"goodbye\n"+lth_cat::overwhelm+lth_cat::suffix);
-            REQUIRE(exec.error == "hello\ngoodbye\n");
+            auto expected = lth_cat::prefix+lth_cat::overwhelm+"hello\n"+lth_cat::overwhelm+"goodbye\n"+lth_cat::overwhelm+lth_cat::suffix;
+            boost::replace_all(expected, "\n", "\r\n");
+            REQUIRE(exec.output == expected);
+            REQUIRE(exec.error == "hello\r\ngoodbye\r\n");
             REQUIRE(exec.exit_code == 0);
         }
         WHEN("requested to write stdout to file") {
