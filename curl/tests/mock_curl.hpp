@@ -22,6 +22,7 @@ struct curl_impl
     {
         success,
         easy_perform_error,
+        easy_perform_write_error,
         http_post_error,
         http_put_error,
         set_url_error,
@@ -57,12 +58,17 @@ struct curl_impl
 
     std::string request_url, cookie, cacert, client_cert, client_key;
     long protocols;
+    long connect_timeout;
     http_method method = http_method::get;
 
     curl_slist* header; // List of custom request headers to be passed to the server
 
     std::string read_buffer; // Buffer to test reading the request body
     std::string resp_body;   // Response body which should be written to a context using the write_body function callback
+
+    char* errbuf = 0;
+    // Pointer to trigger failure callbacks
+    std::function<void()> trigger_external_failure;
 };
 
 enum error_mode

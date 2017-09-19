@@ -19,7 +19,7 @@ using namespace leatherman::logging;
 using namespace leatherman::execution::testing;
 using namespace leatherman::util;
 using namespace leatherman::execution;
-using namespace boost::filesystem;
+namespace fs = boost::filesystem;
 
 SCENARIO("searching for programs with execution::which") {
     GIVEN("an absolute path to an executable file") {
@@ -133,17 +133,17 @@ SCENARIO("executing commands with execution::execute") {
     };
     std::string spool_dir { EXEC_TESTS_DIRECTORY "/spool" };
     auto get_file_content = [spool_dir](string const& filename) {
-        string filepath((path(spool_dir) / filename).string());
+        string filepath((fs::path(spool_dir) / filename).string());
         boost::nowide::ifstream strm(filepath.c_str());
         if (!strm) FAIL("failed to open file: " + filename);
         string content((istreambuf_iterator<char>(strm)), (istreambuf_iterator<char>()));
         strm.close();
         return content;
     };
-    if (!exists(spool_dir) && !create_directories(spool_dir)) {
+    if (!fs::exists(spool_dir) && !fs::create_directories(spool_dir)) {
         FAIL("failed to create spool directory");
     }
-    scope_exit spool_cleaner([spool_dir]() { remove_all(spool_dir); });
+    scope_exit spool_cleaner([spool_dir]() { fs::remove_all(spool_dir); });
     GIVEN("a command that succeeds") {
         THEN("the output should be returned") {
             auto exec = execute("cat", { EXEC_TESTS_DIRECTORY "/fixtures/ls/file3.txt" });
@@ -271,10 +271,10 @@ SCENARIO("executing commands with execution::execute") {
         WHEN("requested to write stdout to file") {
             string out_file(spool_dir + "/stdout_test.out");
             auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message", {}, "", out_file);
-            REQUIRE(exists(out_file));
+            REQUIRE(fs::exists(out_file));
             THEN("stdout is correctly redirected to file") {
                 auto output = get_file_content("stdout_test.out");
-                REQUIRE(output == "foo=bar\n");
+                REQUIRE(output == "foo=bar\nsome more stuff\n");
             }
             THEN("the returned results are correct and stdout was not buffered") {
                 REQUIRE(exec.success);
@@ -282,13 +282,13 @@ SCENARIO("executing commands with execution::execute") {
                 REQUIRE(exec.error == "error message!");
             }
         }
-        WHEN("requested to write stdout and stderr to the same file") {
+        WHEN("requested to write stdout and stderr to the same file with trim") {
             string out_file(spool_dir + "/stdout_stderr_test.out");
             auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message", {}, "", out_file, "", map<string, string>(), nullptr, 0, { execution_options::trim_output, execution_options::merge_environment, execution_options::redirect_stderr_to_stdout });
-            REQUIRE(boost::filesystem::exists(out_file));
+            REQUIRE(fs::exists(out_file));
             THEN("stdout and stderr are correctly redirected to file") {
                 auto output = get_file_content("stdout_stderr_test.out");
-                REQUIRE(output == "error message!\nfoo=bar\n");
+                REQUIRE(output == "error message!\nfoo=bar\nsome more stuff\n");
             }
             THEN("the returned results are correct and out/err streams were not buffered") {
                 REQUIRE(exec.success);
@@ -308,16 +308,42 @@ SCENARIO("executing commands with execution::execute") {
                 REQUIRE_FALSE(success);
             }
         }
-        WHEN("requested to write both stdout and stderr to file") {
+        WHEN("requested to write both stdout and stderr to file with permissions") {
             string out_file(spool_dir + "/stdout_test_b.out");
             string err_file(spool_dir + "/stderr_test_b.err");
-            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message", {}, "", out_file, err_file);
-            REQUIRE(boost::filesystem::exists(out_file));
-            REQUIRE(boost::filesystem::exists(err_file));
+            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message", {}, "", out_file, err_file, {}, nullptr, 0,
+                                fs::owner_read | fs::owner_write | fs::group_read, lth_util::option_set<execution_options>{});
+            REQUIRE(fs::exists(out_file));
+            REQUIRE(fs::exists(err_file));
             THEN("stdout and stderr are correctly redirected to different files") {
                 auto output = get_file_content("stdout_test_b.out");
                 auto error = get_file_content("stderr_test_b.err");
-                REQUIRE(output == "foo=bar\n");
+                REQUIRE(output == "foo=bar\n\nsome more stuff\n");
+                REQUIRE(error == "error message!\n");
+            }
+            THEN("the files have restricted permissions") {
+                auto out_perms = fs::status(out_file).permissions();
+                auto err_perms = fs::status(err_file).permissions();
+                REQUIRE(out_perms == (fs::owner_read | fs::owner_write | fs::group_read));
+                REQUIRE(err_perms == (fs::owner_read | fs::owner_write | fs::group_read));
+            }
+            THEN("the returned results are correct and out/err streams were not buffered") {
+                REQUIRE(exec.success);
+                REQUIRE(exec.output.empty());
+                REQUIRE(exec.error.empty());
+            }
+        }
+        WHEN("requested to write both stdout and stderr to file without trim") {
+            string out_file(spool_dir + "/stdout_test_b.out");
+            string err_file(spool_dir + "/stderr_test_b.err");
+            auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message", {}, "",
+                                out_file, err_file, {}, nullptr, 0, lth_util::option_set<execution_options>{});
+            REQUIRE(fs::exists(out_file));
+            REQUIRE(fs::exists(err_file));
+            THEN("stdout and stderr are correctly redirected to different files") {
+                auto output = get_file_content("stdout_test_b.out");
+                auto error = get_file_content("stderr_test_b.err");
+                REQUIRE(output == "foo=bar\n\nsome more stuff\n");
                 REQUIRE(error == "error message!\n");
             }
             THEN("the returned results are correct and out/err streams were not buffered") {
@@ -427,7 +453,7 @@ SCENARIO("executing commands with execution::execute") {
             log_capture capture(log_level::debug);
             auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message");
             REQUIRE(exec.success);
-            REQUIRE(exec.output == "foo=bar");
+            REQUIRE(exec.output == "foo=bar\n\nsome more stuff");
             REQUIRE(exec.error.empty());
             THEN("stderr is logged") {
                 auto output = capture.result();
@@ -439,7 +465,7 @@ SCENARIO("executing commands with execution::execute") {
             log_capture capture(log_level::warning);
             auto exec = execute(EXEC_TESTS_DIRECTORY "/fixtures/error_message");
             REQUIRE(exec.success);
-            REQUIRE(exec.output == "foo=bar");
+            REQUIRE(exec.output == "foo=bar\n\nsome more stuff");
             REQUIRE(exec.error.empty());
             THEN("stderr is not logged") {
                 auto output = capture.result();

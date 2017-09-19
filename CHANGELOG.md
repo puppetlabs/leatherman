@@ -2,6 +2,70 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.3.0]
+
+### Added
+- A toPrettyJson routine to Leatherman.json\_container that pretty prints a valid JSON object.
+
+## [1.2.1]
+
+### Fixed
+- Made Leatherman.curl's download_file response accessible, with results included when an error code is returned.
+
+## [1.2.0]
+
+### Added
+- A URI parsing utility in Leatherman.util (LTH-143)
+
+### Changed
+- Refactored Leatherman.curl's http_file_operation_exception to inherit from http_request_exception so that the three possible failure modes are distinguished by class
+
+## [1.1.2]
+
+### Fixed
+- Separated the possible failure modes for Leatherman.curl into three categories (LTH-142)
+     * Curl setup errors
+     * File operation errors (e.g. writing to disk during file download)
+     * Server side errors (e.g. bad host)
+
+- Simplified the logic of Leatherman.curl's download_file method by abstracting out actions associated with the temporary file (creating, writing, removing) to a class that follows the RAII pattern. (LTH-142)
+
+## [1.1.1]
+
+### Fixed
+- Generate build artifact with GCC 5.2.0 on Windows.
+
+## [1.1.0]
+
+### Added
+- Execution with file redirection and `atomic_write_to_file` can specify the permissions of those files. (LTH-139)
+- Leatherman.curl added a download_file function for doing streaming file downloads. (LTH-140)
+
+### Fixed
+- Fix redundant newlines when using `execute` that redirects output to files when not using the `trim` option. This combination now also ensures empty lines are not skipped. A side effect is that when not using `trim`, empty lines may appear when iterating over lines of output via `each_line` as well. (LTH-138)
+
+## [1.0.0]
+Final tag for Leatherman 1.0.0, containing the same change set as 0.99.0.
+
+## [0.99.0]
+This is a pre-release version for Leatherman 1.0.0, containing backwards-incompatible API changes.
+
+### Changed
+- Remove Ruby bindings for Fixnum and Bignum, replace with Integer for Ruby 2.4 support (LTH-124)
+
+## [0.12.1]
+
+### Fixed
+- Locale files are installed relative to the Leatherman install root, taking into account support for relocatable packages (LTH-135)
+
+### Added
+- Ruby API binding for rb_ll2inum (missing from 0.12.0)
+
+## [0.12.0]
+
+### Added
+- Support for finding locale files with a relocatable package, particularly on Windows (LTH-133)
+
 ## [0.11.2]
 
 ### Added

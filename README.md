@@ -191,6 +191,26 @@ add_definitions(${LEATHERMAN_DEFINITIONS})
 add_definitions(-DLEATHERMAN_I18N)
 ```
 
+By default locale files are installed to `${CMAKE_INSTALL_PREFIX}/share/locale`.
+This behavior can be changed to use environment variables for the prefix
+instead by defining `LEATHERMAN_LOCALE_VAR` and `LEATHERMAN_LOCALE_INSTALL`.
+`LEATHERMAN_LOCALE_VAR` should refer to an environment variable pointing to the
+root of the Leatherman install, while `LEATHERMAN_LOCALE_INSTALL` should contain
+a path relative to that location, where locale files should be installed and searched
+for at run time.
+
+For example, if Leatherman is installed to `C:/tools`, and you would like
+to install translation files to `C:/languages/leatherman`, you can create an environment
+variable (e.g. `$LEATHERMAN_LOCATION`) containing `C:\tools`, then set
+`LEATHERMAN_LOCALE_VAR=LEATHERMAN_LOCATION` and 
+`LEATHERMAN_LOCALE_INSTALL=../languages/leatherman`. Then locale files will be installed to
+`C:/tools/../languages/leatherman` and at runtime Leatherman will search for locale
+files there.
+
+To ensure that consuming projects also install their locale files to the right location,
+it is recommended to set `LEATHERMAN_LOCALE_INSTALL` for all projects attempting to use
+Leatherman's i18n tooling.
+
 #### Extracting and Translating Text
 
 The format strings in logging (the first argument) will automatically be
@@ -209,7 +229,7 @@ translate("Apple");
 ```
 // Note the parameter duplication: The first count value `2` selects the appropriate
 // translated message, and the second `2` fills in the `{1}` substitution token.
-format_n("Apple", "{1} Apples", 2, 2);
+format_n("{1} Apple", "{1} Apples", 2, 2);
 ```
 * Prefixed-context (`translate_p`, `format_p`) when a word or phrase has multiple meanings.
 ```
@@ -217,7 +237,7 @@ translate_p("Fruit", "Apple")
 ```
 * Pluralized and prefixed-context (`translate_np`, `format_np`)
 ```
-format_np("Fruit", "Apple", "{1} Apples", 3, 3);
+format_np("Fruit", "{1} Apple", "{1} Apples", 3, 3);
 ```
 
 `leatherman::locale::format` is a replacement for

@@ -1,6 +1,9 @@
 #define BUILDING_LIBCURL
 #include <cstring>
 #include <stdarg.h>
+#include <stdio.h>
+#include <array>
+#include <algorithm>
 #include "mock_curl.hpp"
 
 using namespace std;
@@ -10,6 +13,7 @@ using namespace std;
  * cURL global and easy initialization, before the client object exists.
  */
 static error_mode test_failure_mode = success;
+
 
 curl_fail_init::curl_fail_init(error_mode mode)
 {
@@ -220,6 +224,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLoption option, ...)
                 va_end(vl);
                 return CURLE_COULDNT_CONNECT;
             }
+            h->connect_timeout = va_arg(vl, long);
             break;
         case CURLOPT_TIMEOUT_MS:
             if (h->test_failure_mode == curl_impl::error_mode::request_timeout_error) {
@@ -233,6 +238,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLoption option, ...)
                 return CURLE_COULDNT_CONNECT;
             }
             h->protocols = va_arg(vl, long);
+            break;
+        case CURLOPT_ERRORBUFFER:
+            h->errbuf = va_arg(vl, char*); 
             break;
         default:
             break;
@@ -248,7 +256,13 @@ CURLcode curl_easy_setopt(CURL *handle, CURLoption option, ...)
 CURLcode curl_easy_perform(CURL * easy_handle)
 {
     auto h = reinterpret_cast<curl_impl*>(easy_handle);
+    if (h->test_failure_mode == curl_impl::error_mode::easy_perform_write_error) {
+        return CURLE_WRITE_ERROR;
+    }
     if (h->test_failure_mode == curl_impl::error_mode::easy_perform_error) {
+        if (h->errbuf) {
+            strcpy(h->errbuf, "easy perform failed"); 
+        }
         return CURLE_COULDNT_CONNECT;
     }
 
@@ -264,11 +278,18 @@ CURLcode curl_easy_perform(CURL * easy_handle)
         }
     }
 
+    static const array<string, 3> VALID_URLS{{
+      "http://valid.com/",
+      "https://download.com",
+      "https://remove_temp_file.com"
+    }};
+
     /*
      * If we pass 'valid.com' in the test, return HTTP status 200. Otherwise, return status 404.
      */
     if (h->write_header) {
-        if (h->request_url == "http://valid.com/") {
+        bool is_valid_url = find(VALID_URLS.begin(), VALID_URLS.end(), h->request_url) != VALID_URLS.end();
+        if (is_valid_url) {
             string header_content = "HTTP/1.1 200 OK\n"
                                     "Connection: keep-alive\n"
                                     "Date: Thu, 16 Jul 2015 18:41:08 GMT\n"
@@ -296,6 +317,23 @@ CURLcode curl_easy_perform(CURL * easy_handle)
 
             h->write_header(&header_content[0], 1, header_content.size(), h->header_context);
         }
+    }
+
+    /*
+     * For file download. It is OK if exception is thrown if write_body is not set,
+     * that means something went wrong in our code's setup so we want our test to
+     * fail.
+     */
+    if (h->request_url == "https://download.com" || h->request_url == "https://download_trigger_404.com") {
+        string download_msg = (h->request_url == "https://download.com") ? "successfully downloaded file" : "Not found";
+        h->write_body(const_cast<char*>(download_msg.c_str()), 1, reinterpret_cast<size_t>(download_msg.size()), h->body_context);
+        if (h->trigger_external_failure) {
+           #ifdef _WIN32
+           fclose(reinterpret_cast<FILE*>(h->body_context));
+           #endif
+           h->trigger_external_failure();
+        }
+        return CURLE_OK;
     }
 
     /*

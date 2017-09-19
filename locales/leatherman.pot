@@ -6,7 +6,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: leatherman 0.11.2\n"
+"Project-Id-Version: leatherman 1.2.1\n"
 "Report-Msgid-Bugs-To: docs@puppet.com\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -17,8 +17,59 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: curl/inc/leatherman/curl/client.hpp
+msgid "Failed setting up libcurl. Reason: {1}"
+msgstr ""
+
 #: curl/src/client.cc
 msgid "curl_easy_escape failed to escape string."
+msgstr ""
+
+#: curl/src/client.cc
+msgid "File operation error: {1}"
+msgstr ""
+
+#: curl/src/client.cc
+msgid "failed to open temporary file for writing"
+msgstr ""
+
+#: curl/src/client.cc
+msgid "failed to modify permissions of temporary file"
+msgstr ""
+
+#. debug
+#: curl/src/client.cc
+msgid "Download completed, now writing result to file {1}"
+msgstr ""
+
+#. warning
+#: curl/src/client.cc
+msgid ""
+"Failed to write the results of the temporary file to the actual file {1}"
+msgstr ""
+
+#: curl/src/client.cc
+msgid "failed to move over the temporary file's downloaded contents"
+msgstr ""
+
+#. debug
+#: curl/src/client.cc
+msgid "Writing the temp file's contents to the response body"
+msgstr ""
+
+#. warning
+#: curl/src/client.cc
+msgid ""
+"Failed to write the contents of the temporary file to the response body."
+msgstr ""
+
+#: curl/src/client.cc
+msgid "failed to write the temporary file's contents to the response body"
+msgstr ""
+
+#. warning
+#: curl/src/client.cc
+msgid "Failed to properly clean-up the temporary file {1}"
 msgstr ""
 
 #: curl/src/client.cc
@@ -28,6 +79,14 @@ msgstr ""
 #. debug
 #: curl/src/client.cc
 msgid "request completed (status {1})."
+msgstr ""
+
+#: curl/src/client.cc
+msgid "failed to write to the temporary file during download"
+msgstr ""
+
+#: curl/src/client.cc
+msgid "File download server side error: {1}"
 msgstr ""
 
 #: curl/src/client.cc
@@ -114,11 +173,19 @@ msgid "executing command: {1}"
 msgstr ""
 
 #: execution/src/execution.cc
-msgid "failed to open the output file."
+msgid "failed to open output file {1}"
 msgstr ""
 
 #: execution/src/execution.cc
-msgid "failed to open the error file."
+msgid "failed to modify permissions on output file {1} to {2,num,oct}: {3}"
+msgstr ""
+
+#: execution/src/execution.cc
+msgid "failed to open error file {1}"
+msgstr ""
+
+#: execution/src/execution.cc
+msgid "failed to modify permissions on error file {1} to {2,num,oct}: {3}"
 msgstr ""
 
 #. debug

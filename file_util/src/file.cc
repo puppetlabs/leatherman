@@ -72,6 +72,13 @@ namespace boost_file = boost::filesystem;
     void atomic_write_to_file(const std::string &text,
                               const std::string &file_path,
                               std::ios_base::openmode mode) {
+        atomic_write_to_file(text, file_path, {}, mode);
+    }
+
+    void atomic_write_to_file(const std::string &text,
+                              const std::string &file_path,
+                              boost::optional<boost_file::perms> perms,
+                              std::ios_base::openmode mode) {
         boost::nowide::ofstream ofs;
         std::string tmp_name = file_path + "~";
         ofs.open(tmp_name.c_str(), mode);
@@ -80,6 +87,11 @@ namespace boost_file = boost::filesystem;
                                                         boost_error::make_error_code(
                                                                 boost_error::io_error) };
         }
+
+        if (perms) {
+            boost_file::permissions(tmp_name, *perms);
+        }
+
         ofs << text;
         ofs.close();
         boost_file::rename(tmp_name.data(), file_path.data());

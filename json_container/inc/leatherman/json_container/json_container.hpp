@@ -20,6 +20,9 @@ namespace rapidjson {
 }  // namespace rapidjson
 
 namespace leatherman { namespace json_container {
+    // Constants
+    constexpr size_t DEFAULT_LEFT_PADDING { 4 };
+
     // Errors
 
     /// Parent error class.
@@ -139,8 +142,12 @@ namespace leatherman { namespace json_container {
         /// Throw a data_key_error in case the specified key is unknown.
         std::string toString(const std::vector<JsonContainerKey>& keys) const;
 
+        // TODO: Refactor this to use a default parameter of DEFAULT_LEFT_PADDING
+        // for left_padding to remove the empty-argument variant.
         std::string toPrettyString(size_t left_padding) const;
         std::string toPrettyString() const;
+
+        std::string toPrettyJson(size_t left_padding = DEFAULT_LEFT_PADDING) const;
 
         /// Return true if the root is an empty JSON array or an empty
         /// JSON object, false otherwise.

@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.2.2)
-project(leatherman VERSION 0.11.2)
+project(leatherman VERSION 1.3.0)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+if (WIN32)
+    link_libraries("-Wl,--nxcompat -Wl,--dynamicbase")
+endif()
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${PROJECT_BINARY_DIR}/cmake")
+# Populate locale install location
+configure_file(cmake/leatherman.cmake.in "${PROJECT_BINARY_DIR}/cmake/leatherman.cmake" @ONLY)
 include(internal)
 
 # If we're the top-level project, we want to ensure the build type is
@@ -41,21 +47,28 @@ endif()
 defoption(LEATHERMAN_MOCK_CURL "Use mock curl library for testing Leatherman.curl" ${MOCK_CURL})
 
 add_definitions(${LEATHERMAN_DEFINITIONS})
-add_definitions(-DLEATHERMAN_LOCALE_INSTALL="${CMAKE_INSTALL_PREFIX}/share/locale")
+if (LEATHERMAN_LOCALE_VAR AND LEATHERMAN_LOCALE_INSTALL)
+    # Add an environment variable to look up install prefix at runtime.
+    add_definitions(-DLEATHERMAN_LOCALE_VAR="${LEATHERMAN_LOCALE_VAR}"
+                    -DLEATHERMAN_LOCALE_INSTALL="${LEATHERMAN_LOCALE_INSTALL}")
+else()
+    # Add install location instead.
+    add_definitions(-DLEATHERMAN_LOCALE_INSTALL="${CMAKE_INSTALL_PREFIX}/share/locale")
+endif()
 
 file(GLOB_RECURSE ALL_LEATHERMAN_SOURCES */src/*.cc */inc/*.hpp)
 add_subdirectory(locales)
 
 add_leatherman_dir(catch EXCLUDE_FROM_VARS)
 add_leatherman_dir(nowide)
+add_leatherman_dir(util)
 add_leatherman_dir(locale)
 add_leatherman_dir(logging)
 add_leatherman_dir(rapidjson)
 add_leatherman_dir(json_container)
-add_leatherman_dir(util)
 add_leatherman_dir(file_util)
 add_leatherman_dir(curl)
-if(WIN32)
+if (WIN32)
   add_leatherman_dir(windows)
 endif()
 add_leatherman_dir(dynamic_library)
@@ -106,14 +119,16 @@ if (LEATHERMAN_INSTALL)
         cmake/GetGitRevisionDescription.cmake
         cmake/GetGitRevisionDescription.cmake.in
         cmake/pod2man.cmake
-        cmake/leatherman.cmake
         cmake/options.cmake
         cmake/leatherman_config.cmake
         cmake/normalize_pot.cmake
         cmake/generate_translations.cmake
     )
     set(INSTALL_LOC "lib${LIB_SUFFIX}/cmake/leatherman")
-    install(FILES ${CMAKE_FILES} DESTINATION "${INSTALL_LOC}/cmake/")
+    install(FILES
+        ${CMAKE_FILES}
+        "${PROJECT_BINARY_DIR}/cmake/leatherman.cmake"
+        DESTINATION "${INSTALL_LOC}/cmake/")
 
     configure_file(LeathermanConfig.cmake.in "${PROJECT_BINARY_DIR}/LeathermanConfig.cmake" @ONLY)
     configure_file(LeathermanConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/LeathermanConfigVersion.cmake" @ONLY)

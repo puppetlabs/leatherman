@@ -2,16 +2,19 @@
 #include <leatherman/curl/request.hpp>
 #include <leatherman/curl/response.hpp>
 #include <leatherman/util/regex.hpp>
+#include <leatherman/file_util/file.hpp>
 #include <leatherman/logging/logging.hpp>
-#include <leatherman/locale/locale.hpp>
 #include <boost/utility/string_ref.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/nowide/iostream.hpp>
+#include <boost/nowide/fstream.hpp>
 #include <sstream>
 
 // Mark string for translation (alias for leatherman::locale::format)
 using leatherman::locale::_;
 
 using namespace std;
+namespace fs = boost::filesystem;
 
 namespace leatherman { namespace curl {
 
@@ -91,6 +94,81 @@ namespace leatherman { namespace curl {
         }
     }
 
+    static std::string make_file_err_msg(std::string const& reason) {
+        return _("File operation error: {1}", reason);
+    }
+
+    download_temp_file::download_temp_file(request const& req, std::string const& file_path, boost::optional<boost::filesystem::perms> perms) :
+      _req(req),
+      _file_path(file_path)
+    {
+        try {
+            _temp_path = fs::path(file_path).parent_path() / fs::unique_path("temp_file_%%%%-%%%%-%%%%-%%%%");
+            _fp = boost::nowide::fopen(_temp_path.string().c_str(), "wb");
+            if (!_fp) {
+                throw http_file_operation_exception(_req, _file_path, make_file_err_msg(_("failed to open temporary file for writing")));
+            }
+            if (!perms) {
+                return;
+            }
+
+            boost::system::error_code ec;
+            fs::permissions(_temp_path.string(), *perms, ec);
+            if (ec) {
+                cleanup();
+                throw http_file_operation_exception(_req, _file_path, make_file_err_msg(_("failed to modify permissions of temporary file")));
+            }
+        } catch (fs::filesystem_error& e) {
+            throw http_file_operation_exception(_req, _file_path, make_file_err_msg(e.what()));
+        }
+    }
+
+    download_temp_file::~download_temp_file() {
+        cleanup();
+    }
+
+    FILE* download_temp_file::get_fp() {
+        return _fp;
+    }
+
+    void download_temp_file::write() {
+        LOG_DEBUG("Download completed, now writing result to file {1}", _file_path);
+        close_fp();
+        boost::system::error_code ec;
+        fs::rename(_temp_path, _file_path, ec);
+        if (ec) {
+            LOG_WARNING("Failed to write the results of the temporary file to the actual file {1}", _file_path);
+            throw http_file_operation_exception(_req, _file_path, make_file_err_msg(_("failed to move over the temporary file's downloaded contents")));
+        }
+    }
+
+    void download_temp_file::write(response& res) {
+        LOG_DEBUG("Writing the temp file's contents to the response body");
+        close_fp();
+        string res_body;
+        if (!leatherman::file_util::read(_temp_path.string(), res_body)) {
+            LOG_WARNING("Failed to write the contents of the temporary file to the response body.");
+            throw http_file_operation_exception(_req, _file_path, make_file_err_msg(_("failed to write the temporary file's contents to the response body")));
+        }
+        res.body(res_body);
+    }
+
+    void download_temp_file::close_fp() {
+      fclose(_fp);
+      _fp = nullptr;
+    }
+
+    void download_temp_file::cleanup() {
+        if (_fp) {
+            fclose(_fp);
+        }
+        boost::system::error_code ec;
+        fs::remove(_temp_path, ec);
+        if (ec) {
+            LOG_WARNING("Failed to properly clean-up the temporary file {1}", _temp_path);
+        }
+    }
+
     client::client()
     {
         if (!_handle) {
@@ -133,14 +211,8 @@ namespace leatherman { namespace curl {
         curl_easy_reset(_handle);
 
         // Set common options
-        auto result = curl_easy_setopt(_handle, CURLOPT_NOPROGRESS, 1);
-        if (result != CURLE_OK) {
-            throw http_request_exception(req, curl_easy_strerror(result));
-        }
-        result = curl_easy_setopt(_handle, CURLOPT_FOLLOWLOCATION, 1);
-        if (result != CURLE_OK) {
-            throw http_request_exception(req, curl_easy_strerror(result));
-        }
+        curl_easy_setopt_maybe(ctx, CURLOPT_NOPROGRESS, 1);
+        curl_easy_setopt_maybe(ctx, CURLOPT_FOLLOWLOCATION, 1);
 
         // Set tracing from libcurl if enabled (we don't care if this fails)
         if (LOG_IS_DEBUG_ENABLED()) {
@@ -161,7 +233,7 @@ namespace leatherman { namespace curl {
         set_client_protocols(ctx);
 
         // Perform the request
-        result = curl_easy_perform(_handle);
+        auto result = curl_easy_perform(_handle);
         if (result != CURLE_OK) {
             throw http_request_exception(req, curl_easy_strerror(result));
         }
@@ -171,6 +243,61 @@ namespace leatherman { namespace curl {
         // Set the body of the response
         res.body(move(ctx.response_buffer));
         return res;
+    }
+
+    void client::download_file(request const& req, std::string const& file_path, boost::optional<fs::perms> perms)
+    {
+        download_file_helper(req, file_path, {}, perms);
+    }
+
+    void client::download_file(request const& req, std::string const& file_path, response& res, boost::optional<fs::perms> perms)
+    {
+        download_file_helper(req, file_path, res, perms);
+    }
+
+    void client::download_file_helper(request const& req, std::string const& file_path, boost::optional<response&> res, boost::optional<fs::perms> perms)
+    {
+        response _res;
+        context ctx(req, _res);
+
+        // Reset the options
+        curl_easy_reset(_handle);
+
+        char errbuf[CURL_ERROR_SIZE] = { '\0' };
+        download_temp_file temp_file(req, file_path, perms);
+        curl_easy_setopt_maybe(ctx, CURLOPT_NOPROGRESS, 1);
+
+        // Setup the remaining request
+        set_url(ctx);
+        set_headers(ctx);
+        set_timeouts(ctx);
+        set_write_callbacks(ctx, temp_file.get_fp());
+        set_ca_info(ctx);
+        set_client_info(ctx);
+        set_client_protocols(ctx);
+
+        // More detailed error messages
+        curl_easy_setopt_maybe(ctx, CURLOPT_ERRORBUFFER, errbuf);
+
+        // Perform the request
+        auto result = curl_easy_perform(_handle);
+        if (result == CURLE_WRITE_ERROR) {
+            throw http_file_operation_exception(req, file_path, make_file_err_msg(_("failed to write to the temporary file during download")));
+        } else if (result != CURLE_OK) {
+            throw http_file_download_exception(req, file_path, _("File download server side error: {1}", errbuf));
+        }
+
+        // Check the status code. If 400+, fill in the response
+        LOG_DEBUG("request completed (status {1}).", _res.status_code());
+        if (_res.status_code() >= 400 && res) {
+            temp_file.write(_res);
+        } else {
+            temp_file.write();
+        }
+
+        if (res) {
+            (*res) = move(_res);
+        }
     }
 
     void client::set_ca_cert(string const& cert_file)
@@ -196,18 +323,12 @@ namespace leatherman { namespace curl {
                 return;
 
             case http_method::post: {
-                auto result = curl_easy_setopt(_handle, CURLOPT_POST, 1);
-                if (result != CURLE_OK) {
-                    throw http_request_exception(ctx.req, curl_easy_strerror(result));
-                }
+                curl_easy_setopt_maybe(ctx, CURLOPT_POST, 1);
                 break;
             }
 
             case http_method::put: {
-                auto result = curl_easy_setopt(_handle, CURLOPT_UPLOAD, 1);
-                if (result != CURLE_OK) {
-                    throw http_request_exception(ctx.req, curl_easy_strerror(result));
-                }
+                curl_easy_setopt_maybe(ctx, CURLOPT_UPLOAD, 1);
                 break;
             }
 
@@ -219,11 +340,7 @@ namespace leatherman { namespace curl {
     void client::set_url(context& ctx)
     {
         // TODO: support an easy interface for setting escaped query parameters
-        auto result = curl_easy_setopt(_handle, CURLOPT_URL, ctx.req.url().c_str());
-        if (result != CURLE_OK) {
-            throw http_request_exception(ctx.req, curl_easy_strerror(result));
-        }
-
+        curl_easy_setopt_maybe(ctx, CURLOPT_URL, ctx.req.url().c_str());
         LOG_DEBUG("requesting {1}.", ctx.req.url());
     }
 
@@ -233,10 +350,7 @@ namespace leatherman { namespace curl {
             ctx.request_headers.append(name + ": " + value);
             return true;
         });
-        auto result = curl_easy_setopt(_handle, CURLOPT_HTTPHEADER, static_cast<curl_slist*>(ctx.request_headers));
-        if (result != CURLE_OK) {
-            throw http_request_exception(ctx.req, curl_easy_strerror(result));
-        }
+        curl_easy_setopt_maybe(ctx, CURLOPT_HTTPHEADER, static_cast<curl_slist*>(ctx.request_headers));
     }
 
     void client::set_cookies(context& ctx)
@@ -249,44 +363,23 @@ namespace leatherman { namespace curl {
             cookies << name << "=" << value;
             return true;
         });
-        auto result = curl_easy_setopt(_handle, CURLOPT_COOKIE, cookies.str().c_str());
-        if (result != CURLE_OK) {
-            throw http_request_exception(ctx.req, curl_easy_strerror(result));
-        }
+        curl_easy_setopt_maybe(ctx, CURLOPT_COOKIE, cookies.str().c_str());
     }
 
     void client::set_body(context& ctx, http_method method)
     {
-        auto result = curl_easy_setopt(_handle, CURLOPT_READFUNCTION, read_body);
-        if (result != CURLE_OK) {
-            throw http_request_exception(ctx.req, curl_easy_strerror(result));
-        }
-        result = curl_easy_setopt(_handle, CURLOPT_READDATA, &ctx);
-        if (result != CURLE_OK) {
-            throw http_request_exception(ctx.req, curl_easy_strerror(result));
-        }
-        result = curl_easy_setopt(_handle, CURLOPT_SEEKFUNCTION, seek_body);
-        if (result != CURLE_OK) {
-            throw http_request_exception(ctx.req, curl_easy_strerror(result));
-        }
-        result = curl_easy_setopt(_handle, CURLOPT_SEEKDATA, &ctx);
-        if (result != CURLE_OK) {
-            throw http_request_exception(ctx.req, curl_easy_strerror(result));
-        }
+        curl_easy_setopt_maybe(ctx, CURLOPT_READFUNCTION, read_body);
+        curl_easy_setopt_maybe(ctx, CURLOPT_READDATA, &ctx);
+        curl_easy_setopt_maybe(ctx, CURLOPT_SEEKFUNCTION, seek_body);
+        curl_easy_setopt_maybe(ctx, CURLOPT_SEEKDATA, &ctx);
 
         switch (method) {
             case http_method::post: {
-                auto result = curl_easy_setopt(_handle, CURLOPT_POSTFIELDSIZE_LARGE, ctx.req.body().size());
-                if (result != CURLE_OK) {
-                    throw http_request_exception(ctx.req, curl_easy_strerror(result));
-                }
+                curl_easy_setopt_maybe(ctx, CURLOPT_POSTFIELDSIZE_LARGE, ctx.req.body().size());
                 break;
             }
             case http_method::put: {
-                auto result = curl_easy_setopt(_handle, CURLOPT_INFILESIZE_LARGE, ctx.req.body().size());
-                if (result != CURLE_OK) {
-                    throw http_request_exception(ctx.req, curl_easy_strerror(result));
-                }
+                curl_easy_setopt_maybe(ctx, CURLOPT_INFILESIZE_LARGE, ctx.req.body().size());
                 break;
             }
             default:
@@ -296,63 +389,49 @@ namespace leatherman { namespace curl {
 
     void client::set_timeouts(context& ctx)
     {
-        auto result = curl_easy_setopt(_handle, CURLOPT_CONNECTTIMEOUT_MS, ctx.req.connection_timeout());
-        if (result != CURLE_OK) {
-            throw http_request_exception(ctx.req, curl_easy_strerror(result));
-        }
-        result = curl_easy_setopt(_handle, CURLOPT_TIMEOUT_MS, ctx.req.timeout());
-        if (result != CURLE_OK) {
-            throw http_request_exception(ctx.req, curl_easy_strerror(result));
-        }
+        curl_easy_setopt_maybe(ctx, CURLOPT_CONNECTTIMEOUT_MS, ctx.req.connection_timeout());
+        curl_easy_setopt_maybe(ctx, CURLOPT_TIMEOUT_MS, ctx.req.timeout());
+    }
+
+    void client::set_header_write_callbacks(context& ctx)
+    {
+        curl_easy_setopt_maybe(ctx, CURLOPT_HEADERFUNCTION, write_header);
+        curl_easy_setopt_maybe(ctx, CURLOPT_HEADERDATA, &ctx);
     }
 
     void client::set_write_callbacks(context& ctx)
     {
-        auto result = curl_easy_setopt(_handle, CURLOPT_HEADERFUNCTION, write_header);
-        if (result != CURLE_OK) {
-            throw http_request_exception(ctx.req, curl_easy_strerror(result));
-        }
-        result = curl_easy_setopt(_handle, CURLOPT_HEADERDATA, &ctx);
-        if (result != CURLE_OK) {
-            throw http_request_exception(ctx.req, curl_easy_strerror(result));
-        }
-        result = curl_easy_setopt(_handle, CURLOPT_WRITEFUNCTION, write_body);
-        if (result != CURLE_OK) {
-            throw http_request_exception(ctx.req, curl_easy_strerror(result));
-        }
-        result = curl_easy_setopt(_handle, CURLOPT_WRITEDATA, &ctx);
-        if (result != CURLE_OK) {
-            throw http_request_exception(ctx.req, curl_easy_strerror(result));
-        }
+        set_header_write_callbacks(ctx);
+        curl_easy_setopt_maybe(ctx, CURLOPT_WRITEFUNCTION, write_body);
+        curl_easy_setopt_maybe(ctx, CURLOPT_WRITEDATA, &ctx);
+    }
+
+    void client::set_write_callbacks(context& ctx, FILE* fp)
+    {
+        set_header_write_callbacks(ctx);
+        curl_easy_setopt_maybe(ctx, CURLOPT_WRITEFUNCTION, write_file);
+        curl_easy_setopt_maybe(ctx, CURLOPT_WRITEDATA, fp);
     }
 
     void client::set_ca_info(context& ctx){
-        if (_ca_cert != ""){
-            auto result = curl_easy_setopt(_handle, CURLOPT_CAINFO, _ca_cert.c_str());
-            if (result != CURLE_OK) {
-                throw http_request_exception(ctx.req, curl_easy_strerror(result));
-            }
+        if (_ca_cert == "") {
+            return;
         }
+
+        curl_easy_setopt_maybe(ctx, CURLOPT_CAINFO, _ca_cert.c_str());
     }
 
     void client::set_client_info(context &ctx) {
-        if (_client_cert != "" && _client_key != ""){
-            auto result = curl_easy_setopt(_handle, CURLOPT_SSLCERT, _client_cert.c_str());
-            if (result != CURLE_OK) {
-                throw http_request_exception(ctx.req, curl_easy_strerror(result));
-            }
-            result = curl_easy_setopt(_handle, CURLOPT_SSLKEY, _client_key.c_str());
-            if (result != CURLE_OK) {
-                throw http_request_exception(ctx.req, curl_easy_strerror(result));
-            }
+        if (_client_cert == "" || _client_key == "") {
+          return;
         }
+
+        curl_easy_setopt_maybe(ctx, CURLOPT_SSLCERT, _client_cert.c_str());
+        curl_easy_setopt_maybe(ctx, CURLOPT_SSLKEY, _client_key.c_str());
     }
 
     void client::set_client_protocols(context& ctx) {
-        auto result = curl_easy_setopt(_handle, CURLOPT_PROTOCOLS, _client_protocols);
-        if (result != CURLE_OK) {
-            throw http_request_exception(ctx.req, curl_easy_strerror(result));
-        }
+        curl_easy_setopt_maybe(ctx, CURLOPT_PROTOCOLS, _client_protocols);
     }
 
     size_t client::read_body(char* buffer, size_t size, size_t count, void* ptr)
@@ -449,6 +528,11 @@ namespace leatherman { namespace curl {
         }
 
         return written;
+    }
+
+    size_t client::write_file(char *buffer, size_t size, size_t count, void* ptr)
+    {
+        return fwrite(buffer, size, count, reinterpret_cast<FILE*>(ptr));
     }
 
     int client::debug(CURL* handle, curl_infotype type, char* data, size_t size, void* ptr)

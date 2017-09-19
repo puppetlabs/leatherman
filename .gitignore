@@ -14,3 +14,4 @@ compile_commands.json
 /*/tests/fixtures.hpp
 /curl/inc/leatherman/curl/export.h
 /curl/tests/export.h
+cmake/leatherman.cmake

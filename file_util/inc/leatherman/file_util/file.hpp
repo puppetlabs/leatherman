@@ -4,7 +4,8 @@
  */
 #pragma once
 
-#include <boost/filesystem/path.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/optional.hpp>
 
 #include <string>
 #include <stdexcept>
@@ -55,6 +56,24 @@ namespace leatherman { namespace file_util {
     void atomic_write_to_file(const std::string &text,
                               const std::string &file_path,
                               std::ios_base::openmode mode = std::ios::binary);
+
+    /**
+     * Writes content to a temporary file in the specified mode, then
+     * renames the file to the desired path. If the file already exists,
+     * its previous content will be deleted, so appending is not
+     * possible.
+     * @param text The content to be written
+     * @param file_path The final destination and name of the file
+     * @param perms The file permissions to apply to the file.
+     *              On Windows this only toggles read-only.
+     * @param mode The mode in which to write the file
+     *
+     * Throws an error in case it fails to open the file to write.
+     */
+    void atomic_write_to_file(const std::string &text,
+                              const std::string &file_path,
+                              boost::optional<boost::filesystem::perms> perms,
+                              std::ios_base::openmode mode);
 
     /**
      * Expands a leading tilde to the user's home directory
