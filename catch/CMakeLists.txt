@@ -1,1 +1,1 @@
-add_leatherman_vendored("catch-1.4.0.zip" "catch" "include")
+add_leatherman_vendored("Catch-1.10.0.zip" "Catch-1.10.0" "single_include")

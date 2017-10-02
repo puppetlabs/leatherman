@@ -298,7 +298,7 @@ namespace leatherman { namespace curl {
 
         SECTION("client fails to initialize a libcurl easy session") {
             curl_fail_init mock_error {easy_init_error};
-            REQUIRE_THROWS_AS(mock_client test_client, http_exception);
+            REQUIRE_THROWS_AS(mock_client(), http_exception);
         }
 
         SECTION("client fails to perform a cURL request") {
