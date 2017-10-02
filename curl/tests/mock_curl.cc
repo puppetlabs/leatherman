@@ -103,7 +103,10 @@ CURLcode curl_easy_setopt(CURL *handle, CURLoption option, ...)
 {
     auto h = reinterpret_cast<curl_impl*>(handle);
     va_list vl;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wvarargs"
     va_start(vl, option);
+#pragma clang diagnostic pop
 
     switch (option) {
         case CURLOPT_HEADERFUNCTION:
