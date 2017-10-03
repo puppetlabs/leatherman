@@ -161,6 +161,7 @@ namespace leatherman { namespace execution {
     // Represents information about a pipe
     struct pipe
     {
+        // cppcheck-suppress passedByValue
         pipe(string pipe_name, scoped_descriptor desc, function<bool(string const&)> cb) :
             name(move(pipe_name)),
             descriptor(move(desc)),
@@ -169,6 +170,7 @@ namespace leatherman { namespace execution {
         {
         }
 
+        // cppcheck-suppress passedByValue
         pipe(string pipe_name, scoped_descriptor desc, string buf) :
             name(move(pipe_name)),
             descriptor(move(desc)),

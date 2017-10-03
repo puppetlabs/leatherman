@@ -16,7 +16,7 @@ static const std::string JSON = "{\"foo\" : {\"bar\" : 2},"
                                 "               }"
                                 "}";
 
-namespace leatherman { namespace json_container {
+using namespace leatherman::json_container;
 
 TEST_CASE("JsonContainer::JsonContainer - passing JSON string", "[data]") {
     std::string json_value {};
@@ -149,7 +149,7 @@ TEST_CASE("JsonContainer::get for object entries", "[data]") {
     }
 
     SECTION("it can get the root object") {
-      REQUIRE(data.get<JsonContainer>().get<int>("goo") == 1);
+        REQUIRE(data.get<JsonContainer>().get<int>("goo") == 1);
     }
 
     SECTION("it should behave correctly given a null value") {
@@ -355,7 +355,7 @@ TEST_CASE("JsonContainer::get for object entries", "[data]") {
 
         SECTION("array with values of different types") {
             JsonContainer a { "[ 1, \"foo\", true, [2.718, 3.14], 42, 42.0, "
-                              "{\"spam\":\"eggs\"} ]" };
+                "{\"spam\":\"eggs\"} ]" };
 
             SECTION("boolean") {
                 REQUIRE(a.get<bool>(2));
@@ -900,8 +900,8 @@ TEST_CASE("JsonContainer::set", "[data]") {
 TEST_CASE("JsonContainer::keys", "[data]") {
     SECTION("It returns a vector of keys") {
         JsonContainer data { "{ \"a\" : 1, "
-                             " \"b\" : 2, "
-                             " \"c\\u0000null\" : 2}" };
+            " \"b\" : 2, "
+                " \"c\\u0000null\" : 2}" };
         std::vector<std::string> expected_keys { "a", "b", { "c\0null", 6 } };
 
         REQUIRE(data.keys() == expected_keys);
@@ -1053,7 +1053,7 @@ TEST_CASE("JsonContainer::type", "[data]") {
 
 TEST_CASE("JsonContainer::type for arrays entries", "[data]") {
     JsonContainer data { "[false, -42, 3.14, \"spam\", {\"foo\" : [3, true]}, "
-                         "[1, 2, 3, 4] ]" };
+        "[1, 2, 3, 4] ]" };
 
     SECTION("root entry") {
         SECTION("array") {
@@ -1127,5 +1127,3 @@ TEST_CASE("JsonContainer::type for arrays entries", "[data]") {
         }
     }
 }
-
-}}  // namespace leatherman::json_container

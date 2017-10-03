@@ -233,6 +233,7 @@ namespace leatherman { namespace execution {
         vector<string> const& arguments,
         string const& input,
         map<string, string> const& environment,
+        // cppcheck-suppress passedByValue
         std::function<void(size_t)> pid_callback,
         uint32_t timeout,
         option_set<execution_options> const& options)
@@ -258,12 +259,14 @@ namespace leatherman { namespace execution {
     }
 
     result execute(
+        // cppcheck-suppress funcArgOrderDifferent
         std::string const& file,
         std::vector<std::string> const& arguments,
         std::string const& input,
         std::string const& out_file,
         std::string const& err_file,
         std::map<std::string, std::string> const& environment,
+        // cppcheck-suppress passedByValue
         std::function<void(size_t)> pid_callback,
         uint32_t timeout,
         boost::optional<fs::perms> perms,
