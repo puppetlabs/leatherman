@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.4.0]
+
+### Changed
+- Updated Catch library to 1.10.0.
+- Updated Boost.Nowide to ec9672b
+- Update Travis CI to use container-based builds
+
+### Fixed
+- Builds with Xcode 9
+
 ## [1.3.0]
 
 ### Added
