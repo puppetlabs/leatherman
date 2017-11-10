@@ -203,12 +203,7 @@ msgid "{1}: {2} ({3})."
 msgstr ""
 
 #: execution/src/posix/execution.cc
-msgid "select call failed"
-msgstr ""
-
-#: execution/src/posix/execution.cc
-#: execution/src/windows/execution.cc
-msgid "child i/o failed."
+msgid "select call failed waiting for child i/o"
 msgstr ""
 
 #. debug
@@ -216,10 +211,8 @@ msgstr ""
 msgid "select call was interrupted and will be retried."
 msgstr ""
 
-#. error
 #: execution/src/posix/execution.cc
-#: execution/src/windows/execution.cc
-msgid "{1} pipe i/o failed: {2}."
+msgid "{1} pipe i/o failed: {2}"
 msgstr ""
 
 #. debug
@@ -264,15 +257,11 @@ msgid "waitpid failed"
 msgstr ""
 
 #: execution/src/posix/execution.cc
-msgid "sigaction failed"
+msgid "sigaction failed while setting up timeout"
 msgstr ""
 
 #: execution/src/posix/execution.cc
-msgid "failed to setup timer"
-msgstr ""
-
-#: execution/src/posix/execution.cc
-msgid "setitimer failed"
+msgid "setitimer failed while setting up timeout"
 msgstr ""
 
 #. debug
@@ -343,6 +332,15 @@ msgstr ""
 
 #: execution/src/windows/execution.cc
 msgid "failed to create read event."
+msgstr ""
+
+#. error
+#: execution/src/windows/execution.cc
+msgid "{1} pipe i/o failed: {2}."
+msgstr ""
+
+#: execution/src/windows/execution.cc
+msgid "child i/o failed."
 msgstr ""
 
 #. error

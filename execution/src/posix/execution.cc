@@ -223,8 +223,7 @@ namespace leatherman { namespace execution {
             int result = select(max + 1, &read_set, &write_set, nullptr, timeout ? &read_timeout : nullptr);
             if (result == -1) {
                 if (errno != EINTR) {
-                    LOG_ERROR(format_error(_("select call failed")));
-                    throw execution_exception(_("child i/o failed."));
+                    throw execution_exception(format_error(_("select call failed waiting for child i/o")));
                 }
                 // Interrupted by signal
                 LOG_DEBUG("select call was interrupted and will be retried.");
@@ -245,8 +244,7 @@ namespace leatherman { namespace execution {
                     write(pipe.descriptor, pipe.buffer.c_str(), pipe.buffer.size());
                 if (count < 0) {
                     if (errno != EINTR) {
-                        LOG_ERROR("{1} pipe i/o failed: {2}.", pipe.name, format_error());
-                        throw execution_exception(_("child i/o failed."));
+                        throw execution_exception(_("{1} pipe i/o failed: {2}", pipe.name, format_error()));
                     }
                     // Interrupted by signal
                     LOG_DEBUG("{1} pipe i/o was interrupted and will be retried.", pipe.name);
@@ -503,15 +501,13 @@ namespace leatherman { namespace execution {
             struct sigaction sa = {};
             sa.sa_handler = timer_handler;
             if (sigaction(SIGALRM, &sa, nullptr) == -1) {
-                LOG_ERROR(format_error(_("sigaction failed")));
-                throw execution_exception(format_error(_("failed to setup timer")));
+                throw execution_exception(format_error(_("sigaction failed while setting up timeout")));
             }
 
             itimerval timer = {};
             timer.it_value.tv_sec = static_cast<decltype(timer.it_interval.tv_sec)>(timeout);
             if (setitimer(ITIMER_REAL, &timer, nullptr) == -1) {
-                LOG_ERROR(format_error(_("setitimer failed")));
-                throw execution_exception(format_error(_("failed to setup timer")));
+                throw execution_exception(format_error(_("setitimer failed while setting up timeout")));
             }
 
             // Set the resource to disable the timer
