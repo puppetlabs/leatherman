@@ -216,15 +216,18 @@ msgstr ""
 msgid "select call was interrupted and will be retried."
 msgstr ""
 
-#. error
+#. debug
 #: execution/src/posix/execution.cc
-#: execution/src/windows/execution.cc
-msgid "{1} pipe i/o failed: {2}."
+msgid "{1} pipe i/o was closed early, process may have ignored input."
 msgstr ""
 
 #. debug
 #: execution/src/posix/execution.cc
 msgid "{1} pipe i/o was interrupted and will be retried."
+msgstr ""
+
+#: execution/src/posix/execution.cc
+msgid "{1} pipe i/o failed: {2}"
 msgstr ""
 
 #: execution/src/posix/execution.cc
@@ -343,6 +346,11 @@ msgstr ""
 
 #: execution/src/windows/execution.cc
 msgid "failed to create read event."
+msgstr ""
+
+#. error
+#: execution/src/windows/execution.cc
+msgid "{1} pipe i/o failed: {2}."
 msgstr ""
 
 #. error
