@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.2.2]
+
+### Fixed
+- Allow Leatherman.execute calls to opt into allowing tasks to finish without reading stdin (i.e. don't fail when the pipe is closed) via the `allow_stdin_unread` option. This specifically supports pxp-agent's task execution where input may or may not be used. (LTH-149)
+
 ## [1.2.1]
 
 ### Fixed

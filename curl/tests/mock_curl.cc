@@ -99,11 +99,15 @@ CURL *curl_easy_init()
  * option is set, we'll return CURLE_COULDNT_CONNECT for the current
  * option.
  */
+#pragma clang diagnostic push
+// This function signature is required to mock curl, so disable a warning generated from it.
+#pragma clang diagnostic ignored "-Wvarargs"
 CURLcode curl_easy_setopt(CURL *handle, CURLoption option, ...)
 {
     auto h = reinterpret_cast<curl_impl*>(handle);
     va_list vl;
     va_start(vl, option);
+#pragma clang diagnostic pop
 
     switch (option) {
         case CURLOPT_HEADERFUNCTION:
