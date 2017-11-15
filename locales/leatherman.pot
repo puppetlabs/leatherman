@@ -211,13 +211,18 @@ msgstr ""
 msgid "select call was interrupted and will be retried."
 msgstr ""
 
+#. debug
 #: execution/src/posix/execution.cc
-msgid "{1} pipe i/o failed: {2}"
+msgid "{1} pipe i/o was closed early, process may have ignored input."
 msgstr ""
 
 #. debug
 #: execution/src/posix/execution.cc
 msgid "{1} pipe i/o was interrupted and will be retried."
+msgstr ""
+
+#: execution/src/posix/execution.cc
+msgid "{1} pipe i/o failed: {2}"
 msgstr ""
 
 #: execution/src/posix/execution.cc
