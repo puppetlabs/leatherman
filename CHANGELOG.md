@@ -11,11 +11,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Builds with Xcode 9
+- Allow Leatherman.execute calls to opt into allowing tasks to finish without reading stdin (i.e. don't fail when the pipe is closed) via the `allow_stdin_unread` option. This specifically supports pxp-agent's task execution where input may or may not be used. (LTH-149)
 
 ## [1.3.0]
 
 ### Added
 - A toPrettyJson routine to Leatherman.json\_container that pretty prints a valid JSON object.
+
+## [1.2.2]
+
+### Fixed
+- Allow Leatherman.execute calls to opt into allowing tasks to finish without reading stdin (i.e. don't fail when the pipe is closed) via the `allow_stdin_unread` option. This specifically supports pxp-agent's task execution where input may or may not be used. (LTH-149)
 
 ## [1.2.1]
 

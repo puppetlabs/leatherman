@@ -83,6 +83,10 @@ namespace leatherman { namespace execution {
          */
         thread_safe = (1 << 11),
         /**
+         * Allow standard input to be unread, rather than failing if it is ignored.
+         */
+        allow_stdin_unread = (1 << 12),
+        /**
          * A combination of all throw options.
          */
         throw_on_failure = throw_on_nonzero_exit | throw_on_signal,

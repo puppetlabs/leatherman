@@ -186,7 +186,7 @@ namespace leatherman { namespace execution {
         bool read;
     };
 
-    static void rw_from_child(pid_t child, array<pipe, 3>& pipes, uint32_t timeout)
+    static void rw_from_child(pid_t child, array<pipe, 3>& pipes, uint32_t timeout, bool allow_stdin_unread)
     {
         // Each pipe is a tuple of descriptor, buffer to use to read data, and a callback to call when data is read
         // The input pair is a descriptor and text to write to it
@@ -243,12 +243,17 @@ namespace leatherman { namespace execution {
                     read(pipe.descriptor, &pipe.buffer[0], pipe.buffer.size()) :
                     write(pipe.descriptor, pipe.buffer.c_str(), pipe.buffer.size());
                 if (count < 0) {
-                    if (errno != EINTR) {
-                        throw execution_exception(_("{1} pipe i/o failed: {2}", pipe.name, format_error()));
+                    if (allow_stdin_unread && !pipe.read && errno == EPIPE) {
+                        // Input pipe was closed prematurely due to process exit, log and let it go.
+                        LOG_DEBUG("{1} pipe i/o was closed early, process may have ignored input.", pipe.name);
+                        pipe.descriptor = {};
+                        continue;
+                    } else if (errno == EINTR) {
+                        // Interrupted by signal
+                        LOG_DEBUG("{1} pipe i/o was interrupted and will be retried.", pipe.name);
+                        continue;
                     }
-                    // Interrupted by signal
-                    LOG_DEBUG("{1} pipe i/o was interrupted and will be retried.", pipe.name);
-                    continue;
+                    throw execution_exception(_("{1} pipe i/o failed: {2}", pipe.name, format_error()));
                 } else if (count == 0) {
                     // Pipe has closed
                     pipe.descriptor = {};
@@ -536,7 +541,7 @@ namespace leatherman { namespace execution {
                 input ? pipe("stdin", move(stdin_write), *input) : pipe("", {}, "")
             }};
 
-            rw_from_child(child, pipes, timeout);
+            rw_from_child(child, pipes, timeout, options[execution_options::allow_stdin_unread]);
         });
 
         // Close the read pipes
