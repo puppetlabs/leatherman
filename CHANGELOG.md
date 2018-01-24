@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.12.3]
+
+This is a maintenance release to re-sync the code version with the tag, in order to make our internal automation happy
+
+## [0.12.2]
+
+### Added
+- Leatherman can now be built with DEP on Windows
+
 ## [0.12.1]
 
 ### Fixed
