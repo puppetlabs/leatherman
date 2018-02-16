@@ -81,8 +81,8 @@ endmacro()
 macro(leatherman_install)
     install(TARGETS ${ARGV}
         RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib${LIB_SUFFIX}
-        ARCHIVE DESTINATION lib${LIB_SUFFIX})
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
     foreach(ARG ${ARGV})
         if (TARGET ${ARG})
             set_target_properties(${ARG} PROPERTIES PREFIX "" IMPORT_PREFIX "")

@@ -42,8 +42,10 @@ Leatherman is broken up into a number of focused component
 libraries. Both methods of using Leatherman allow you to control which
 components are built and used.
 
-Library install locations can be controlled using the LIB_SUFFIX
-variable, which results in installing libraries to `lib${LIB_SUFFIX}`.
+Library install locations can be controlled using the `CMAKE_INSTALL_LIBDIR`
+variable, which results in installing libraries to `CMAKE_INSTALL_LIBDIR`. It
+will default to a platform-specific directory if its value is not provided
+(e.g. on Fedora 26, this value is lib64).
 
 ### Dependencies
 

@@ -124,7 +124,7 @@ if (LEATHERMAN_INSTALL)
         cmake/normalize_pot.cmake
         cmake/generate_translations.cmake
     )
-    set(INSTALL_LOC "lib${LIB_SUFFIX}/cmake/leatherman")
+    set(INSTALL_LOC "${CMAKE_INSTALL_LIBDIR}/cmake/leatherman")
     install(FILES
         ${CMAKE_FILES}
         "${PROJECT_BINARY_DIR}/cmake/leatherman.cmake"
