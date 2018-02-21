@@ -367,3 +367,13 @@ macro(unpack_vendored pkg extracted_dir dir)
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/src
         )
 endmacro(unpack_vendored)
+
+# Usage: set_cmake_install_rpath
+#
+# Sets RPATH if not installing to a system library directory
+macro(set_cmake_install_rpath)
+  list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" INSTALL_IS_SYSTEM_DIR)
+  if ("${INSTALL_IS_SYSTEM_DIR}" STREQUAL "-1")
+      set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+  endif()
+endmacro(set_cmake_install_rpath)
