@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.12.4]
+
+- LIB\_SUFFIX has been replaced by CMAKE\_INSTALL\_LIBDIR, which is a default provided by the GNUInstallDirs module (FACT-1772)
+- A new cmake macro, `set_cmake_install_rpath` was added that sets the RPATH for a C++ project that is not being installed to a system library directory
+
 ## [0.12.3]
 
 This is a maintenance release to re-sync the code version with the tag, in order to make our internal automation happy
