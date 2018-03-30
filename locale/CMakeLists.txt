@@ -1,11 +1,18 @@
 if (LEATHERMAN_USE_LOCALES)
     find_package(Boost 1.54 REQUIRED COMPONENTS locale system)
+    if (BOOST_STATIC AND LEATHERMAN_USE_ICU)
+        find_package(ICU COMPONENTS i18n uc)
+    endif()
 else()
     find_package(Boost 1.54 REQUIRED regex)
 endif()
 
 add_leatherman_includes(${Boost_INCLUDE_DIRS})
 add_leatherman_deps(${Boost_LIBRARIES})
+
+if (ICU_LIBRARIES)
+    add_leatherman_deps(${ICU_LIBRARIES})
+endif()
 
 if (LEATHERMAN_USE_LOCALES AND BOOST_STATIC AND APPLE)
     # Boost.Locale relies on libiconv; if not using shared boost libraries

@@ -69,6 +69,15 @@ This is a pre-release version for Leatherman 1.0.0, containing backwards-incompa
 ### Changed
 - Remove Ruby bindings for Fixnum and Bignum, replace with Integer for Ruby 2.4 support (LTH-124)
 
+## [0.12.3]
+
+This is a maintenance release to re-sync the code version with the tag, in order to make our internal automation happy
+
+## [0.12.2]
+
+### Added
+- Leatherman can now be built with DEP on Windows
+
 ## [0.12.1]
 
 ### Fixed
