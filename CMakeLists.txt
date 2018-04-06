@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2.2)
-project(leatherman VERSION 0.12.4)
+project(leatherman VERSION 0.12.5)
 
 if (WIN32)
     link_libraries("-Wl,--nxcompat -Wl,--dynamicbase")
