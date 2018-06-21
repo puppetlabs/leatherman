@@ -236,6 +236,21 @@ TEST_CASE("curl::client CA bundle and SSL setup") {
         REQUIRE(test_impl->cacert == "cacert");
     }
 
+    SECTION("Proxy should be unspecified by default") {
+        auto resp = test_client.get(test_request);
+        CURL* const& handle = test_client.get_handle();
+        auto test_impl = reinterpret_cast<curl_impl* const>(handle);
+        REQUIRE(test_impl->proxy == "");
+    }
+
+    SECTION("cURL should receive the proxy specified in the request") {
+        test_client.set_proxy("proxy");
+        auto resp = test_client.get(test_request);
+        CURL* const& handle = test_client.get_handle();
+        auto test_impl = reinterpret_cast<curl_impl* const>(handle);
+        REQUIRE(test_impl->proxy == "proxy");
+    }
+
     SECTION("Client cert name should be unspecified by default") {
         auto resp = test_client.get(test_request);
         CURL* const& handle = test_client.get_handle();

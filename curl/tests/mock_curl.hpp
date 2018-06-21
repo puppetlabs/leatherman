@@ -40,6 +40,7 @@ struct curl_impl
         ssl_cert_error,
         ssl_key_error,
         protocol_error,
+        proxy_error
     };
 
     error_mode test_failure_mode = error_mode::success;
@@ -56,7 +57,7 @@ struct curl_impl
     std::function<size_t(char*, size_t, size_t, void*)> read_function;
     void* read_data; // Where to read the request body from
 
-    std::string request_url, cookie, cacert, client_cert, client_key;
+    std::string request_url, cookie, cacert, client_cert, client_key, proxy;
     long protocols;
     long connect_timeout;
     http_method method = http_method::get;

@@ -217,6 +217,14 @@ CURLcode curl_easy_setopt(CURL *handle, CURLoption option, ...)
             }
             h->client_cert = va_arg(vl, char*);
             break;
+        case CURLOPT_PROXY:
+            // Set the mock curl proxy to that which was passed in the request.
+            if (h->test_failure_mode == curl_impl::error_mode::proxy_error) {
+                va_end(vl);
+                return CURLE_OUT_OF_MEMORY;
+            }
+            h->proxy = va_arg(vl, char*);
+            break;
         case CURLOPT_SSLKEY:
             // Set the mock curl private keyfile name to that which was passed in the request.
             if (h->test_failure_mode == curl_impl::error_mode::ssl_key_error) {
