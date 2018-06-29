@@ -351,6 +351,13 @@ namespace leatherman { namespace curl {
         void set_client_cert(std::string const& client_cert, std::string const& client_key);
 
         /**
+         * Set proxy information.
+         * @param proxy String with following components [scheme]://[hostname]:[port].
+         *        (see more: https://curl.haxx.se/libcurl/c/CURLOPT_PROXY.html)
+         */
+        void set_proxy(std::string const& proxy);
+
+        /**
          * Set and limit what protocols curl will support
          * @param client_protocols bitmask of CURLPROTO_*
          *        (see more: http://curl.haxx.se/libcurl/c/CURLOPT_PROTOCOLS.html)
@@ -387,6 +394,7 @@ namespace leatherman { namespace curl {
         std::string _ca_cert;
         std::string _client_cert;
         std::string _client_key;
+        std::string _proxy;
         long _client_protocols = CURLPROTO_ALL;
 
         response perform(http_method method, request const& req);
@@ -407,6 +415,7 @@ namespace leatherman { namespace curl {
         LEATHERMAN_CURL_NO_EXPORT void set_client_info(context &ctx);
         LEATHERMAN_CURL_NO_EXPORT void set_ca_info(context& ctx);
         LEATHERMAN_CURL_NO_EXPORT void set_client_protocols(context& ctx);
+        LEATHERMAN_CURL_NO_EXPORT void set_proxy_info(context& ctx);
 
         template <typename ParamType>
         LEATHERMAN_CURL_NO_EXPORT void curl_easy_setopt_maybe(
