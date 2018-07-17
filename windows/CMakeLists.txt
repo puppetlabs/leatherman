@@ -1,4 +1,4 @@
-find_package(Boost 1.54 REQUIRED COMPONENTS filesystem)
+find_package(Boost 1.54 REQUIRED COMPONENTS filesystem regex system)
 
 add_leatherman_deps(Wbemuuid.lib userenv.lib "${Boost_LIBRARIES}")
 add_leatherman_includes("${Boost_INCLUDE_DIRS}")
