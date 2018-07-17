@@ -4,8 +4,11 @@
  */
 #pragma once
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/compare.hpp>
+#pragma GCC diagnostic pop
 #include <functional>
 #include <string>
 #include <vector>
