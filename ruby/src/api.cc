@@ -51,6 +51,7 @@ namespace leatherman { namespace ruby {
         LOAD_SYMBOL(rb_define_singleton_method),
         LOAD_SYMBOL(rb_class_new_instance),
         LOAD_SYMBOL(rb_gv_get),
+        LOAD_SYMBOL(rb_gv_set),
         LOAD_SYMBOL(rb_eval_string),
         LOAD_SYMBOL(rb_funcall),
         LOAD_ALIASED_SYMBOL(rb_funcallv, rb_funcall2),

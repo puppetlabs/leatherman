@@ -210,6 +210,10 @@ namespace leatherman {  namespace ruby {
         /**
          * See MRI documentation.
          */
+        VALUE (* const rb_gv_set)(char const*, VALUE);
+        /**
+         * See MRI documentation.
+         */
         VALUE (* const rb_eval_string)(char const*);
         /**
          * See MRI documentation.
