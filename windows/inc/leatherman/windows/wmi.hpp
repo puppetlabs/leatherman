@@ -44,6 +44,11 @@ namespace leatherman { namespace windows {
         constexpr static char const* computersystemproduct = "Win32_ComputerSystemProduct";
 
         /**
+         * Identifier for the WMI property UUID
+         */
+        constexpr static char const* uuid = "UUID";
+
+        /**
          * Identifier for the WMI class Win32_OperatingSystem
          */
         constexpr static char const* operatingsystem = "Win32_OperatingSystem";
