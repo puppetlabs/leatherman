@@ -15,15 +15,15 @@ script:
     make $TARGET DESTDIR=/leatherman/dest -j2 &&
     { [ '$COVERALLS' == 'ON' ] && coveralls --gcov-options '\-lp' -r . -b . -e src -e vendor >/dev/null || true; }
     "
-  - if [ "$DO_RELEASE" == "true" ]; then tar czvf leatherman.tar.gz `find dest -type f -print`; fi
+  - if [ "$DO_RELEASE" == "true" ]; then tar czvf leatherman${PKG_SUFFIX}.tar.gz `find dest -type f -print`; fi
 
 env:
   matrix:
     - TARGET=cpplint
     - TARGET=cppcheck
-    - TARGET="all test install ARGS=-V" DO_RELEASE=true EXTRA_VARS="-DBOOST_STATIC=ON"
+    - TARGET="all test install ARGS=-V" DO_RELEASE=true PKG_SUFFIX="" EXTRA_VARS="-DBOOST_STATIC=ON"
+    - TARGET="all test install ARGS=-V" DO_RELEASE=true PKG_SUFFIX="-dynamic" EXTRA_VARS="-DLEATHERMAN_SHARED=ON"
     - TARGET="all test install ARGS=-V" EXTRA_VARS="-DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON" COVERALLS=ON
-    - TARGET="all test install ARGS=-V" EXTRA_VARS="-DLEATHERMAN_SHARED=ON"
     - TARGET="all test install ARGS=-V" EXTRA_VARS="-DLEATHERMAN_USE_LOCALES=OFF"
     - TARGET="all test install ARGS=-V" EXTRA_VARS="-DLEATHERMAN_GETTEXT=OFF"
 
@@ -31,7 +31,8 @@ deploy:
   provider: releases
   api_key:
     secure: XARXGAo5DNbqu7/EVPlKocdAAdtVqui2yaJiqw8GVXMSsK5lxqkHNfm1UF204y9ONl7DTa1hzBS8VRLupfb2aIjIZWMM68tnWYbyJYNdRUevylPTK01rO9wpR8iVe7xFqQOlDXPrX0UVfKCvf+e1j+IleO5Eyjf1mTLIRR3fuOY=
-  file: leatherman.tar.gz
+  file_glob: true
+  file: leatherman*.tar.gz
   skip_cleanup: true
   on:
     repo: puppetlabs/leatherman
