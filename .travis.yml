@@ -21,11 +21,11 @@ env:
   matrix:
     - TARGET=cpplint
     - TARGET=cppcheck
-    - TARGET="all test install ARGS=-V" DO_RELEASE=true PKG_SUFFIX="" EXTRA_VARS="-DBOOST_STATIC=ON"
-    - TARGET="all test install ARGS=-V" DO_RELEASE=true PKG_SUFFIX="-dynamic" EXTRA_VARS="-DLEATHERMAN_SHARED=ON"
-    - TARGET="all test install ARGS=-V" EXTRA_VARS="-DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON" COVERALLS=ON
-    - TARGET="all test install ARGS=-V" EXTRA_VARS="-DLEATHERMAN_USE_LOCALES=OFF"
-    - TARGET="all test install ARGS=-V" EXTRA_VARS="-DLEATHERMAN_GETTEXT=OFF"
+    - TARGET="all test install ARGS=-v" DO_RELEASE=true PKG_SUFFIX="" EXTRA_VARS="-DBOOST_STATIC=ON"
+    - TARGET="all test install ARGS=-v" DO_RELEASE=true PKG_SUFFIX="-dynamic" EXTRA_VARS="-DLEATHERMAN_SHARED=ON"
+    - TARGET="all test install ARGS=-v" EXTRA_VARS="-DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON" COVERALLS=ON
+    - TARGET="all test install ARGS=-v" EXTRA_VARS="-DLEATHERMAN_USE_LOCALES=OFF"
+    - TARGET="all test install ARGS=-v" EXTRA_VARS="-DLEATHERMAN_GETTEXT=OFF"
 
 deploy:
   provider: releases
