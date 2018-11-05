@@ -314,9 +314,13 @@ namespace leatherman { namespace execution {
         }
 
         // Close all open file descriptors above stderr
+#if defined(__FreeBSD__)
+        closefrom(STDERR_FILENO + 1);
+#else
         for (uint64_t i = (STDERR_FILENO + 1); i < max_fd; ++i) {
             close(i);
         }
+#endif
 
         // Execute the given program; this should not return if successful
         execve(program, const_cast<char* const*>(argv), const_cast<char* const*>(envp));
