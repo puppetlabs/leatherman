@@ -1,4 +1,5 @@
 include(leatherman)
+defoption(ENABLE_CXX_WERROR "Enables the -Werror compiler option" ON)
 defoption(COVERALLS "Generate code coverage using Coveralls.io" OFF)
 defoption(BOOST_STATIC "Use Boost's static libraries" OFF)
 defoption(CURL_STATIC "Use curl's static libraries" OFF)
