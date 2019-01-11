@@ -2,7 +2,7 @@ find_package(Boost 1.54 REQUIRED COMPONENTS regex)
 find_package(RapidJSON 1.1.0 REQUIRED)
 
 add_leatherman_deps("${Boost_LIBRARIES}")
-add_leatherman_includes("${Boost_INCLUDE_DIRS} ${RAPIDJSON_INCLUDE_DIRS}")
+add_leatherman_includes("${Boost_INCLUDE_DIRS}" "${RAPIDJSON_INCLUDE_DIRS}")
 
 leatherman_dependency(locale)
 
