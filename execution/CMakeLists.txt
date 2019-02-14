@@ -63,3 +63,8 @@ if (BUILDING_LEATHERMAN)
         "${CMAKE_CURRENT_LIST_DIR}/tests/fixtures.hpp"
     )
 endif()
+
+check_library_exists(c closefrom /lib CLOSEFROM_IN_LIBC)
+if ("${CLOSEFROM_IN_LIBC}" STREQUAL "1")
+    add_compile_definitions(HAS_CLOSEFROM)
+endif()

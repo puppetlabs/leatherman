@@ -314,7 +314,7 @@ namespace leatherman { namespace execution {
         }
 
         // Close all open file descriptors above stderr
-#if defined(__FreeBSD__)
+#ifdef HAS_CLOSEFROM
         closefrom(STDERR_FILENO + 1);
 #else
         for (uint64_t i = (STDERR_FILENO + 1); i < max_fd; ++i) {
