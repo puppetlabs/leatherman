@@ -35,7 +35,7 @@ namespace nowide {
     inline char *getenv(char const *key)
     {
         static stackstring value;
-        
+
         wshort_stackstring name;
         if(!name.convert(key))
             return 0;
@@ -61,7 +61,7 @@ namespace nowide {
     }
     ///
     /// \brief  UTF-8 aware setenv, \a key - the variable name, \a value is a new UTF-8 value,
-    /// 
+    ///
     /// if override is not 0, that the old value is always overridded, otherwise,
     /// if the variable exists it remains unchanged
     ///
@@ -101,14 +101,14 @@ namespace nowide {
     {
         char const *key = string;
         char const *key_end = string;
-        while(*key_end!='=' && key_end!='\0')
+        while(*key_end!='=' && *key_end!='\0')
             key_end++;
         if(*key_end == '\0')
             return -1;
         wshort_stackstring wkey;
         if(!wkey.convert(key,key_end))
             return -1;
-        
+
         wstackstring wvalue;
         if(!wvalue.convert(key_end+1))
             return -1;
