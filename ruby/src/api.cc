@@ -112,6 +112,7 @@ namespace leatherman { namespace ruby {
         LOAD_SYMBOL(rb_eLoadError),
         LOAD_OPTIONAL_SYMBOL(ruby_setup),
         LOAD_SYMBOL(ruby_init),
+        LOAD_SYMBOL(ruby_sysinit),
         LOAD_SYMBOL(ruby_options),
         LOAD_SYMBOL(ruby_cleanup),
         _library(move(library))
@@ -157,13 +158,13 @@ namespace leatherman { namespace ruby {
         }
 
         if (_library.first_load()) {
-            // Run an empty script evaluation
-            // ruby_options is a required call as it sets up some important stuff (unfortunately)
-            char const* opts[] = {
-                "ruby",
-                "-e",
-                ""
+            // Calling ruby_sysinit to initialize windows sockets due to the change in
+            // https://github.com/ruby/ruby/commit/e33b1690d06f867e45750bd8e3e8b06d78b5bc26
+            int sysinit_opts_size = 1;
+            char const* sysinit_opts[] = {
+                "ruby"
             };
+            ruby_sysinit(&sysinit_opts_size, reinterpret_cast<char***>(&sysinit_opts));
 
             // Check for bundler; this is the only ruby option we support
             string ruby_opt;
@@ -174,6 +175,13 @@ namespace leatherman { namespace ruby {
                 environment::set("RUBYOPT", "");
             }
 
+            // Run an empty script evaluation
+            // ruby_options is a required call as it sets up some important stuff (unfortunately)
+            char const* opts[] = {
+                "ruby",
+                "-e",
+                ""
+            };
             ruby_options(sizeof(opts) / sizeof(opts[0]), const_cast<char**>(opts));
         }
 
