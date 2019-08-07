@@ -709,6 +709,7 @@ namespace leatherman {  namespace ruby {
         // Imported Ruby functions that should not be called externally
         int (* const ruby_setup)();
         void (* const ruby_init)();
+        void (* const ruby_sysinit)(int*, char***);
         void* (* const ruby_options)(int, char**);
         int (* const ruby_cleanup)(volatile int);
 
