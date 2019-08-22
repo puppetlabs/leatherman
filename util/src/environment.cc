@@ -5,6 +5,18 @@ using namespace std;
 
 namespace leatherman { namespace util {
 
+    int environment::get_int(string const& name, int default_value)
+    {
+        auto variable = boost::nowide::getenv(name.c_str());
+
+        try {
+            return stoi(variable);
+        }
+        catch (...) {
+            return default_value;
+        }
+    }
+
     bool environment::get(string const& name, string& value)
     {
         auto variable = boost::nowide::getenv(name.c_str());
