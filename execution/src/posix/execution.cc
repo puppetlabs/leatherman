@@ -314,13 +314,30 @@ namespace leatherman { namespace execution {
         }
 
         // Close all open file descriptors above stderr
-#ifdef HAS_CLOSEFROM
+#if defined(HAS_CLOSEFROM)
         closefrom(STDERR_FILENO + 1);
 #else
+  #if defined(HAS_PROC_PID)
+        uint64_t fd;
+        const char* fdpath = "/proc/self/fd";
+        std::list<uint64_t> fd_list;
+
+        if (is_directory(fdpath)) {
+            for (const directory_entry& dent : directory_iterator(fdpath)) {
+                fd = atol(dent.path().filename().c_str());
+                if (fd >= (STDERR_FILENO + 1)) {
+                    fd_list.push_back(fd);
+                }
+            }
+            for (auto fd : fd_list) {
+                close(fd);
+            }
+        } else  //NOLINT
+  #endif  // HAS_PROC_PID
         for (uint64_t i = (STDERR_FILENO + 1); i < max_fd; ++i) {
             close(i);
         }
-#endif
+#endif  // HAS_CLOSEFROM
 
         // Execute the given program; this should not return if successful
         execve(program, const_cast<char* const*>(argv), const_cast<char* const*>(envp));
