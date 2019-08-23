@@ -9,12 +9,13 @@ top of things.
 
 ## Getting Started
 
-* Make sure you have a [Jira account](http://tickets.puppetlabs.com)
-* Make sure you have a [GitHub account](https://github.com/signup/free)
-* Submit a ticket for your issue, assuming one does not already exist.
+* Make sure you have a [Jira account](https://tickets.puppetlabs.com).
+* Make sure you have a [GitHub account](https://github.com/signup/free).
+* Submit a Jira ticket for your issue if one does not already exist.
   * Clearly describe the issue including steps to reproduce when it is a bug.
   * Make sure you fill in the earliest version that you know has the issue.
-* Fork the repository on GitHub
+  * A ticket is not necessary for [trivial changes](https://puppet.com/community/trivial-patch-exemption-policy)
+* Fork the repository on GitHub.
 
 ## New Libraries
 
@@ -27,11 +28,27 @@ to setup and use the library.
   * This is usually the master branch.
   * Only target release branches if you are certain your fix must be on that
     branch.
-  * To quickly create a topic branch based on master; `git branch
-    fix/master/my_contribution master` then checkout the new branch with `git
-    checkout fix/master/my_contribution`.  Please avoid working directly on the
+  * If you use leatherman as part of the [puppet-agent](https://github.com/puppetlabs/puppet-agent),
+    double-check the base branch to make sure your fix gets in the correct
+    stream.
+
+    | leatherman | puppet-agent |
+    |------------|--------------|
+    | 1.4.x      | 5.5.x        |
+    | 1.5.x      | 6.0.x        |
+    | 1.6.x      | 6.4.x        |
+    | master     | master       |
+
+    For example, if you use puppet5 you will want to base your work on top of
+    the `1.4.x` branch, so your fix would end up in a subsequent release of
+    puppet-agent `5.5.x`.
+
+    Once merged, your work will be automatically promoted to the other release
+    streams when our internal CI passes.
+  * To quickly create a topic branch based on master, run `git checkout -b
+    fix/master/my_contribution master`. Please avoid working directly on the
     `master` branch.
-* Make commits of logical units.
+* Make commits of logical and atomic units.
 * Check for unnecessary whitespace with `git diff --check` before committing.
 * If you have python 2 in your path you can run `make cpplint` to ensure your
   code formatting is clean. The linter runs as part of Travis CI and could fail
@@ -51,7 +68,7 @@ to setup and use the library.
     problem by making the example concrete and imperative.
 
     The first line is a real life imperative statement with a ticket number
-    from our issue tracker.  The body describes the behavior without the patch,
+    from our issue tracker. The body describes the behavior without the patch,
     why this is a problem, and how the patch fixes the problem when applied.
 ````
 
@@ -60,25 +77,30 @@ to setup and use the library.
 
 ## Making Trivial Changes
 
-### Documentation
+For [changes of a trivial nature](https://puppet.com/community/trivial-patch-exemption-policy), it is not always necessary to create a new
+ticket in Jira. In this case, it is appropriate to start the first line of a
+commit with one of  `(docs)`, `(maint)`, or `(packaging)` instead of a ticket
+number.
 
-For changes of a trivial nature to comments and documentation, it is not
-always necessary to create a new ticket in Jira. In this case, it is
-appropriate to start the first line of a commit with '(doc)' instead of
-a ticket number.
+If a Jira ticket exists for the documentation commit, you can include it
+after the `(docs)` token.
 
-````
-    (doc) Add documentation commit example to CONTRIBUTING
+```
+    (docs)(DOCUMENT-000) Add docs commit example to CONTRIBUTING
 
     There is no example for contributing a documentation commit
     to the Leatherman repository. This is a problem because the contributor
     is left to assume how a commit of this nature may appear.
 
-    The first line is a real life imperative statement with '(doc)' in
-    place of what would have been the ticket number in a
+    The first line is a real-life imperative statement with '(docs)' in
+    place of what would have been the LTH project ticket number in a
     non-documentation related commit. The body describes the nature of
     the new documentation or comments added.
-````
+```
+
+For commits that address trivial repository maintenance tasks or packaging
+issues, start the first line of the commit with `(maint)` or `(packaging)`,
+respectively.
 
 ## Submitting Changes
 
