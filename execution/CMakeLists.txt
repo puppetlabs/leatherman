@@ -68,8 +68,3 @@ check_library_exists(c closefrom /lib CLOSEFROM_IN_LIBC)
 if ("${CLOSEFROM_IN_LIBC}" STREQUAL "1")
     add_definitions(-DHAS_CLOSEFROM)
 endif()
-
-if (IS_DIRECTORY "/proc/self/fd")
-    add_definitions(-DHAS_PROC_PID)
-    message("-- Found /proc")
-endif()

@@ -314,10 +314,9 @@ namespace leatherman { namespace execution {
         }
 
         // Close all open file descriptors above stderr
-#if defined(HAS_CLOSEFROM)
+#ifdef HAS_CLOSEFROM
         closefrom(STDERR_FILENO + 1);
 #else
-  #if defined(HAS_PROC_PID)
         uint64_t fd;
         const char* fdpath = "/proc/self/fd";
         std::list<uint64_t> fd_list;
@@ -332,10 +331,10 @@ namespace leatherman { namespace execution {
             for (auto fd : fd_list) {
                 close(fd);
             }
-        } else  //NOLINT
-  #endif  // HAS_PROC_PID
-        for (uint64_t i = (STDERR_FILENO + 1); i < max_fd; ++i) {
-            close(i);
+        } else {
+            for (uint64_t i = (STDERR_FILENO + 1); i < max_fd; ++i) {
+                close(i);
+            }
         }
 #endif  // HAS_CLOSEFROM
 
