@@ -8,11 +8,14 @@ namespace leatherman { namespace util {
     int environment::get_int(string const& name, int default_value)
     {
         auto variable = boost::nowide::getenv(name.c_str());
+        if (!variable) {
+            return default_value;
+        }
 
         try {
             return stoi(variable);
         }
-        catch (...) {
+        catch (invalid_argument&) {
             return default_value;
         }
     }
