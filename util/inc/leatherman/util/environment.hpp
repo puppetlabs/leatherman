@@ -16,6 +16,14 @@ namespace leatherman { namespace util {
     struct environment
     {
         /**
+         * Gets an environment variable as integer.
+         * @param name The name of the environment variable to get.
+         * @param default_value The value to return if the variable is absent or invalid.
+         * @return Returns the environment variable if present and valid or the default value if not.
+         */
+        static int get_int(std::string const& name, int default_value);
+
+        /**
          * Gets an environment variable.
          * @param name The name of the environment variable to get.
          * @param value Returns the value of the environment variable.

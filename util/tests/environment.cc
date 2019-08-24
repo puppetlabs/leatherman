@@ -15,7 +15,37 @@ SCENARIO("getting an environment variable") {
     boost::nowide::unsetenv("ENVTEST");
     value = "";
     REQUIRE_FALSE(environment::get("ENVTEST", value));
+    REQUIRE(environment::get_int("ENVTEST", 100) == 100);
     REQUIRE(value.empty());
+}
+
+SCENARIO("getting an int environment variable") {
+    boost::nowide::setenv("INTVAR", "100", 1);
+    boost::nowide::setenv("STRVAR", "BAR", 1);
+    boost::nowide::setenv("EMPTYVAR", "", 1);
+    GIVEN("an int variable") {
+        THEN("should return the converted value as int") {
+            REQUIRE(environment::get_int("INTVAR", 1) == 100);
+        }
+        boost::nowide::unsetenv("INTVAR");
+    }
+    GIVEN("a string variable") {
+        THEN("should return the default value") {
+            REQUIRE(environment::get_int("STRVAR", 123) == 123);
+        }
+        boost::nowide::unsetenv("STRVAR");
+    }
+    GIVEN("an empty variable") {
+        THEN("should return the default value") {
+            REQUIRE(environment::get_int("EMPTYVAR", 123) == 123);
+        }
+        boost::nowide::unsetenv("EMPTYVAR");
+    }
+    GIVEN("a non-existent variable") {
+        THEN("should return the default value") {
+            REQUIRE(environment::get_int("NOVAR", 123) == 123);
+        }
+    }
 }
 
 SCENARIO("setting an environment variable") {
