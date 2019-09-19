@@ -6,7 +6,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: leatherman 1.5.0\n"
+"Project-Id-Version: leatherman 1.4.8\n"
 "Report-Msgid-Bugs-To: docs@puppet.com\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -193,8 +193,7 @@ msgstr ""
 msgid "completed processing output: closing child pipes."
 msgstr ""
 
-#: execution/src/posix/execution.cc
-#: windows/src/system_error.cc
+#: execution/src/posix/execution.cc windows/src/system_error.cc
 msgid "{1} ({2})"
 msgstr ""
 
@@ -225,8 +224,7 @@ msgstr ""
 msgid "{1} pipe i/o failed: {2}"
 msgstr ""
 
-#: execution/src/posix/execution.cc
-#: execution/src/windows/execution.cc
+#: execution/src/posix/execution.cc execution/src/windows/execution.cc
 msgid "command timed out after {1} seconds."
 msgstr ""
 
@@ -235,13 +233,11 @@ msgid "{1}={2}"
 msgstr ""
 
 #. debug
-#: execution/src/posix/execution.cc
-#: execution/src/windows/execution.cc
+#: execution/src/posix/execution.cc execution/src/windows/execution.cc
 msgid "{1} was not found on the PATH."
 msgstr ""
 
-#: execution/src/posix/execution.cc
-#: execution/src/windows/execution.cc
+#: execution/src/posix/execution.cc execution/src/windows/execution.cc
 msgid "child process returned non-zero exit status."
 msgstr ""
 
@@ -255,6 +251,10 @@ msgstr ""
 
 #: execution/src/posix/execution.cc
 msgid "failed to allocate pipe for stderr redirection"
+msgstr ""
+
+#: execution/src/posix/execution.cc
+msgid "waitpid was interrupted by a signal, retrying"
 msgstr ""
 
 #: execution/src/posix/execution.cc
@@ -590,8 +590,7 @@ msgid "error finding FOLDERID_ProgramData: {1}"
 msgstr ""
 
 #. debug
-#: windows/src/process.cc
-#: windows/src/user.cc
+#: windows/src/process.cc windows/src/user.cc
 msgid "OpenProcessToken call failed: {1}"
 msgstr ""
 
