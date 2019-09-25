@@ -1,3 +1,5 @@
+find_package(Boost "1.54" REQUIRED COMPONENTS system date_time chrono log log_setup thread filesystem regex locale)
+
 include_directories(BEFORE ${LEATHERMAN_CATCH_INCLUDE} ${LEATHERMAN_INCLUDE_DIRS})
 add_executable(leatherman_test main.cc ${LEATHERMAN_TEST_SRCS})
 
