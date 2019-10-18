@@ -43,6 +43,15 @@ namespace leatherman { namespace windows {
         std::string get_registry_string(HKEY hkey, std::string const& subkey, std::string const& value);
 
         /**
+         * Retrieve a DWORD value from the registry.
+         * @param hkey The registry key handle.
+         * @param subkey The name of the registry key.
+         * @param value The name of the registry value.
+         * @return A integer value corresponding to a REG_DWORD type.
+         */
+        unsigned long get_registry_dword(HKEY hkey, std::string const& subkey, std::string const& value);
+
+        /**
          * Retrieve a vector of string values from the registry.
          * @param hkey The registry key handle.
          * @param subkey The name of the registry key.
