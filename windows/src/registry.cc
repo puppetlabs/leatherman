@@ -34,12 +34,27 @@ namespace leatherman { namespace windows {
     }
 
     // Returns the registry value as a wstring buffer. It's up to the caller to interpret it.
-    // This only really works for RRF_RT_REG_EXPAND_SZ, RRF_RT_REG_MULTI_SZ, and RRF_RT_REG_SZ.
+    // This only really works for RRF_RT_REG_EXPAND_SZ, RRF_RT_REG_MULTI_SZ, RRF_RT_REG_SZ,
+    // and RRF_RT_REG_DWORD.
     static wstring get_regvalue(registry::HKEY hkey, string const& lpSubKey, string const& lpValue, DWORD flags)
     {
         auto hk = get_hkey(hkey);
         auto lpSubKeyW = boost::nowide::widen(lpSubKey);
         auto lpValueW = boost::nowide::widen(lpValue);
+
+        // If we're getting a DWORD we don't care about buffer size and other stuff, so we only need
+        // to call RegGetValueW once.
+        if (flags == RRF_RT_REG_DWORD) {
+            DWORD dwValue;
+            DWORD dwSize = sizeof(dwValue);
+
+            auto err = RegGetValueW(hk, lpSubKeyW.c_str(), lpValueW.c_str(), flags, nullptr, (LPBYTE)&dwValue, &dwSize);
+            if (err != ERROR_SUCCESS) {
+                throw registry_exception(_("error reading registry key {1} {2}: {3}",
+                    lpSubKey, lpValue, windows::system_error(err)));
+            }
+            return std::to_wstring(dwValue);
+        }
 
         DWORD size = 0u;
         auto err = RegGetValueW(hk, lpSubKeyW.c_str(), lpValueW.c_str(), flags, nullptr, nullptr, &size);
@@ -62,6 +77,11 @@ namespace leatherman { namespace windows {
         buffer.resize(numwchars > 0u ? numwchars - 1u : 0u);
 
         return buffer;
+    }
+
+    unsigned long registry::get_registry_dword(registry::HKEY hkey, string const& subkey, string const& value)
+    {
+        return std::stoi(get_regvalue(hkey, subkey, value, RRF_RT_REG_DWORD));
     }
 
     string registry::get_registry_string(registry::HKEY hkey, string const& subkey, string const& value)
