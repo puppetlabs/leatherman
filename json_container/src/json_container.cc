@@ -118,7 +118,7 @@ namespace leatherman { namespace json_container {
                         formatted_data += get<std::string>(key);
                         break;
                     case DataType::Int:
-                        formatted_data += std::to_string(get<int>(key));
+                        formatted_data += std::to_string(get<int64_t>(key));
                         break;
                     case DataType::Bool:
                         if (get<bool>(key)) {
@@ -374,6 +374,19 @@ namespace leatherman { namespace json_container {
         }
 
         return value.GetInt();
+    }
+
+    template<>
+    int64_t JsonContainer::getValue<>(const json_value& value) const {
+        if (value.IsNull()) {
+            return 0;
+        }
+
+        if (!value.IsInt64()) {
+            throw data_type_error { _("not an integer") };
+        }
+
+        return value.GetInt64();
     }
 
     template<>
