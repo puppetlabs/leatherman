@@ -115,6 +115,24 @@ SCENARIO("expanding command paths with execution::expand_command") {
             REQUIRE(expand_command("not_executable", { EXEC_TESTS_DIRECTORY "/fixtures" }) == "");
         }
     }
+    GIVEN("set expand to false with a built-in executable") {
+        THEN("the executable is not expanded to an absolute path") {
+            boost::format fmt = boost::format("cd %1% && ls") % EXEC_TESTS_DIRECTORY;
+            std::string fmtStr = boost::str(fmt);
+            vector<string> lines;
+            string command = expand_command(fmtStr, lines, false );
+            REQUIRE( command == "cd " EXEC_TESTS_DIRECTORY " && ls");
+        }
+    }
+    GIVEN("set expand to true with a built-in executable") {
+        THEN("the executable absolute path is not found") {
+            boost::format fmt = boost::format("cd %1% && ls") % EXEC_TESTS_DIRECTORY;
+            std::string fmtStr = boost::str(fmt);
+            vector<string> lines;
+            string command = expand_command(fmtStr, lines, true );
+            REQUIRE( command == "");
+        }
+    }
 }
 
 SCENARIO("executing commands with execution::execute") {

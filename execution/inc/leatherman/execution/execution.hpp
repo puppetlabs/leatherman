@@ -252,17 +252,19 @@ namespace leatherman { namespace execution {
      * Searches the given paths for the given executable file.
      * @param file The file to search for.
      * @param directories The directories to search.
+     * @param expand default true - expand first command to absolute path if founded in @param directories
      * @return Returns the full path or empty if the file could not be found.
      */
-    std::string which(std::string const& file, std::vector<std::string> const& directories = lth_util::environment::search_paths());
+    std::string which(std::string const& file, std::vector<std::string> const& directories = lth_util::environment::search_paths(), bool expand = true);
 
     /**
-     * Expands the executable in the command to the full path.
+     * Expands the executable in the command to the full path, expand is true, otherwise does not expand
      * @param command The command to expand.
      * @param directories The directories to search.
+     * @param expand default true - expand first command to absolute path if founded in @param directories
      * @return Returns the expanded command if the executable was found or empty if it was not found..
      */
-    std::string expand_command(std::string const& command, std::vector<std::string> const& directories = lth_util::environment::search_paths());
+    std::string expand_command(std::string const& command, std::vector<std::string> const& directories = lth_util::environment::search_paths(), bool expand = true);
 
     /**
      * Executes the given program.

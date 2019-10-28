@@ -26,6 +26,7 @@ using namespace leatherman::util::posix;
 using namespace leatherman::execution;
 using namespace leatherman::logging;
 using namespace leatherman::file_util;
+using namespace boost::algorithm;
 using namespace boost::filesystem;
 
 // Declare environ for OSX
@@ -139,8 +140,33 @@ namespace leatherman { namespace execution {
         return fs.st_mode & S_IXOTH;
     }
 
-    string which(string const& file, vector<string> const& directories)
+    bool is_builtin(string const& file)
     {
+        string data;
+        string cmd = "type ";
+        cmd.append(file);
+        const int buffer_offset = 25;
+        const int max_buffer = buffer_offset + file.length();
+        char buffer[max_buffer];
+        FILE *stream = popen(cmd.c_str(), "r");
+        if (stream != nullptr) {
+            rewind(stream);
+            if (fgets(buffer, max_buffer, stream) != NULL){
+                data.append(buffer);
+            }
+            pclose(stream);
+        }
+
+        return contains(data, "builtin");
+    }
+
+    string which(string const& file, vector<string> const& directories, bool expand)
+    {
+        // if it is builtin, just return it
+        if ( !expand && is_builtin(file) ) {
+            return file;
+        }
+
         // If the file is already absolute, return it if it's executable
         path p = file;
         boost::system::error_code ec;
