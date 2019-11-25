@@ -93,7 +93,7 @@ namespace leatherman { namespace execution {
         LOG_DEBUG("executing command: {1}", command_line.str());
     }
 
-    string expand_command(string const& command, vector<string> const& directories)
+    string expand_command(string const& command, vector<string> const& directories, bool expand)
     {
         string result = command;
         boost::trim(result);
@@ -126,7 +126,7 @@ namespace leatherman { namespace execution {
             }
         }
 
-        file = which(file, directories);
+        file = which(file, directories, expand);
         if (file.empty()) {
             return {};
         }
