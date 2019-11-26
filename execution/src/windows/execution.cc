@@ -72,7 +72,7 @@ namespace leatherman { namespace execution {
         return isfile;
     }
 
-    string which(string const& file, vector<string> const& directories)
+    string which(string const& file, vector<string> const& directories, bool expand)
     {
         // On Windows, everything has execute permission; Ruby determined
         // executability based on extension {com, exe, bat, cmd}. We'll do the
