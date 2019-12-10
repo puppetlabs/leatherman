@@ -1,4 +1,6 @@
 # Leatherman - a C++ toolkit
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fpuppetlabs%2Fleatherman.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fpuppetlabs%2Fleatherman?ref=badge_shield)
+
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -414,3 +416,7 @@ the `nowide` and `catch` CMake files are both solid examples.
 [1]: https://github.com/philsquared/Catch
 [2]: https://github.com/miloyip/rapidjson
 [3]: json_container/README.md
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fpuppetlabs%2Fleatherman.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fpuppetlabs%2Fleatherman?ref=badge_large)
