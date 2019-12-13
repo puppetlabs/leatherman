@@ -5,6 +5,7 @@
 // boost includes are not always warning-clean. Disable warnings that
 // cause problems before including the headers, then re-enable the warnings.
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #include <boost/locale.hpp>
 #pragma GCC diagnostic pop
