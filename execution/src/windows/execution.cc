@@ -76,7 +76,7 @@ namespace leatherman { namespace execution {
     {
         // On Windows is not supported to turn off command expansion by setting expand to false
         if (!expand) {
-            LOG_ERROR("Unsupported argument on Windows expand {1} ", expand);
+            LOG_ERROR("Unsupported argument on Windows expand with value false");
             throw std::invalid_argument("Unsupported argument on Windows");
         }
         // On Windows, everything has execute permission; Ruby determined
