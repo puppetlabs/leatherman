@@ -88,6 +88,18 @@ SCENARIO("expanding command paths with execution::expand_command") {
             REQUIRE(expand_command("not_executable", { EXEC_TESTS_DIRECTORY "/fixtures/windows" }) == "");
         }
     }
+    GIVEN("expand false is treated as an invalid parameter") {
+        THEN("An exception is thrown") {
+            vector<string> lines;
+            REQUIRE_THROWS(expand_command("facts", lines, false ));
+        }
+    }
+    GIVEN("expand true is treated as valid parameter") {
+        THEN("An exception is not thrown") {
+            vector<string> lines;
+            CHECK_NOTHROW(expand_command("facts", lines, true ));
+        }
+    }
 }
 
 SCENARIO("executing commands with execution::execute") {
