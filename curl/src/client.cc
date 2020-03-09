@@ -229,6 +229,7 @@ namespace leatherman { namespace curl {
         set_timeouts(ctx);
         set_write_callbacks(ctx);
         set_ca_info(ctx);
+        set_crl_info(ctx);
         set_client_info(ctx);
         set_client_protocols(ctx);
         set_proxy_info(ctx);
@@ -274,6 +275,7 @@ namespace leatherman { namespace curl {
         set_timeouts(ctx);
         set_write_callbacks(ctx, temp_file.get_fp());
         set_ca_info(ctx);
+        set_crl_info(ctx);
         set_client_info(ctx);
         set_client_protocols(ctx);
         set_proxy_info(ctx);
@@ -305,6 +307,11 @@ namespace leatherman { namespace curl {
     void client::set_ca_cert(string const& cert_file)
     {
         _ca_cert = cert_file;
+    }
+
+    void client::set_client_crl(string const& client_crl)
+    {
+        _client_crl = client_crl;
     }
 
     void client::set_proxy(string const& proxy)
@@ -435,6 +442,14 @@ namespace leatherman { namespace curl {
 
         curl_easy_setopt_maybe(ctx, CURLOPT_SSLCERT, _client_cert.c_str());
         curl_easy_setopt_maybe(ctx, CURLOPT_SSLKEY, _client_key.c_str());
+    }
+
+    void client::set_crl_info(context& ctx){
+        if (_client_crl == "") {
+            return;
+        }
+
+        curl_easy_setopt_maybe(ctx, CURLOPT_CRLFILE, _client_crl.c_str());
     }
 
     void client::set_proxy_info(context &ctx) {

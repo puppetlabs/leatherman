@@ -251,6 +251,21 @@ TEST_CASE("curl::client CA bundle and SSL setup") {
         REQUIRE(test_impl->proxy == "proxy");
     }
 
+    SECTION("CRL should be unspecified by default") {
+        auto resp = test_client.get(test_request);
+        CURL* const& handle = test_client.get_handle();
+        auto test_impl = reinterpret_cast<curl_impl* const>(handle);
+        REQUIRE(test_impl->client_crl == "");
+    }
+
+    SECTION("cURL should receive the CRL specified in the request") {
+        test_client.set_client_crl("/tmp/foo.pem");
+        auto resp = test_client.get(test_request);
+        CURL* const& handle = test_client.get_handle();
+        auto test_impl = reinterpret_cast<curl_impl* const>(handle);
+        REQUIRE(test_impl->client_crl == "/tmp/foo.pem");
+    }
+
     SECTION("Client cert name should be unspecified by default") {
         auto resp = test_client.get(test_request);
         CURL* const& handle = test_client.get_handle();
