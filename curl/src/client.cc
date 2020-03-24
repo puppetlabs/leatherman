@@ -450,6 +450,17 @@ namespace leatherman { namespace curl {
         }
 
         curl_easy_setopt_maybe(ctx, CURLOPT_CRLFILE, _client_crl.c_str());
+
+        #ifdef CURLSSLOPT_NO_PARTIALCHAIN
+        // Curl 7.68 has a bug where it defaults to passing
+        // X509_V_FLAG_PARTIAL_CHAIN to openssl. This breaks CRL
+        // chains, since the crl logic passes
+        // X509_V_FLAG_CRL_CHECK_ALL, which requires a full chain.
+        //
+        // We disable partial chains explicitly here to work around
+        // this.
+        curl_easy_setopt_maybe(ctx, CURLOPT_SSL_OPTIONS, CURLSSLOPT_NO_PARTIALCHAIN);
+        #endif
     }
 
     void client::set_proxy_info(context &ctx) {
