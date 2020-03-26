@@ -351,6 +351,13 @@ namespace leatherman { namespace curl {
         void set_client_cert(std::string const& client_cert, std::string const& client_key);
 
         /**
+         * Set client SSL certificate revocation list.
+         * @param client_crl The path to the client's CRL file.
+         *        (see more: https://curl.haxx.se/libcurl/c/CURLOPT_CRLFILE.html)
+         */
+        void set_client_crl(std::string const& client_crl);
+
+        /**
          * Set proxy information.
          * @param proxy String with following components [scheme]://[hostname]:[port].
          *        (see more: https://curl.haxx.se/libcurl/c/CURLOPT_PROXY.html)
@@ -394,6 +401,7 @@ namespace leatherman { namespace curl {
         std::string _ca_cert;
         std::string _client_cert;
         std::string _client_key;
+        std::string _client_crl;
         std::string _proxy;
         long _client_protocols = CURLPROTO_ALL;
 
@@ -414,6 +422,7 @@ namespace leatherman { namespace curl {
         LEATHERMAN_CURL_NO_EXPORT void set_write_callbacks(context& ctx, FILE* fp);
         LEATHERMAN_CURL_NO_EXPORT void set_client_info(context &ctx);
         LEATHERMAN_CURL_NO_EXPORT void set_ca_info(context& ctx);
+        LEATHERMAN_CURL_NO_EXPORT void set_crl_info(context& ctx);
         LEATHERMAN_CURL_NO_EXPORT void set_client_protocols(context& ctx);
         LEATHERMAN_CURL_NO_EXPORT void set_proxy_info(context& ctx);
 
