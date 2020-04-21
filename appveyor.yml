@@ -38,7 +38,7 @@ deploy:
   description: Leatherman build from AppVeyor
   provider: GitHub
   auth_token:
-    secure: pSPKogvXGsTpt4hZPOWEMPpiwcYCKpTuQODqmsdN34Av6nN640H0DPiK/sKwDhMP
+    secure: RlVaba6k+N1/p56mjknNAwKrXQwQpKRn0SIr+AZ8TuVszFntRxl0qFPHcq4bOMui
   artifact: leatherman.7z
   on:
     appveyor_repo_tag: true
