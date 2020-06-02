@@ -1,5 +1,6 @@
 #include <leatherman/util/environment.hpp>
 #include <boost/nowide/cenv.hpp>
+#include <stdexcept>
 
 using namespace std;
 
