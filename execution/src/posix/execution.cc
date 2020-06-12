@@ -145,7 +145,7 @@ namespace leatherman { namespace execution {
         string data;
         string cmd = "type ";
         cmd.append(file);
-        const int buffer_offset = 25;
+        const int buffer_offset = 128;
         const int max_buffer = buffer_offset + file.length();
         char buffer[max_buffer];
         FILE *stream = popen(cmd.c_str(), "r");
