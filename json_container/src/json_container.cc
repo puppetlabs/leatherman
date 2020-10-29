@@ -620,7 +620,7 @@ namespace leatherman { namespace json_container {
     void JsonContainer::setValue<>(json_value& jval, std::vector<bool> new_value ) {
         jval.SetArray();
 
-        for (const auto& value : new_value) {
+        for (auto value : new_value) {
             json_value tmp_val;
             tmp_val.SetBool(value);
             jval.PushBack(tmp_val, document_root_->GetAllocator());
