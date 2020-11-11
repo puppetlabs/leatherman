@@ -1,8 +1,13 @@
 cmake_minimum_required(VERSION 3.2.2)
 project(leatherman VERSION 1.12.4)
 
+option(DYNAMICBASE "Add dynamicbase linker option" ON)
 if (WIN32)
-    link_libraries("-Wl,--nxcompat -Wl,--dynamicbase")
+    if (DYNAMICBASE)
+        link_libraries("-Wl,--nxcompat -Wl,--dynamicbase")
+    else()
+        link_libraries("-Wl,--nxcompat")
+    endif()
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${PROJECT_BINARY_DIR}/cmake")
