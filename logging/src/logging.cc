@@ -35,6 +35,7 @@ namespace leatherman { namespace logging {
     static log_level g_level = log_level::none;
     static bool g_colorize = false;
     static bool g_error_logged = false;
+    static bool use_event_log = false;
 
     namespace lth_locale = leatherman::locale;
 
@@ -165,14 +166,18 @@ namespace leatherman { namespace logging {
             return;
         }
 
-        src::logger slg;
-        slg.add_attribute("Severity", attrs::constant<log_level>(level));
-        slg.add_attribute("Namespace", attrs::constant<string>(logger));
-        if (line_num > 0) {
-            slg.add_attribute("LineNum", attrs::constant<int>(line_num));
-        }
+        if (use_event_log) {
+            log_eventlog(level, message);
+        } else {
+            src::logger slg;
+            slg.add_attribute("Severity", attrs::constant<log_level>(level));
+            slg.add_attribute("Namespace", attrs::constant<string>(logger));
+            if (line_num > 0) {
+                slg.add_attribute("LineNum", attrs::constant<int>(line_num));
+            }
 
-        BOOST_LOG(slg) << message;
+            BOOST_LOG(slg) << message;
+        }
     }
 
     istream& operator>>(istream& in, log_level& level)
@@ -224,6 +229,16 @@ namespace leatherman { namespace logging {
         }
 
         return strm;
+    }
+
+    void enable_event_log()
+    {
+        use_event_log = true;
+    }
+
+    void disable_event_log()
+    {
+        use_event_log = false;
     }
 
 }}  // namespace leatherman::logging

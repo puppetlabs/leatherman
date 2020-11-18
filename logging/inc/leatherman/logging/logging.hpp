@@ -156,6 +156,13 @@ namespace leatherman { namespace logging {
     void setup_logging(std::ostream &dst, std::string locale = "", std::string domain = PROJECT_NAME, bool use_locale = true);
 
     /**
+     * Registers application to event log and configures event log handle
+     * The logging level is set to warning by default.
+     * @param application Destination stream for logging output.
+     */
+    void setup_eventlog_logging(std::string application);
+
+    /**
      * Sets the current log level.
      * @param level The new current log level to set.
      */
@@ -261,4 +268,8 @@ namespace leatherman { namespace logging {
      */
     bool color_supported(std::ostream &dst);
 
+    // private
+    void log_eventlog(log_level level, std::string const& message);
+    void enable_event_log(void);
+    void disable_event_log(void);
 }}  // namespace leatherman::logging

@@ -36,4 +36,7 @@ namespace leatherman { namespace logging {
         return (&dst == &cout && isatty(fileno(stdout))) || (&dst == &cerr && isatty(fileno(stderr)));
     }
 
+    void log_eventlog(log_level level, string const& message) {
+        throw runtime_error("eventlog is available only on windows");
+    }
 }}  // namespace leatherman::logging
