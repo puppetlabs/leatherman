@@ -41,10 +41,11 @@ namespace leatherman { namespace logging {
         throw runtime_error("eventlog is available only on windows");
     }
 
-    void setup_syslog_logging(string application, syslog_facility facility)
+    void setup_syslog_logging(const char* application, syslog_facility facility)
     {
         int fac = static_cast<int>(facility);
-        openlog(application.c_str(), LOG_PID | LOG_NDELAY, fac);
+
+        openlog(application, LOG_PID | LOG_NDELAY, fac);
 
         // Default to the warning level
         set_level(log_level::warning);
