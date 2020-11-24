@@ -6,7 +6,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: leatherman 1.4.10\n"
+"Project-Id-Version: leatherman 1.12.4\n"
 "Report-Msgid-Bugs-To: docs@puppet.com\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -529,6 +529,11 @@ msgstr ""
 msgid ""
 "invalid log level '{1}': expected none, trace, debug, info, warn, error, or "
 "fatal."
+msgstr ""
+
+#: logging/src/windows/logging.cc
+#, c-format
+msgid "RegisterEventSource failed with 0x%x.\n"
 msgstr ""
 
 #: ruby/src/api.cc
