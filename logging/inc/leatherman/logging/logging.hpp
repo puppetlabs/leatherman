@@ -163,6 +163,13 @@ namespace leatherman { namespace logging {
     void setup_eventlog_logging(std::string application);
 
     /**
+     * Configures application to log to syslog
+     * The logging level is set to warning by default.
+     * @param application Destination stream for logging output.
+     */
+    void setup_syslog_logging(std::string application, int facility = (21<<3));
+
+    /**
      * Sets the current log level.
      * @param level The new current log level to set.
      */
@@ -270,6 +277,9 @@ namespace leatherman { namespace logging {
 
     // private
     void log_eventlog(log_level level, std::string const& message);
+    void log_syslog(log_level level, std::string const& message);
     void enable_event_log(void);
     void disable_event_log(void);
+    void enable_syslog(void);
+    void disable_syslog(void);
 }}  // namespace leatherman::logging

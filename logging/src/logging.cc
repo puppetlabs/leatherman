@@ -36,6 +36,7 @@ namespace leatherman { namespace logging {
     static bool g_colorize = false;
     static bool g_error_logged = false;
     static bool use_event_log = false;
+    static bool use_syslog = false;
 
     namespace lth_locale = leatherman::locale;
 
@@ -168,6 +169,8 @@ namespace leatherman { namespace logging {
 
         if (use_event_log) {
             log_eventlog(level, message);
+        } else if (use_syslog) {
+            log_syslog(level, message);
         } else {
             src::logger slg;
             slg.add_attribute("Severity", attrs::constant<log_level>(level));
@@ -239,6 +242,16 @@ namespace leatherman { namespace logging {
     void disable_event_log()
     {
         use_event_log = false;
+    }
+
+    void enable_syslog()
+    {
+        use_syslog = true;
+    }
+
+    void disable_syslog()
+    {
+        use_syslog = false;
     }
 
 }}  // namespace leatherman::logging
