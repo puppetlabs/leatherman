@@ -33,10 +33,9 @@ namespace leatherman { namespace logging {
 
     static function<bool(log_level, string const&)> g_callback;
     static log_level g_level = log_level::none;
+    static logging_backend g_backend = logging_backend::file;
     static bool g_colorize = false;
     static bool g_error_logged = false;
-    static bool use_event_log = false;
-    static bool use_syslog = false;
 
     namespace lth_locale = leatherman::locale;
 
@@ -167,20 +166,29 @@ namespace leatherman { namespace logging {
             return;
         }
 
-        if (use_event_log) {
+        switch (g_backend) {
+        case logging_backend::eventlog:
             log_eventlog(level, message);
-        } else if (use_syslog) {
+            break;
+        case logging_backend::syslog:
             log_syslog(level, message);
-        } else {
-            src::logger slg;
-            slg.add_attribute("Severity", attrs::constant<log_level>(level));
-            slg.add_attribute("Namespace", attrs::constant<string>(logger));
-            if (line_num > 0) {
-                slg.add_attribute("LineNum", attrs::constant<int>(line_num));
-            }
-
-            BOOST_LOG(slg) << message;
+            break;
+        default:
+            log_boost(logger, level, line_num, message);
+            break;
         }
+    }
+
+    void log_boost(const string &logger, log_level level, int line_num, string const& message)
+    {
+        src::logger slg;
+        slg.add_attribute("Severity", attrs::constant<log_level>(level));
+        slg.add_attribute("Namespace", attrs::constant<string>(logger));
+        if (line_num > 0) {
+            slg.add_attribute("LineNum", attrs::constant<int>(line_num));
+        }
+
+        BOOST_LOG(slg) << message;
     }
 
     istream& operator>>(istream& in, log_level& level)
@@ -236,22 +244,22 @@ namespace leatherman { namespace logging {
 
     void enable_event_log()
     {
-        use_event_log = true;
+        g_backend = logging_backend::eventlog;
     }
 
     void disable_event_log()
     {
-        use_event_log = false;
+        g_backend = logging_backend::file;
     }
 
     void enable_syslog()
     {
-        use_syslog = true;
+        g_backend = logging_backend::syslog;
     }
 
     void disable_syslog()
     {
-        use_syslog = false;
+        g_backend = logging_backend::file;
     }
 
 }}  // namespace leatherman::logging

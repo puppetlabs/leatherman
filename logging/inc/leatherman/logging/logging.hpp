@@ -128,6 +128,8 @@ namespace leatherman { namespace logging {
         fatal
     };
 
+    enum class logging_backend { eventlog, syslog, file };
+
     /**
      * Reads a log level from an input stream.
      * This is used in boost::lexical_cast<log_level>.
@@ -278,6 +280,7 @@ namespace leatherman { namespace logging {
     // private
     void log_eventlog(log_level level, std::string const& message);
     void log_syslog(log_level level, std::string const& message);
+    void log_boost(const std::string &logger, log_level level, int line_num, std::string const& message);
     void enable_event_log(void);
     void disable_event_log(void);
     void enable_syslog(void);
