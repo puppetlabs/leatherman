@@ -160,16 +160,17 @@ namespace leatherman { namespace logging {
     /**
      * Registers application to event log and configures event log handle
      * The logging level is set to warning by default.
-     * @param application Destination stream for logging output.
+     * @param application Application name.
      */
     void setup_eventlog_logging(std::string application);
 
     /**
      * Configures application to log to syslog
      * The logging level is set to warning by default.
-     * @param application Destination stream for logging output.
+     * @param application Application name.
+     * @param facility Syslog facility to log to.
      */
-    void setup_syslog_logging(std::string application, int facility = (21<<3));
+    void setup_syslog_logging(std::string application, int facility);
 
     /**
      * Sets the current log level.

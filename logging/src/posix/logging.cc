@@ -41,7 +41,7 @@ namespace leatherman { namespace logging {
         throw runtime_error("eventlog is available only on windows");
     }
 
-    void setup_syslog_logging(string application, int facility /* = LOG_LOCAL5 */)
+    void setup_syslog_logging(string application, int facility)
     {
         openlog(application.c_str(), LOG_CONS | LOG_PID | LOG_NDELAY, facility);
 
