@@ -65,7 +65,6 @@ namespace leatherman { namespace logging {
             return LOG_INFO;
         case log_level::debug:
         case log_level::trace:
-        case log_level::none:
             return LOG_DEBUG;
         default:
             return LOG_INFO;
@@ -73,8 +72,10 @@ namespace leatherman { namespace logging {
     }
 
     void log_syslog(log_level level, string const &message) {
-        int severity = log_level_to_severity(level);
-        syslog(severity, "%s", message.c_str());
+        if (level != log_level::none) {
+            int severity = log_level_to_severity(level);
+            syslog(severity, "%s", message.c_str());
+        }
     }
 
     void clean_syslog_logging() { closelog(); }
