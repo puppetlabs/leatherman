@@ -198,7 +198,7 @@ namespace leatherman { namespace logging {
      * @param application Application name.
      * @param facility Syslog facility to log to.
      */
-    void setup_syslog_logging(const char* application, syslog_facility facility);
+    void setup_syslog_logging(const char* application, const std::string& facility);
 
     /**
      * Sets the current log level.
