@@ -531,6 +531,10 @@ msgid ""
 "fatal."
 msgstr ""
 
+#: logging/src/posix/logging.cc
+msgid "invalid syslog facility: '{1}'"
+msgstr ""
+
 #: logging/src/windows/logging.cc
 #, c-format
 msgid "RegisterEventSource failed with 0x%x.\n"
