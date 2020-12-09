@@ -129,6 +129,36 @@ namespace leatherman { namespace logging {
     };
 
     /**
+     * Represents the supported logging backends.
+     */
+    enum class logging_backend { eventlog, syslog, file };
+
+    /**
+     * Represents the supported syslog facilities
+     */
+    enum class syslog_facility
+    {
+        kern = (0<<3),
+        user = (1<<3),
+        mail = (2<<3),
+        daemon = (3<<3),
+        auth = (4<<3),
+        syslog = (5<<3),
+        lpr = (6<<3),
+        news = (7<<3),
+        uucp = (8<<3),
+        cron = (9<<3),
+        local0 = (16<<3),
+        local1 = (17<<3),
+        local2 = (18<<3),
+        local3 = (19<<3),
+        local4 = (20<<3),
+        local5 = (21<<3),
+        local6 = (22<<3),
+        local7 = (23<<3),
+    };
+
+    /**
      * Reads a log level from an input stream.
      * This is used in boost::lexical_cast<log_level>.
      * @param in The input stream.
@@ -158,9 +188,17 @@ namespace leatherman { namespace logging {
     /**
      * Registers application to event log and configures event log handle
      * The logging level is set to warning by default.
-     * @param application Destination stream for logging output.
+     * @param application Application name.
      */
     void setup_eventlog_logging(std::string application);
+
+    /**
+     * Configures application to log to syslog
+     * The logging level is set to warning by default.
+     * @param application Application name.
+     * @param facility Syslog facility to log to.
+     */
+    void setup_syslog_logging(const char* application, const std::string& facility);
 
     /**
      * Sets the current log level.
@@ -270,6 +308,10 @@ namespace leatherman { namespace logging {
 
     // private
     void log_eventlog(log_level level, std::string const& message);
+    void log_syslog(log_level level, std::string const& message);
+    void log_boost(const std::string &logger, log_level level, int line_num, std::string const& message);
     void enable_event_log(void);
     void disable_event_log(void);
+    void enable_syslog(void);
+    void disable_syslog(void);
 }}  // namespace leatherman::logging

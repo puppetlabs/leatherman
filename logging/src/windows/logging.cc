@@ -112,6 +112,10 @@ namespace leatherman { namespace logging {
         }
     }
 
+    void log_syslog(log_level level, string const &message) {
+        throw runtime_error("syslog is only available on POSIX platforms");
+    }
+
     void clean_eventlog_logging()
     {
         if (h_event_log) {
