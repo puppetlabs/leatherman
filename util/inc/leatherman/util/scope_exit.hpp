@@ -5,6 +5,7 @@
 #pragma once
 
 #include <functional>
+#include <cstddef>
 
 namespace leatherman { namespace util {
 
@@ -51,9 +52,9 @@ namespace leatherman { namespace util {
     private:
         explicit scope_exit(scope_exit const&) = delete;
         scope_exit& operator=(scope_exit const&) = delete;
-        void* operator new(size_t) = delete;
+        void* operator new(std::size_t) = delete;
         void operator delete(void*) = delete;
-        void* operator new[](size_t) = delete;
+        void* operator new[](std::size_t) = delete;
         void operator delete[](void* ptr) = delete;
 
         std::function<void()> _callback;

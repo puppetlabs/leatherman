@@ -5,6 +5,7 @@
 #pragma once
 
 #include <functional>
+#include <cstddef>
 
 namespace leatherman { namespace util {
     /**
@@ -121,9 +122,9 @@ namespace leatherman { namespace util {
         std::function<void(T&)> _deleter;
 
      private:
-        void* operator new(size_t) = delete;
+        void* operator new(std::size_t) = delete;
         void operator delete(void*) = delete;
-        void* operator new[](size_t) = delete;
+        void* operator new[](std::size_t) = delete;
         void operator delete[](void* ptr) = delete;
     };
 
