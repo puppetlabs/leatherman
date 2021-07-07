@@ -8,6 +8,7 @@ before_install:
 script:
   - >
     docker run -v `pwd`:/leatherman gcr.io/cpp-projects/cpp-ci:1 /bin/bash -c "
+    apk add --no-cache rapidjson-dev &&
     cd /leatherman &&
     rm locales/leatherman.pot &&
     cmake $EXTRA_VARS . &&
