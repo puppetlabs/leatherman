@@ -1,1 +1,1 @@
-add_leatherman_vendored("rapidjson-1.0.2.zip" "rapidjson" "include")
+add_leatherman_vendored("rapidjson-1.1.0.zip" "rapidjson" "include")
