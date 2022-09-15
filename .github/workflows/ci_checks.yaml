@@ -1,0 +1,35 @@
+name: CI Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  ci_checks:
+    strategy:
+      matrix:
+        options:
+          - make_command: cpplint
+          - make_command: cppcheck
+          - make_command: all test install ARGS=-v
+            cmake_extra_vars: -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON
+            coveralls: ON
+          - make_command: all test install ARGS=-v
+            cmake_extra_vars: -DLEATHERMAN_USE_LOCALES=OFF
+          - make_command: all test install ARGS=-v
+            cmake_extra_vars: -DLEATHERMAN_GETTEXT=OFF
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout current pr
+        uses: actions/checkout@v3
+      - name: docker pull and make
+        uses: ./.github/actions/docker_pull_and_make
+        with:
+          cmake_extra_vars: ${{ matrix.options.cmake_extra_vars }}
+          make_command: ${{ matrix.options.make_command }}
+          coveralls: ${{ matrix.options.coveralls }}
