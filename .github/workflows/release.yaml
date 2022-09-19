@@ -1,0 +1,38 @@
+name: Release Jobs
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    strategy:
+      matrix:
+        options:
+          - make_command: all test install ARGS=-v
+            cmake_extra_vars: -DBOOST_STATIC=ON
+          - make_command: all test install ARGS=-v
+            cmake_extra_vars: -DLEATHERMAN_SHARED=ON
+            pkg_suffix: "-dynamic"
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout current pr
+        uses: actions/checkout@v3
+      - name: docker pull and make
+        uses: ./.github/actions/docker_pull_and_make
+        with:
+          cmake_extra_vars: ${{ matrix.options.cmake_extra_vars }}
+          make_command: ${{ matrix.options.make_command }}
+          pkg_suffix: ${{ matrix.options.pkg_suffix }}
+      - name: build release artifact for tags
+        if: startsWith(github.ref, 'refs/tags/')
+        run: tar czvf leatherman${{ matrix.options.pkg_suffix }}.tar.gz `find dest -type f -print`
+      - name: upload release artifacts for tag
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: leatherman${{ matrix.options.pkg_suffix }}.tar.gz

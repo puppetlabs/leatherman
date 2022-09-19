@@ -1,0 +1,33 @@
+name: docker_pull_and_make
+
+inputs:
+  pkg_suffix:
+    description: leatherman package suffix
+    type: string
+  cmake_extra_vars:
+    description: extra vars for cmake
+    type: string
+  make_command:
+    description: make command
+    type: string
+  coveralls:
+    description: on or off
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: pull docker image
+      shell: bash
+      run: docker pull gcr.io/cpp-projects/cpp-ci:1
+    - name: run make
+      shell: bash
+      run: |
+        docker run -v `pwd`:/leatherman gcr.io/cpp-projects/cpp-ci:1 /bin/bash -c "
+        cd /leatherman &&
+        rm locales/leatherman.pot &&
+        cmake ${{ matrix.options.cmake_extra_vars }} . &&
+        mkdir dest &&
+        make ${{ matrix.options.make_command }} DESTDIR=/leatherman/dest -j2 &&
+        { [[ '${{ matrix.options.coveralls }}' == 'ON' ]] && coveralls --gcov-options '\-lp' -r . -b . -e src -e vendor >/dev/null || true; }
+        "
