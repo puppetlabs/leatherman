@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2.2)
-project(leatherman VERSION 1.12.9)
+project(leatherman VERSION 1.12.10)
 
 option(DYNAMICBASE "Add dynamicbase linker option" ON)
 if (WIN32)
