@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout current pr
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: docker pull and make
         uses: ./.github/actions/docker_pull_and_make
         with:
