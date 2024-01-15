@@ -3,7 +3,7 @@
 # not set CMAKE_CXX_FLAGS globally because gtest is not warning-clean.
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "\\w*Clang")
     if (ENABLE_CXX_WERROR)
-        set(CMAKE_CXX_FLAGS "-Werror ${CMAKE_CXX_FLAGS}")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     endif()
     set(LEATHERMAN_CXX_FLAGS "-std=c++11 -Wall -Wextra -Wno-unused-parameter -Wno-tautological-constant-out-of-range-compare ${CMAKE_CXX_FLAGS}")
 

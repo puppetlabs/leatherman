@@ -369,7 +369,7 @@ namespace leatherman { namespace curl {
          * @param client_protocols bitmask of CURLPROTO_*
          *        (see more: http://curl.haxx.se/libcurl/c/CURLOPT_PROTOCOLS.html)
          */
-        void set_supported_protocols(long client_protocols);
+        void set_supported_protocols(std::string client_protocols);
 
      private:
         client(client const&) = delete;
@@ -403,7 +403,7 @@ namespace leatherman { namespace curl {
         std::string _client_key;
         std::string _client_crl;
         std::string _proxy;
-        long _client_protocols = CURLPROTO_ALL;
+        std::string _client_protocols = "ALL"; // see https://curl.se/libcurl/c/CURLOPT_PROTOCOLS_STR.html
 
         response perform(http_method method, request const& req);
         void download_file_helper(request const& req,

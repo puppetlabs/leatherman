@@ -59,7 +59,6 @@ struct curl_impl
     void* read_data; // Where to read the request body from
 
     std::string request_url, cookie, cacert, client_cert, client_key, client_crl, proxy;
-    long protocols;
     long connect_timeout;
     http_method method = http_method::get;
 
@@ -67,6 +66,7 @@ struct curl_impl
 
     std::string read_buffer; // Buffer to test reading the request body
     std::string resp_body;   // Response body which should be written to a context using the write_body function callback
+    std::string protocols;  // Protocols (see CURLOPT_PROTOCOLS_STR)
 
     char* errbuf = 0;
     // Pointer to trigger failure callbacks

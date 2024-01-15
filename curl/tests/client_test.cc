@@ -297,18 +297,18 @@ TEST_CASE("curl::client CA bundle and SSL setup") {
     }
 
     SECTION("cURL should make an HTTP request with the specified HTTP protocol") {
-        test_client.set_supported_protocols(CURLPROTO_HTTP);
+        test_client.set_supported_protocols("HTTP");
         auto resp = test_client.get(test_request);
         CURL* const& handle = test_client.get_handle();
         auto test_impl = reinterpret_cast<curl_impl* const>(handle);
-        REQUIRE(test_impl->protocols == CURLPROTO_HTTP);
+        REQUIRE(test_impl->protocols == "HTTP");
     }
 
     SECTION("cURL defaults to all protocols if no protocols are specified") {
         auto resp = test_client.get(test_request);
         CURL* const& handle = test_client.get_handle();
         auto test_impl = reinterpret_cast<curl_impl* const>(handle);
-        REQUIRE(test_impl->protocols == CURLPROTO_ALL);
+        REQUIRE(test_impl->protocols == "ALL");
     }
 }
 
@@ -418,7 +418,7 @@ TEST_CASE("curl::client errors") {
     }
 
     SECTION("client fails to make http call with https protocol only enabled") {
-        test_client.set_supported_protocols(CURLPROTO_HTTPS);
+        test_client.set_supported_protocols("HTTPS");
         test_impl->test_failure_mode = curl_impl::error_mode::protocol_error;
         REQUIRE_THROWS_AS(test_client.get(test_request), http_curl_setup_exception);
     }
@@ -428,8 +428,9 @@ TEST_CASE("curl::client errors") {
         mock_client test_client;
         temp_directory temp_dir;
         fs::path temp_dir_path = fs::path(temp_dir.get_dir_name()); 
+        // TEMP: handle is a LEATHERMAN_CURL_EXPORT
         CURL* const& handle = test_client.get_handle();
-        auto test_impl = reinterpret_cast<curl_impl* const>(handle);
+        curl_impl* test_impl = reinterpret_cast<curl_impl* const>(handle);
         std::string url = "https://download.com";
 
         SECTION("when a response is not passed in") {
@@ -440,7 +441,7 @@ TEST_CASE("curl::client errors") {
 
                 test_client.set_ca_cert(ca_file);
                 test_client.set_client_cert(cert_file, key_file);
-                test_client.set_supported_protocols(CURLPROTO_HTTPS);
+                test_client.set_supported_protocols("HTTPS");
 
                 std::string file_path = (temp_dir_path / "test_file").string();
                 std::string token = "token";
@@ -455,7 +456,7 @@ TEST_CASE("curl::client errors") {
                 REQUIRE(test_impl->cacert == ca_file);
                 REQUIRE(test_impl->client_cert == cert_file);
                 REQUIRE(test_impl->client_key == key_file);
-                REQUIRE(test_impl->protocols == CURLPROTO_HTTPS);
+                REQUIRE(test_impl->protocols == "HTTPS");
                 REQUIRE(test_impl->connect_timeout == connect_timeout);
                 REQUIRE(std::string(test_impl->header->data) == ("X-Authentication: " + token));
                 if (test_impl->header->next) {
@@ -507,7 +508,7 @@ TEST_CASE("curl::client errors") {
 
               test_client.set_ca_cert(ca_file);
               test_client.set_client_cert(cert_file, key_file);
-              test_client.set_supported_protocols(CURLPROTO_HTTPS);
+              test_client.set_supported_protocols("HTTPS");
 
               std::string file_path = (temp_dir_path / "test_file").string();
               std::string token = "token";
@@ -523,7 +524,7 @@ TEST_CASE("curl::client errors") {
               REQUIRE(test_impl->cacert == ca_file);
               REQUIRE(test_impl->client_cert == cert_file);
               REQUIRE(test_impl->client_key == key_file);
-              REQUIRE(test_impl->protocols == CURLPROTO_HTTPS);
+              REQUIRE(test_impl->protocols == "HTTPS");
               REQUIRE(test_impl->connect_timeout == connect_timeout);
               REQUIRE(std::string(test_impl->header->data) == ("X-Authentication: " + token));
               if (test_impl->header->next) {

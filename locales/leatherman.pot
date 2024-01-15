@@ -6,7 +6,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: leatherman 1.12.4\n"
+"Project-Id-Version: leatherman 1.12.12\n"
 "Report-Msgid-Bugs-To: docs@puppet.com\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -18,6 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: curl/inc/leatherman/curl/client.hpp
+#, c++-format
 msgid "Failed setting up libcurl. Reason: {1}"
 msgstr ""
 
@@ -26,6 +27,7 @@ msgid "curl_easy_escape failed to escape string."
 msgstr ""
 
 #: curl/src/client.cc
+#, c++-format
 msgid "File operation error: {1}"
 msgstr ""
 
@@ -39,11 +41,13 @@ msgstr ""
 
 #. debug
 #: curl/src/client.cc
+#, c++-format
 msgid "Download completed, now writing result to file {1}"
 msgstr ""
 
 #. warning
 #: curl/src/client.cc
+#, c++-format
 msgid ""
 "Failed to write the results of the temporary file to the actual file {1}"
 msgstr ""
@@ -69,6 +73,7 @@ msgstr ""
 
 #. warning
 #: curl/src/client.cc
+#, c++-format
 msgid "Failed to properly clean-up the temporary file {1}"
 msgstr ""
 
@@ -78,6 +83,7 @@ msgstr ""
 
 #. debug
 #: curl/src/client.cc
+#, c++-format
 msgid "request completed (status {1})."
 msgstr ""
 
@@ -86,6 +92,7 @@ msgid "failed to write to the temporary file during download"
 msgstr ""
 
 #: curl/src/client.cc
+#, c++-format
 msgid "File download server side error: {1}"
 msgstr ""
 
@@ -95,71 +102,84 @@ msgstr ""
 
 #. debug
 #: curl/src/client.cc
+#, c++-format
 msgid "requesting {1}."
 msgstr ""
 
 #. warning
 #: curl/src/client.cc
+#, c++-format
 msgid "unexpected HTTP response header: {1}."
 msgstr ""
 
 #. debug
 #: dynamic_library/src/posix/dynamic_library.cc
+#, c++-format
 msgid "library {1} not found {2} ({3})."
 msgstr ""
 
 #. debug
 #: dynamic_library/src/posix/dynamic_library.cc
 #: dynamic_library/src/windows/dynamic_library.cc
+#, c++-format
 msgid "library {1} is not loaded when attempting to load symbol {2}."
 msgstr ""
 
 #. debug
 #: dynamic_library/src/posix/dynamic_library.cc
 #: dynamic_library/src/windows/dynamic_library.cc
+#, c++-format
 msgid "symbol {1} not found in library {2}, trying alias {3}."
 msgstr ""
 
 #: dynamic_library/src/posix/dynamic_library.cc
 #: dynamic_library/src/windows/dynamic_library.cc
+#, c++-format
 msgid "symbol {1} was not found in {2}."
 msgstr ""
 
 #. debug
 #: dynamic_library/src/posix/dynamic_library.cc
 #: dynamic_library/src/windows/dynamic_library.cc
+#, c++-format
 msgid "symbol {1} not found in library {2}."
 msgstr ""
 
 #. debug
 #: dynamic_library/src/windows/dynamic_library.cc
+#, c++-format
 msgid ""
 "library matching pattern {1} not found, CreateToolhelp32Snapshot failed: {2}."
 msgstr ""
 
 #. debug
 #: dynamic_library/src/windows/dynamic_library.cc
+#, c++-format
 msgid "library matching pattern {1} not found, Module32First failed: {2}."
 msgstr ""
 
 #. debug
 #: dynamic_library/src/windows/dynamic_library.cc
+#, c++-format
 msgid "library {1} found from pattern {2}"
 msgstr ""
 
 #. debug
 #: dynamic_library/src/windows/dynamic_library.cc
+#, c++-format
 msgid ""
 "library {1} found from pattern {2}, but unloaded before handle was acquired"
 msgstr ""
 
 #. debug
 #: dynamic_library/src/windows/dynamic_library.cc
+#, c++-format
 msgid "no loaded libraries found matching pattern {1}"
 msgstr ""
 
 #. debug
 #: dynamic_library/src/windows/dynamic_library.cc
+#, c++-format
 msgid "library {1} not found {2}."
 msgstr ""
 
@@ -169,10 +189,12 @@ msgstr ""
 
 #. debug
 #: execution/src/execution.cc
+#, c++-format
 msgid "executing command: {1}"
 msgstr ""
 
 #: execution/src/execution.cc
+#, c++-format
 msgid "failed to open output file {1}"
 msgstr ""
 
@@ -181,6 +203,7 @@ msgid "failed to modify permissions on output file {1} to {2,num,oct}: {3}"
 msgstr ""
 
 #: execution/src/execution.cc
+#, c++-format
 msgid "failed to open error file {1}"
 msgstr ""
 
@@ -193,11 +216,14 @@ msgstr ""
 msgid "completed processing output: closing child pipes."
 msgstr ""
 
-#: execution/src/posix/execution.cc windows/src/system_error.cc
+#: execution/src/posix/execution.cc
+#: windows/src/system_error.cc
+#, c++-format
 msgid "{1} ({2})"
 msgstr ""
 
 #: execution/src/posix/execution.cc
+#, c++-format
 msgid "{1}: {2} ({3})."
 msgstr ""
 
@@ -212,32 +238,41 @@ msgstr ""
 
 #. debug
 #: execution/src/posix/execution.cc
+#, c++-format
 msgid "{1} pipe i/o was closed early, process may have ignored input."
 msgstr ""
 
 #. debug
 #: execution/src/posix/execution.cc
+#, c++-format
 msgid "{1} pipe i/o was interrupted and will be retried."
 msgstr ""
 
 #: execution/src/posix/execution.cc
+#, c++-format
 msgid "{1} pipe i/o failed: {2}"
 msgstr ""
 
-#: execution/src/posix/execution.cc execution/src/windows/execution.cc
+#: execution/src/posix/execution.cc
+#: execution/src/windows/execution.cc
+#, c++-format
 msgid "command timed out after {1} seconds."
 msgstr ""
 
 #: execution/src/posix/execution.cc
+#, c++-format
 msgid "{1}={2}"
 msgstr ""
 
 #. debug
-#: execution/src/posix/execution.cc execution/src/windows/execution.cc
+#: execution/src/posix/execution.cc
+#: execution/src/windows/execution.cc
+#, c++-format
 msgid "{1} was not found on the PATH."
 msgstr ""
 
-#: execution/src/posix/execution.cc execution/src/windows/execution.cc
+#: execution/src/posix/execution.cc
+#: execution/src/windows/execution.cc
 msgid "child process returned non-zero exit status."
 msgstr ""
 
@@ -271,19 +306,23 @@ msgstr ""
 
 #. debug
 #: execution/src/posix/execution.cc
+#, c++-format
 msgid "process was signaled with signal {1}."
 msgstr ""
 
 #. debug
 #: execution/src/posix/execution.cc
+#, c++-format
 msgid "process exited with status code {1}."
 msgstr ""
 
 #: execution/src/posix/execution.cc
+#, c++-format
 msgid "child process returned non-zero exit status ({1})."
 msgstr ""
 
 #: execution/src/posix/execution.cc
+#, c++-format
 msgid "child process was terminated by signal ({1})."
 msgstr ""
 
@@ -314,11 +353,13 @@ msgid "Unsupported argument on Windows expand with value false"
 msgstr ""
 
 #: execution/src/windows/execution.cc
+#, c++-format
 msgid "\\\\.\\Pipe\\leatherman.{1}.{2}.{3}.{4}"
 msgstr ""
 
 #. error
 #: execution/src/windows/execution.cc
+#, c++-format
 msgid "failed to create read pipe: {1}."
 msgstr ""
 
@@ -328,6 +369,7 @@ msgstr ""
 
 #. error
 #: execution/src/windows/execution.cc
+#, c++-format
 msgid "failed to create write pipe: {1}."
 msgstr ""
 
@@ -337,6 +379,7 @@ msgstr ""
 
 #. error
 #: execution/src/windows/execution.cc
+#, c++-format
 msgid "failed to create {1} read event: {2}."
 msgstr ""
 
@@ -346,6 +389,7 @@ msgstr ""
 
 #. error
 #: execution/src/windows/execution.cc
+#, c++-format
 msgid "{1} pipe i/o failed: {2}."
 msgstr ""
 
@@ -355,6 +399,7 @@ msgstr ""
 
 #. error
 #: execution/src/windows/execution.cc
+#, c++-format
 msgid "failed to wait for child process i/o: {1}."
 msgstr ""
 
@@ -364,6 +409,7 @@ msgstr ""
 
 #. error
 #: execution/src/windows/execution.cc
+#, c++-format
 msgid "asynchronous i/o on {1} failed: {2}."
 msgstr ""
 
@@ -377,6 +423,7 @@ msgstr ""
 
 #. debug
 #: execution/src/windows/execution.cc
+#, c++-format
 msgid "child environment {1}={2}"
 msgstr ""
 
@@ -390,6 +437,7 @@ msgstr ""
 
 #. error
 #: execution/src/windows/execution.cc
+#, c++-format
 msgid "failed to create process: {1}."
 msgstr ""
 
@@ -399,6 +447,7 @@ msgstr ""
 
 #. error
 #: execution/src/windows/execution.cc
+#, c++-format
 msgid "failed to create job object: {1}."
 msgstr ""
 
@@ -408,6 +457,7 @@ msgstr ""
 
 #. error
 #: execution/src/windows/execution.cc
+#, c++-format
 msgid "failed to associate process with job object: {1}."
 msgstr ""
 
@@ -417,16 +467,19 @@ msgstr ""
 
 #. error
 #: execution/src/windows/execution.cc
+#, c++-format
 msgid "failed to terminate process: {1}."
 msgstr ""
 
 #. warning
 #: execution/src/windows/execution.cc
+#, c++-format
 msgid "could not terminate process {1} because a job object could not be used."
 msgstr ""
 
 #. error
 #: execution/src/windows/execution.cc
+#, c++-format
 msgid "failed to create waitable timer: {1}."
 msgstr ""
 
@@ -436,6 +489,7 @@ msgstr ""
 
 #. error
 #: execution/src/windows/execution.cc
+#, c++-format
 msgid "failed to set waitable timer: {1}."
 msgstr ""
 
@@ -445,6 +499,7 @@ msgstr ""
 
 #. error
 #: execution/src/windows/execution.cc
+#, c++-format
 msgid "failed to wait for child process to terminate: {1}."
 msgstr ""
 
@@ -458,6 +513,7 @@ msgstr ""
 
 #. debug
 #: execution/src/windows/execution.cc
+#, c++-format
 msgid "process exited with exit code {1}."
 msgstr ""
 
@@ -468,15 +524,18 @@ msgstr ""
 
 #. debug
 #: file_util/src/file.cc
+#, c++-format
 msgid "Error reading file: {1}"
 msgstr ""
 
 #: file_util/src/file.cc
+#, c++-format
 msgid "failed to open {1}"
 msgstr ""
 
 #. warning
 #: file_util/src/file.cc
+#, c++-format
 msgid "{1} has not been set"
 msgstr ""
 
@@ -498,6 +557,7 @@ msgid "invalid json"
 msgstr ""
 
 #: json_container/src/json_container.cc
+#, c++-format
 msgid "unknown object entry with key: {1}"
 msgstr ""
 
@@ -526,12 +586,14 @@ msgid "not a double"
 msgstr ""
 
 #: logging/src/logging.cc
+#, c++-format
 msgid ""
 "invalid log level '{1}': expected none, trace, debug, info, warn, error, or "
 "fatal."
 msgstr ""
 
 #: logging/src/posix/logging.cc
+#, c++-format
 msgid "invalid syslog facility: '{1}'"
 msgstr ""
 
@@ -546,6 +608,7 @@ msgstr ""
 
 #. info
 #: ruby/src/api.cc
+#, c++-format
 msgid "ruby loaded from \"{1}\"."
 msgstr ""
 
@@ -556,24 +619,29 @@ msgstr ""
 
 #. info
 #: ruby/src/api.cc
+#, c++-format
 msgid "using ruby version {1}"
 msgstr ""
 
 #: ruby/src/api.cc
+#, c++-format
 msgid "size_t maximum exceeded, requested size was {1}"
 msgstr ""
 
 #: ruby/src/api.cc
+#, c++-format
 msgid "maximum array size exceeded, reported size was {1}"
 msgstr ""
 
 #. warning
 #: ruby/src/api.cc
+#, c++-format
 msgid "preferred ruby library \"{1}\" could not be loaded."
 msgstr ""
 
 #. warning
 #: ruby/src/api.cc
+#, c++-format
 msgid "ruby library \"{1}\" could not be loaded."
 msgstr ""
 
@@ -584,32 +652,39 @@ msgstr ""
 
 #. debug
 #: ruby/src/api.cc
+#, c++-format
 msgid "ruby was found at \"{1}\"."
 msgstr ""
 
 #. warning
 #: ruby/src/api.cc
+#, c++-format
 msgid "ruby failed to run: {1}"
 msgstr ""
 
 #. debug
 #: ruby/src/api.cc
+#, c++-format
 msgid ""
 "ruby library \"{1}\" was not found: ensure ruby was built with the --enable-"
 "shared configuration option."
 msgstr ""
 
 #: windows/src/file_util.cc
+#, c++-format
 msgid "error finding FOLDERID_ProgramData: {1}"
 msgstr ""
 
 #. debug
-#: windows/src/process.cc windows/src/user.cc
+#: windows/src/process.cc
+#: windows/src/user.cc
+#, c++-format
 msgid "OpenProcessToken call failed: {1}"
 msgstr ""
 
 #. debug
 #: windows/src/process.cc
+#, c++-format
 msgid "GetTokenInformation call failed: {1}"
 msgstr ""
 
@@ -618,15 +693,18 @@ msgid "invalid HKEY specified"
 msgstr ""
 
 #: windows/src/registry.cc
+#, c++-format
 msgid "error reading registry key {1} {2}: {3}"
 msgstr ""
 
 #: windows/src/system_error.cc
+#, c++-format
 msgid "unknown error ({1})"
 msgstr ""
 
 #. debug
 #: windows/src/user.cc
+#, c++-format
 msgid "Failed to create administrators SID: {1}"
 msgstr ""
 
@@ -637,6 +715,7 @@ msgstr ""
 
 #. debug
 #: windows/src/user.cc
+#, c++-format
 msgid "Failed to check membership: {1}"
 msgstr ""
 
@@ -647,6 +726,7 @@ msgstr ""
 
 #. debug
 #: windows/src/user.cc
+#, c++-format
 msgid "GetUserProfileDirectoryW call failed: {1}"
 msgstr ""
 
@@ -692,32 +772,38 @@ msgstr ""
 
 #. debug
 #: windows/src/wmi.cc
+#, c++-format
 msgid "ignoring {1}-dimensional array in query {2}.{3}"
 msgstr ""
 
 #. debug
 #: windows/src/wmi.cc
+#, c++-format
 msgid ""
 "WMI query {1}.{2} result could not be converted from type {3} to a string"
 msgstr ""
 
 #. debug
 #: windows/src/wmi.cc
+#, c++-format
 msgid "query {1} failed"
 msgstr ""
 
 #. debug
 #: windows/src/wmi.cc
+#, c++-format
 msgid "query {1}.{2} could not be found"
 msgstr ""
 
 #. debug
 #: windows/src/wmi.cc
+#, c++-format
 msgid "only single value requested from array for key {1}"
 msgstr ""
 
 #. debug
 #: windows/src/wmi.cc
+#, c++-format
 msgid "only single entry requested from array of entries for key {1}"
 msgstr ""
 

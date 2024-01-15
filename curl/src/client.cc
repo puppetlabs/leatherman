@@ -50,7 +50,6 @@ namespace leatherman { namespace curl {
         if (init_helper.result() != CURLE_OK) {
             throw http_exception(curl_easy_strerror(init_helper.result()));
         }
-
         _resource = curl_easy_init();
     }
 
@@ -325,7 +324,7 @@ namespace leatherman { namespace curl {
         _client_key = client_key;
     }
 
-    void client::set_supported_protocols(long client_protocols) {
+    void client::set_supported_protocols(string client_protocols) {
         _client_protocols = client_protocols;
     }
 
@@ -472,7 +471,7 @@ namespace leatherman { namespace curl {
     }
 
     void client::set_client_protocols(context& ctx) {
-        curl_easy_setopt_maybe(ctx, CURLOPT_PROTOCOLS, _client_protocols);
+        curl_easy_setopt_maybe(ctx, CURLOPT_PROTOCOLS_STR, _client_protocols.c_str());
     }
 
     size_t client::read_body(char* buffer, size_t size, size_t count, void* ptr)

@@ -254,12 +254,12 @@ CURLcode curl_easy_setopt(CURL *handle, CURLoption option, ...)
                 return CURLE_COULDNT_CONNECT;
             }
             break;
-        case CURLOPT_PROTOCOLS:
+        case CURLOPT_PROTOCOLS_STR:
             if (h->test_failure_mode == curl_impl::error_mode::protocol_error) {
                 va_end(vl);
                 return CURLE_COULDNT_CONNECT;
             }
-            h->protocols = va_arg(vl, long);
+            h->protocols = va_arg(vl, char*);
             break;
         case CURLOPT_ERRORBUFFER:
             h->errbuf = va_arg(vl, char*); 
