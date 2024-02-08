@@ -34,7 +34,7 @@ fs::path find_matching_file(const boost::regex& re) {
         fs::recursive_directory_iterator(fs::current_path()),
         fs::recursive_directory_iterator(),
         [re](const fs::path& f) { return boost::regex_match(f.filename().string(), re); });
-  
+
     // throw exception, as this means that the matching file does not exist.
     if (file == fs::recursive_directory_iterator()) {
       throw std::runtime_error("matching file not found");
@@ -297,18 +297,43 @@ TEST_CASE("curl::client CA bundle and SSL setup") {
     }
 
     SECTION("cURL should make an HTTP request with the specified HTTP protocol") {
-        test_client.set_supported_protocols(CURLPROTO_HTTP);
+        test_client.set_supported_protocols("http");
         auto resp = test_client.get(test_request);
         CURL* const& handle = test_client.get_handle();
         auto test_impl = reinterpret_cast<curl_impl* const>(handle);
-        REQUIRE(test_impl->protocols == CURLPROTO_HTTP);
+        REQUIRE(test_impl->protocols == "http");
+    }
+
+    SECTION("cURL should make an HTTP request with multiple specified protocols") {
+        test_client.set_supported_protocols("http,https");
+        auto resp = test_client.get(test_request);
+        CURL* const& handle = test_client.get_handle();
+        auto test_impl = reinterpret_cast<curl_impl* const>(handle);
+        // Either order is fine
+        REQUIRE((test_impl->protocols == "http,https" || test_impl->protocols == "https,http"));
+    }
+
+    SECTION("leatherman should throw an error when multiple specified protocols include anything other than http, https") {
+        REQUIRE_THROWS_AS(test_client.set_supported_protocols(CURLPROTO_HTTP | CURLPROTO_HTTPS | CURLPROTO_SFTP), http_exception);
+    }
+
+    SECTION("cURL should make an HTTP request with the HTTPS protocol when given the CURLPROTO_HTTPS bitmask") {
+        test_client.set_supported_protocols(CURLPROTO_HTTPS);
+        auto resp = test_client.get(test_request);
+        CURL* const& handle = test_client.get_handle();
+        auto test_impl = reinterpret_cast<curl_impl* const>(handle);
+        REQUIRE(test_impl->protocols == "https");
+    }
+
+    SECTION("leatherman should throw an error when any bitmask other than CURLPROTO_HTTP/HTTPS/ALL is given to set_supported_protocols") {
+        REQUIRE_THROWS_AS(test_client.set_supported_protocols(CURLPROTO_SCP), http_exception);
     }
 
     SECTION("cURL defaults to all protocols if no protocols are specified") {
         auto resp = test_client.get(test_request);
         CURL* const& handle = test_client.get_handle();
         auto test_impl = reinterpret_cast<curl_impl* const>(handle);
-        REQUIRE(test_impl->protocols == CURLPROTO_ALL);
+        REQUIRE(test_impl->protocols == "all");
     }
 }
 
@@ -418,7 +443,7 @@ TEST_CASE("curl::client errors") {
     }
 
     SECTION("client fails to make http call with https protocol only enabled") {
-        test_client.set_supported_protocols(CURLPROTO_HTTPS);
+        test_client.set_supported_protocols("https");
         test_impl->test_failure_mode = curl_impl::error_mode::protocol_error;
         REQUIRE_THROWS_AS(test_client.get(test_request), http_curl_setup_exception);
     }
@@ -427,7 +452,7 @@ TEST_CASE("curl::client errors") {
     TEST_CASE("curl::client download_file") {
         mock_client test_client;
         temp_directory temp_dir;
-        fs::path temp_dir_path = fs::path(temp_dir.get_dir_name()); 
+        fs::path temp_dir_path = fs::path(temp_dir.get_dir_name());
         CURL* const& handle = test_client.get_handle();
         auto test_impl = reinterpret_cast<curl_impl* const>(handle);
         std::string url = "https://download.com";
@@ -440,7 +465,7 @@ TEST_CASE("curl::client errors") {
 
                 test_client.set_ca_cert(ca_file);
                 test_client.set_client_cert(cert_file, key_file);
-                test_client.set_supported_protocols(CURLPROTO_HTTPS);
+                test_client.set_supported_protocols("https");
 
                 std::string file_path = (temp_dir_path / "test_file").string();
                 std::string token = "token";
@@ -455,7 +480,7 @@ TEST_CASE("curl::client errors") {
                 REQUIRE(test_impl->cacert == ca_file);
                 REQUIRE(test_impl->client_cert == cert_file);
                 REQUIRE(test_impl->client_key == key_file);
-                REQUIRE(test_impl->protocols == CURLPROTO_HTTPS);
+                REQUIRE(test_impl->protocols == "https");
                 REQUIRE(test_impl->connect_timeout == connect_timeout);
                 REQUIRE(std::string(test_impl->header->data) == ("X-Authentication: " + token));
                 if (test_impl->header->next) {
@@ -487,7 +512,7 @@ TEST_CASE("curl::client errors") {
               std::string url = "https://download_trigger_404.com";
               auto file_path = (temp_dir_path / "404_test_file").string();
               request req(url);
-              test_client.download_file(req, file_path); 
+              test_client.download_file(req, file_path);
 
               // now check that the file was actually downloaded and written with the right
               // contents.
@@ -507,7 +532,7 @@ TEST_CASE("curl::client errors") {
 
               test_client.set_ca_cert(ca_file);
               test_client.set_client_cert(cert_file, key_file);
-              test_client.set_supported_protocols(CURLPROTO_HTTPS);
+              test_client.set_supported_protocols("https");
 
               std::string file_path = (temp_dir_path / "test_file").string();
               std::string token = "token";
@@ -523,7 +548,7 @@ TEST_CASE("curl::client errors") {
               REQUIRE(test_impl->cacert == ca_file);
               REQUIRE(test_impl->client_cert == cert_file);
               REQUIRE(test_impl->client_key == key_file);
-              REQUIRE(test_impl->protocols == CURLPROTO_HTTPS);
+              REQUIRE(test_impl->protocols == "https");
               REQUIRE(test_impl->connect_timeout == connect_timeout);
               REQUIRE(std::string(test_impl->header->data) == ("X-Authentication: " + token));
               if (test_impl->header->next) {
@@ -561,11 +586,11 @@ TEST_CASE("curl::client errors") {
               auto file_path = (temp_dir_path / "404_test_file").string();
               request req(url);
               response res;
-              test_client.download_file(req, file_path, res); 
+              test_client.download_file(req, file_path, res);
 
               REQUIRE(res.status_code() == 404);
               REQUIRE(res.body() == "Not found");
-              // check that the file was not downloaded 
+              // check that the file was not downloaded
               REQUIRE(!fs::exists(file_path));
           }
       }
@@ -574,7 +599,7 @@ TEST_CASE("curl::client errors") {
 TEST_CASE("curl::client download_file errors") {
     mock_client test_client;
     temp_directory temp_dir;
-    fs::path temp_dir_path = fs::path(temp_dir.get_dir_name()); 
+    fs::path temp_dir_path = fs::path(temp_dir.get_dir_name());
     CURL* const& handle = test_client.get_handle();
     auto test_impl = reinterpret_cast<curl_impl* const>(handle);
 
@@ -600,7 +625,7 @@ TEST_CASE("curl::client download_file errors") {
     SECTION("when curl_easy_perform fails due to a CURLE_WRITE_ERROR, but the temporary file is removed, an http_file_operation_exception is thrown") {
         std::string file_path = (temp_dir_path / "file").string();
         request req("");
-        test_impl->test_failure_mode = curl_impl::error_mode::easy_perform_write_error; 
+        test_impl->test_failure_mode = curl_impl::error_mode::easy_perform_write_error;
         REQUIRE_THROWS_AS_WITH(
             test_client.download_file(req, file_path),
             http_file_operation_exception,
@@ -610,7 +635,7 @@ TEST_CASE("curl::client download_file errors") {
     SECTION("when curl_easy_perform fails for reasons other than a CURLE_WRITE_ERROR, but the temporary file is removed, only the errbuf message is contained in the thrown http_file_download_exception") {
         std::string file_path = (temp_dir_path / "file").string();
         request req("");
-        test_impl->test_failure_mode = curl_impl::error_mode::easy_perform_error; 
+        test_impl->test_failure_mode = curl_impl::error_mode::easy_perform_error;
         REQUIRE_THROWS_AS_WITH(
             test_client.download_file(req, file_path),
             http_file_download_exception,
@@ -623,7 +648,7 @@ TEST_CASE("curl::client download_file errors") {
     SECTION("when renaming the temporary file to the user-provided file path fails, an http_file_operation_exception is thrown") {
         std::string file_path = (temp_dir_path / "file").string();
         request req("https://download.com");
-        test_impl->trigger_external_failure = remove_temp_file; 
+        test_impl->trigger_external_failure = remove_temp_file;
         REQUIRE_THROWS_AS_WITH(
             test_client.download_file(req, file_path),
             http_file_operation_exception,
