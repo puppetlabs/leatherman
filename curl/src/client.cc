@@ -322,8 +322,28 @@ namespace leatherman { namespace curl {
         _client_key = client_key;
     }
 
-    void client::set_supported_protocols(long client_protocols) {
+    void client::set_supported_protocols(string const& client_protocols) {
         _client_protocols = client_protocols;
+    }
+
+    void client::set_supported_protocols(long client_protocols) {
+        std::vector<std::string> protocols;
+
+        if (client_protocols == CURLPROTO_ALL) {
+            _client_protocols = "all";
+        } else {
+            if (client_protocols & CURLPROTO_HTTPS) {
+                protocols.push_back("https");
+            }
+            if (client_protocols & CURLPROTO_HTTP) {
+                protocols.push_back("http");
+            }
+            // If there was anything that _wasn't_ http or https we throw
+            if (client_protocols & ~(CURLPROTO_HTTP | CURLPROTO_HTTPS)) {
+                throw http_exception(_("Passing CURLPROTO_* bitmasks to set supported protocols is deprecated! Upgrade to cURL 8 and use the string version of set_supported_protocols instead"));
+            }
+        }
+        _client_protocols = boost::join(protocols, ",");
     }
 
     void client::set_method(context& ctx, http_method method)
@@ -469,7 +489,30 @@ namespace leatherman { namespace curl {
     }
 
     void client::set_client_protocols(context& ctx) {
-        curl_easy_setopt_maybe(ctx, CURLOPT_PROTOCOLS, _client_protocols);
+        #ifdef CURLOPT_PROTOCOLS_STR
+            curl_easy_setopt_maybe(ctx, CURLOPT_PROTOCOLS_STR, _client_protocols.c_str());
+        #else
+            // If leatherman is still being compiled with cURL versions less than 8, parse
+            // the string versions of the protocols back to bit masks. Allow use of HTTP/HTTPS and
+            // ALL, but otherwise fail and warn the user they need to upgrade cURL.
+            long protocols = 0;
+            if (_client_protocols == "all") {
+                curl_easy_setopt_maybe(ctx, CURLOPT_PROTOCOLS, CURLPROTO_ALL);
+            } else {
+                std::vector<std::string> split_protocols;
+                boost::split(split_protocols, _client_protocols, boost::is_any_of(","));
+                for (auto proto = split_protocols.begin(); proto != split_protocols.end(); proto++) {
+                    if (*proto == "https") {
+                        protocols |= CURLPROTO_HTTPS;
+                    } else if (*proto == "http") {
+                        protocols |= CURLPROTO_HTTP;
+                    } else {
+                        throw http_exception(_("Passing CURLPROTO_* bitmasks to set supported protocols is deprecated! Upgrade to cURL 8 and use the string version of set_supported_protocols instead"));
+                    }
+                }
+                curl_easy_setopt_maybe(ctx, CURLOPT_PROTOCOLS, protocols);
+            }
+        #endif
     }
 
     size_t client::read_body(char* buffer, size_t size, size_t count, void* ptr)
