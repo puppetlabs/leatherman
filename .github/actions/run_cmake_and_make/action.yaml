@@ -17,17 +17,15 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: pull docker image
+    - name: install the required tools
       shell: bash
-      run: docker pull gcr.io/cpp-projects/cpp-ci:1
+      run: |
+        sudo apt-get install cmake libboost-all-dev python2 curl libcurl4-openssl-dev cppcheck
     - name: run make
       shell: bash
       run: |
-        docker run -v `pwd`:/leatherman gcr.io/cpp-projects/cpp-ci:1 /bin/bash -c "
-        cd /leatherman &&
-        rm locales/leatherman.pot &&
-        cmake ${{ matrix.options.cmake_extra_vars }} . &&
-        mkdir dest &&
-        make ${{ matrix.options.make_command }} DESTDIR=/leatherman/dest -j2 &&
+        rm locales/leatherman.pot && \
+        cmake ${{ matrix.options.cmake_extra_vars }} . && \
+        mkdir dest && \
+        make ${{ matrix.options.make_command }} DESTDIR=./dest -j2 && \
         { [[ '${{ matrix.options.coveralls }}' == 'ON' ]] && coveralls --gcov-options '\-lp' -r . -b . -e src -e vendor >/dev/null || true; }
-        "
