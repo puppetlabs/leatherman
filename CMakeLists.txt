@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.2.2)
 project(leatherman VERSION 1.12.12)
 
+# Set the cmake policy that allows -D<LIB>_ROOT settings, so that you can point to a specific boost or curl
+cmake_policy(SET CMP0074 NEW)
+
 option(DYNAMICBASE "Add dynamicbase linker option" ON)
 if (WIN32)
     if (DYNAMICBASE)
