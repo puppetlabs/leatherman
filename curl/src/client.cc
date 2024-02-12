@@ -21,10 +21,7 @@ namespace leatherman { namespace curl {
     // Helper for globally initializing curl
     struct curl_init_helper
     {
-        curl_init_helper()
-        {
-            _result = curl_global_init(CURL_GLOBAL_DEFAULT);
-        }
+        curl_init_helper(): _result(curl_global_init(CURL_GLOBAL_DEFAULT)) {}
 
         ~curl_init_helper()
         {

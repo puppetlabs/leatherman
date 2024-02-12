@@ -6,7 +6,6 @@
 #include <leatherman/file_util/file.hpp>
 
 namespace fs = boost::filesystem;
-
 temp_directory::temp_directory() {
     auto unique_path = unique_fixture_path();
     dir_name = unique_path.string();

@@ -137,6 +137,7 @@ TEST_CASE("JsonContainer::get for object entries", "[data]") {
         std::vector<int> result { data.get<std::vector<int>>("vec") };
         REQUIRE(tmp.size() == result.size());
         REQUIRE(tmp[0] == result[0]);
+        // cppcheck-suppress containerOutOfBounds
         REQUIRE(tmp[1] == result[1]);
     }
 
@@ -145,6 +146,7 @@ TEST_CASE("JsonContainer::get for object entries", "[data]") {
         std::vector<std::string> result { data.get<std::vector<std::string>>("string_vec") };
         REQUIRE(tmp.size() == result.size());
         REQUIRE(tmp[0] == result[0]);
+        // cppcheck-suppress containerOutOfBounds
         REQUIRE(tmp[1] == result[1]);
     }
 

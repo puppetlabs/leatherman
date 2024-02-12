@@ -12,6 +12,7 @@
  * worthwhile to include a testutils directory for common test
  * code in leatherman?
  * */
+// cppcheck-suppress ctuOneDefinitionRuleViolation
 class temp_directory {
 
 public:
@@ -27,5 +28,5 @@ private:
 /** Generates a unique string for use as a file path. */
 boost::filesystem::path unique_fixture_path();
 
-boost::regex TEMP_FILE_REGEX("\\Atemp_file.*"); 
+boost::regex TEMP_FILE_REGEX("\\Atemp_file.*");
 boost::regex TEMP_DIR_REGEX("\\Afile_util_fixture_.*");

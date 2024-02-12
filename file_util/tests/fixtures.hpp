@@ -7,6 +7,7 @@
  * Class to create a temporary directory with a unique name
  * and destroy it once it is no longer needed.
  * */
+ // cppcheck-suppress ctuOneDefinitionRuleViolation
 class temp_directory {
 
 public:
