@@ -57,16 +57,6 @@ SCENARIO("using an option set") {
             REQUIRE(set[options::baz]);
         }
     }
-    GIVEN("all options are set with set_all") {
-        option_set<options> set;
-        set.set_all();
-        THEN("all options are set") {
-            REQUIRE(set.count() == set.size());
-            REQUIRE(set[options::foo]);
-            REQUIRE(set[options::bar]);
-            REQUIRE(set[options::baz]);
-        }
-    }
     GIVEN("an empty set") {
         option_set<options> set;
         REQUIRE(set.empty());

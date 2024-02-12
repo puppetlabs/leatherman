@@ -78,16 +78,6 @@ namespace leatherman { namespace util {
         }
 
         /**
-         * Sets all options to true.
-         * @return Returns this option_set.
-         */
-        option_set& set_all()
-        {
-            _value = ~value_type(0);
-            return *this;
-        }
-
-        /**
          * Sets the given option to true.
          * @param option The option to set to true.
          * @return Returns this option_set.
