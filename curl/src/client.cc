@@ -10,6 +10,11 @@
 #include <boost/nowide/fstream.hpp>
 #include <sstream>
 
+#ifdef _WIN32
+#include <stdio.h>
+#include <share.h>
+#endif
+
 // Mark string for translation (alias for leatherman::locale::format)
 using leatherman::locale::_;
 
@@ -101,6 +106,9 @@ namespace leatherman { namespace curl {
     {
         try {
             _temp_path = fs::path(file_path).parent_path() / fs::unique_path("temp_file_%%%%-%%%%-%%%%-%%%%");
+            #ifdef _WIN32
+            _fp = _fsopen(_temp_path.string().c_str(), "w+", _SH_DENYNO);
+            #else
             _fp = boost::nowide::fopen(_temp_path.string().c_str(), "wb");
             if (!_fp) {
                 throw http_file_operation_exception(_req, _file_path, make_file_err_msg(_("failed to open temporary file for writing")));
