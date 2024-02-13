@@ -110,6 +110,7 @@ namespace leatherman { namespace curl {
             _fp = _fsopen(_temp_path.string().c_str(), "w+", _SH_DENYNO);
             #else
             _fp = boost::nowide::fopen(_temp_path.string().c_str(), "wb");
+            #endif
             if (!_fp) {
                 throw http_file_operation_exception(_req, _file_path, make_file_err_msg(_("failed to open temporary file for writing")));
             }
