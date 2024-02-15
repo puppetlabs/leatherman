@@ -107,7 +107,7 @@ namespace leatherman { namespace curl {
         try {
             _temp_path = fs::path(file_path).parent_path() / fs::unique_path("temp_file_%%%%-%%%%-%%%%-%%%%");
             #ifdef _WIN32
-            _fp = _fsopen(_temp_path.string().c_str(), "w+", _SH_DENYNO);
+            _fp = _fsopen(_temp_path.string().c_str(), "wb", _SH_DENYNO);
             #else
             _fp = boost::nowide::fopen(_temp_path.string().c_str(), "wb");
             #endif
