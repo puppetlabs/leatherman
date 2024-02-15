@@ -142,6 +142,7 @@ namespace leatherman { namespace curl {
         close_fp();
         boost::system::error_code ec;
         fs::rename(_temp_path, _file_path, ec);
+        LOG_DEBUG("fs::rename {1}, {2}, error_code: {3}", _temp_path, _file_path, ec);
         if (ec) {
             LOG_WARNING("Failed to write the results of the temporary file to the actual file {1}", _file_path);
             throw http_file_operation_exception(_req, _file_path, make_file_err_msg(_("failed to move over the temporary file's downloaded contents")));
