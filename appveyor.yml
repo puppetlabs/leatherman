@@ -1,7 +1,6 @@
 clone_depth: 10
 environment:
   matrix:
-  - shared: OFF
   - shared: ON
 
 init:
