@@ -8,6 +8,14 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/nowide/iostream.hpp>
 #include <boost/nowide/fstream.hpp>
+
+#include <boost/chrono.hpp>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#include <boost/thread/thread.hpp>
+#pragma GCC diagnostic pop
 #include <sstream>
 
 // Mark string for translation (alias for leatherman::locale::format)
@@ -128,11 +136,36 @@ namespace leatherman { namespace curl {
         return _fp;
     }
 
+    bool error_file_in_use(const boost::system::error_code& ec) {
+        bool same = (ec == boost::system::error_code(32, boost::system::system_category()));
+        LOG_DEBUG("error_file_in_use({1}), same = {2}", ec, same);
+        return same;
+    }
+
+    // Handle special case where rename fails on windows due to error code 32
+    void write_retry_with_exp_backoff(boost::filesystem::path const& _temp_path, boost::filesystem::path const& _file_path) {
+        boost::system::error_code ec;
+        int max_retries = 5;
+        int wait_millis = 100;
+        do {
+            LOG_DEBUG("Failed rename with error 32, retrying up to {1} more times", max_retries);
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(wait_millis));
+            fs::rename(_temp_path, _file_path, ec);
+            wait_millis *= 2;
+            max_retries -= 1;
+        } while (max_retries > 0 && error_file_in_use(ec));
+    }
+
+
     void download_temp_file::write() {
         LOG_DEBUG("Download completed, now writing result to file {1}", _file_path);
         close_fp();
         boost::system::error_code ec;
         fs::rename(_temp_path, _file_path, ec);
+        if(error_file_in_use(ec)) {
+            write_retry_with_exp_backoff(_temp_path, _file_path);
+        }
+
         if (ec) {
             LOG_WARNING("Failed to write the results of the temporary file to the actual file {1}", _file_path);
             throw http_file_operation_exception(_req, _file_path, make_file_err_msg(_("failed to move over the temporary file's downloaded contents")));

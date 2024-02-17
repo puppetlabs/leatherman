@@ -21,7 +21,7 @@ install:
   - SET PATH=C:\Ruby21-x64\bin;C:\tools\mingw64\bin;C:\Program Files\gettext-iconv;%PATH%
 
 build_script:
-  - ps: cmake -G "MinGW Makefiles" -DCMAKE_TOOLCHAIN_FILE="C:\tools\pl-build-tools\pl-build-toolchain.cmake" -DCMAKE_INSTALL_PREFIX=C:\tools\leatherman -DBOOST_STATIC=ON -DLEATHERMAN_SHARED="$env:shared" .
+  - ps: cmake -G "MinGW Makefiles" -DENABLE_CXX_WERROR=OFF -DCMAKE_TOOLCHAIN_FILE="C:\tools\pl-build-tools\pl-build-toolchain.cmake" -DCMAKE_INSTALL_PREFIX=C:\tools\leatherman -DBOOST_STATIC=ON -DLEATHERMAN_SHARED="$env:shared" .
   - ps: mingw32-make -j2
 
 test_script:

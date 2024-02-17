@@ -28,6 +28,7 @@
   - [Sample Library CMakeLists.txt file](#sample-library-cmakeliststxt-file)
   - [Vendoring Other Libraries](#vendoring-other-libraries)
 - [How To Release](#how-to-release)
+- [How To Run Tests](#how-to-run-tests)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -414,3 +415,16 @@ the `nowide` and `catch` CMake files are both solid examples.
 [1]: https://github.com/philsquared/Catch
 [2]: https://github.com/miloyip/rapidjson
 [3]: json_container/README.md
+
+## How to run tests
+
+To run the leatherman tests, you need `cmake` and a C++ compiler.
+
+```
+# at the root of the leatherman/ directory
+mkdir build
+cd build
+cmake ..
+make leatherman_test
+bin/leatherman_test
+```
