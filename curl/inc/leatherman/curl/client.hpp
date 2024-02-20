@@ -366,21 +366,6 @@ namespace leatherman { namespace curl {
 
         /**
          * Set and limit what protocols curl will support
-         * @param client_protocols String indicating which protocol will be supported
-         *        (see more: http://curl.haxx.se/libcurl/c/CURLOPT_PROTOCOLS_STR.html)
-         */
-        void set_supported_protocols(std::string const& client_protocols);
-
-        /**
-         * WARNING: USING THE BITMASK IS TECHNICALLY DEPRECATED, USE THE STRING VERSION OF
-         *          THIS FUNCTION FOR ANY FUTURE USES OF set_supported_protocols.
-         *
-         * The bitmask version of this function is left here for compatibility purposes,
-         * and only supports passing the CURLPROTO_HTTP/HTTPS bitmasks. DO NOT ADD SUPPORT FOR ANY OTHER
-         * BITMASKS, NEW PROTOCOLS SHOULD BE USING cURL 8 AND PASSING THE STRING VERSION OF THE PROTOCOLS
-         *
-         * Parse the bitmask and convert to string, then use the string version of
-         * set_supported_protocols to set and limit what protocols curl will support
          * @param client_protocols bitmask of CURLPROTO_*
          *        (see more: http://curl.haxx.se/libcurl/c/CURLOPT_PROTOCOLS.html)
          */
@@ -418,7 +403,7 @@ namespace leatherman { namespace curl {
         std::string _client_key;
         std::string _client_crl;
         std::string _proxy;
-        std::string _client_protocols = "all";
+        long _client_protocols = CURLPROTO_ALL;
 
         response perform(http_method method, request const& req);
         void download_file_helper(request const& req,

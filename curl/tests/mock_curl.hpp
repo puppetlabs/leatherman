@@ -59,7 +59,7 @@ struct curl_impl
     void* read_data; // Where to read the request body from
 
     std::string request_url, cookie, cacert, client_cert, client_key, client_crl, proxy;
-    std::string protocols;
+    long protocols;
     long connect_timeout;
     http_method method = http_method::get;
 
