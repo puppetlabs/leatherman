@@ -90,13 +90,6 @@ msgid "File download server side error: {1}"
 msgstr ""
 
 #: curl/src/client.cc
-msgid ""
-"Passing CURLPROTO_* bitmasks to set supported protocols is deprecated! "
-"Upgrade to cURL 8 and use the string version of set_supported_protocols "
-"instead"
-msgstr ""
-
-#: curl/src/client.cc
 msgid "unexpected HTTP method specified."
 msgstr ""
 
