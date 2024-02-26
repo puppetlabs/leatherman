@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <array>
 #include <algorithm>
+#include <vector>
 #include "mock_curl.hpp"
+#include <boost/algorithm/string.hpp>
 
 using namespace std;
 
@@ -105,6 +107,8 @@ CURL *curl_easy_init()
 CURLcode curl_easy_setopt(CURL *handle, CURLoption option, ...)
 {
     auto h = reinterpret_cast<curl_impl*>(handle);
+    long curlopt;
+    std::vector<std::string> given_protocols;
     va_list vl;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wvarargs"
@@ -259,10 +263,39 @@ CURLcode curl_easy_setopt(CURL *handle, CURLoption option, ...)
                 va_end(vl);
                 return CURLE_COULDNT_CONNECT;
             }
-            h->protocols = va_arg(vl, long);
+            // If still compiling with cURL versions less than 8, CURLOPT_PROTOCOLS
+            // will recieve a bitmask as the param, but the protocol entry type is
+            // a string. Using the string type avoids the need for additional special
+            // logic on creating and checking the value of this entry, but it also
+            // means now we need to parse the bitmasks back to strings.
+            //
+            // When compiling with cURL 8 or newer the client code will use the string
+            // version of the CURLOPT_PROTOCOLS function, so this logic won't be used.
+            curlopt = va_arg(vl, int);
+
+            if (curlopt == CURLPROTO_ALL) {
+                h->protocols = "all";
+            } else {
+                if (curlopt & CURLPROTO_HTTPS) {
+                    given_protocols.push_back("https");
+                }
+                if (curlopt & CURLPROTO_HTTP) {
+                    given_protocols.push_back("http") ;
+                }
+                h->protocols = boost::join(given_protocols,",");
+            }
             break;
+        #ifdef CURLOPT_PROTOCOLS_STR
+        case CURLOPT_PROTOCOLS_STR:
+            if (h->test_failure_mode == curl_impl::error_mode::protocol_error) {
+                va_end(vl);
+                return CURLE_COULDNT_CONNECT;
+            }
+            h->protocols = va_arg(vl, char*);
+            break;
+        #endif
         case CURLOPT_ERRORBUFFER:
-            h->errbuf = va_arg(vl, char*); 
+            h->errbuf = va_arg(vl, char*);
             break;
         default:
             break;
@@ -283,7 +316,7 @@ CURLcode curl_easy_perform(CURL * easy_handle)
     }
     if (h->test_failure_mode == curl_impl::error_mode::easy_perform_error) {
         if (h->errbuf) {
-            strcpy(h->errbuf, "easy perform failed"); 
+            strcpy(h->errbuf, "easy perform failed");
         }
         return CURLE_COULDNT_CONNECT;
     }

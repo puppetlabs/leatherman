@@ -1,4 +1,4 @@
-name: docker_pull_and_make
+name: run_cmake_and_make
 
 inputs:
   pkg_suffix:
