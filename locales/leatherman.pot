@@ -6,7 +6,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: leatherman 1.12.12\n"
+"Project-Id-Version: leatherman 1.12.13\n"
 "Report-Msgid-Bugs-To: docs@puppet.com\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -87,6 +87,13 @@ msgstr ""
 
 #: curl/src/client.cc
 msgid "File download server side error: {1}"
+msgstr ""
+
+#: curl/src/client.cc
+msgid ""
+"Passing CURLPROTO_* bitmasks to set supported protocols is deprecated! "
+"Upgrade to cURL 8 and use the string version of set_supported_protocols "
+"instead"
 msgstr ""
 
 #: curl/src/client.cc
