@@ -20,7 +20,7 @@ runs:
     - name: install the required tools
       shell: bash
       run: |
-        sudo apt-get install cmake libboost-all-dev python2 curl libcurl4-openssl-dev cppcheck
+        sudo apt-get update && sudo apt-get install cmake libboost-all-dev python2 curl libcurl4-openssl-dev cppcheck
     - name: run make
       shell: bash
       run: |
