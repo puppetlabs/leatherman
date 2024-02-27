@@ -162,7 +162,7 @@ namespace leatherman { namespace curl {
         close_fp();
         boost::system::error_code ec;
         fs::rename(_temp_path, _file_path, ec);
-        if(error_file_in_use(ec)) {
+        if (error_file_in_use(ec)) {
             write_retry_with_exp_backoff(_temp_path, _file_path);
         }
 
