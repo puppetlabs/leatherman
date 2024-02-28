@@ -1,4 +1,4 @@
-find_package(Boost 1.54 REQUIRED COMPONENTS regex system chrono filesystem)
+find_package(Boost 1.54 REQUIRED COMPONENTS regex system filesystem thread)
 
 add_leatherman_deps("${Boost_LIBRARIES}")
 add_leatherman_includes("${Boost_INCLUDE_DIRS}")
