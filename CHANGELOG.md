@@ -396,7 +396,7 @@ This is a maintenance release to re-sync the code version with the tag, in order
 - leatherman.dynamic\_library - cross-platform loading of dynamic libraries
 - leatherman.execution - cross-platform system invocation with input/output support
 - leatherman.file\_util - utilities for manipulating files, augmenting Boost.FileSystem
-- leatherman.json\_container - a simplified C++ interface for rapidjson 
+- leatherman.json\_container - a simplified C++ interface for rapidjson
 - leatherman.ruby - support for embedding and working with the Ruby interpreter
 - leatherman.util - general C++ utilities
   - strings, augmenting Boost.Algorithms
