@@ -137,7 +137,7 @@ namespace leatherman { namespace curl {
     }
 
     bool error_file_in_use(const boost::system::error_code& ec) {
-        bool same = (ec == boost::system::error_code(32, boost::system::system_category()));
+        bool same = (ec.value() == 32);
         LOG_DEBUG("error_file_in_use({1}), same = {2}", ec, same);
         return same;
     }
@@ -153,7 +153,7 @@ namespace leatherman { namespace curl {
             fs::rename(_temp_path, _file_path, ec);
             wait_millis *= 2;
             max_retries -= 1;
-        } while (max_retries > 0 && error_file_in_use(ec));
+        } while (error_file_in_use(ec) && max_retries > 0);
     }
 
 
@@ -162,6 +162,7 @@ namespace leatherman { namespace curl {
         close_fp();
         boost::system::error_code ec;
         fs::rename(_temp_path, _file_path, ec);
+        LOG_DEBUG("error_code = {1}", ec);
         if (error_file_in_use(ec)) {
             write_retry_with_exp_backoff(_temp_path, _file_path);
         }
