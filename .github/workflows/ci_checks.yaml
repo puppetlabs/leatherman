@@ -29,9 +29,18 @@ jobs:
     steps:
       - name: checkout current pr
         uses: actions/checkout@v4
-      - name: run CMake and Make
+      - name: run CMake and Make on Linux
         uses: ./.github/actions/run_cmake_and_make
         with:
           cmake_extra_vars: ${{ matrix.options.cmake_extra_vars }}
           make_command: ${{ matrix.options.make_command }}
           coveralls: ${{ matrix.options.coveralls }}
+  win_ci_checks:
+    strategy:
+      fail-fast: false
+    runs-on: windows-latest
+    steps:
+      - name: checkout current pr
+        uses: actions/checkout@v4
+      - name: run CMake and Make on Windows
+        uses: ./.github/actions/run_win_cmake_and_make

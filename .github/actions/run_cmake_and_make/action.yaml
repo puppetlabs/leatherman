@@ -1,9 +1,6 @@
 name: run_cmake_and_make
 
 inputs:
-  pkg_suffix:
-    description: leatherman package suffix
-    type: string
   cmake_extra_vars:
     description: extra vars for cmake
     type: string
@@ -25,7 +22,7 @@ runs:
       shell: bash
       run: |
         rm locales/leatherman.pot && \
-        cmake ${{ matrix.options.cmake_extra_vars }} . && \
-        mkdir dest && \
-        make ${{ matrix.options.make_command }} DESTDIR=./dest -j2 && \
-        { [[ '${{ matrix.options.coveralls }}' == 'ON' ]] && coveralls --gcov-options '\-lp' -r . -b . -e src -e vendor >/dev/null || true; }
+        cmake ${{ inputs.cmake_extra_vars }} . && \
+        mkdir -p /tmp/leatherman/dest && \
+        make ${{ inputs.make_command }} DESTDIR=/tmp/leatherman/dest -j2 && \
+        { [[ '${{ inputs.coveralls }}' == 'ON' ]] && coveralls --gcov-options '\-lp' -r . -b . -e src -e vendor >/dev/null || true; }

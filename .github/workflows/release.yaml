@@ -9,30 +9,36 @@ permissions:
   contents: write
 
 jobs:
-  release:
-    strategy:
-      matrix:
-        options:
-          - make_command: all test install ARGS=-v
-            cmake_extra_vars: -DBOOST_STATIC=ON
-          - make_command: all test install ARGS=-v
-            cmake_extra_vars: -DLEATHERMAN_SHARED=ON
-            pkg_suffix: "-dynamic"
+  release-unix:
     runs-on: ubuntu-latest
     steps:
       - name: checkout current pr
         uses: actions/checkout@v4
-      - name: docker pull and make
-        uses: ./.github/actions/docker_pull_and_make
+      - name: run CMake and Make on Linux
+        uses: ./.github/actions/run_cmake_and_make
         with:
-          cmake_extra_vars: ${{ matrix.options.cmake_extra_vars }}
-          make_command: ${{ matrix.options.make_command }}
-          pkg_suffix: ${{ matrix.options.pkg_suffix }}
+          cmake_extra_vars: all test install ARGS=-v
+          make_command: -DLEATHERMAN_SHARED=ON
       - name: build release artifact for tags
         if: startsWith(github.ref, 'refs/tags/')
-        run: tar czvf leatherman${{ matrix.options.pkg_suffix }}.tar.gz `find dest -type f -print`
+        run: tar czvf leatherman-dynamic.tar.gz `find /tmp/leatherman/dest -type f -print`
       - name: upload release artifacts for tag
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: leatherman${{ matrix.options.pkg_suffix }}.tar.gz
+          files: leatherman-dynamic.tar.gz
+  release-win:
+    runs-on: windows-latest
+    steps:
+      - name: checkout current pr
+        uses: actions/checkout@v4
+      - name: run CMake and Make on Windows
+        uses: ./.github/actions/run_win_cmake_and_make
+      - name: build release artifact for tags
+        if: startsWith(github.ref, 'refs/tags/')
+        run: 7z.exe a -t7z leatherman.7z C:\tools\leatherman\
+      - name: upload release artifacts for tag
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: leatherman.7z
